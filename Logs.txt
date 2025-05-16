@@ -1,0 +1,40 @@
+CAR PARKING
+-------------------------------------------------------
+- Cars can go backward/forward on the direction they are facing
+- Car hits peds | Game Over
+- If more than 1 car is on the road, and another car tries to get on the road
+    [=] If there is space between the cars, then the car will get on the road between them
+    [=] If there is no space, then the car will wait for both of them to pass, and then get on the road
+    [=] If 2 cars are side by side, waiting to get on the road, then the car to the right will go first.
+        {+} In case, both are trying to get on the road from downwards.
+    [=] For 2 cars side-by-side, the car that comes first, going with clockwise direction, will go first
+    [=] Show some emoji, when a car hits another car
+    [=] Obstacles around the parking area, to blobk the car from moving
+    [=] Cars follow point to point while on the road, no need for fancy animation of turning.
+        {+} In case of getting on the road also, no turning animation, just quick turn to align with the road
+    [=] Need to check for space before the oncoming car, if a car wants to get on the road
+    [=] The car rotates from the pivot, no matter where it is hit to shake
+        {+} If side, then to and fro
+        {+} If frront/back, then that direction
+    [=] Keep in mind, how a car turns, if going backwards, then turn to the direction of the road, not 360
+
+
+--------------------------------------------------------------------------------------------------------------
+                                                    15 May 2025
+--------------------------------------------------------------------------------------------------------------
+- Creating basic scene
+
+- VehicleController
+    [=] Single script to control all the vehicles | Lighten the burden of running multiple scripts
+- InputManager
+    [=] For managing all the inputs for the gameplay
+    [=] Testing Unit Selection
+        {+} Keeping track if user has let go or is still interacting [Click/Touch]
+        {+} Slide Direction logic
+- GameManager
+    [=] Singleton to manage Gameplay
+    [=] Adding action for selecting Unirs
+
+
+- Vehicle Prefab
+    [=] Basic vehicle prefab for now
