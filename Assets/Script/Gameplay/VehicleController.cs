@@ -8,17 +8,20 @@ namespace Test_A.Gameplay
         [Serializable]
         internal struct VehicleInfo
         {
-            public bool hasInteracted;
-
-            // 0: Interacted or Not | 1: Forwards/Backwards | 2: Left/Right
-            // public int vehicleStatus;
+            // public bool hasInteracted;
             public Vector2 interactedDir;
+
+            /// <summary> 0: Interacted or Not | 1: Vertical/Horizontal | 2: Positive/Negative | 3: Reached Road Or Not</summary>
+            public int vehicleStatus;
         }
 
 
-        [SerializeField] private Transform[] vehicleTransforms;
-        private VehicleInfo[] vehicleInfos;
-        private int vehicleSetID;
+        [SerializeField] private Transform[] _vehicleTransforms;
+        private VehicleInfo[] _vehicleInfos;
+        private int _vehicleSetID;
+
+        private const float _cVehicleSpeedMultiplier = 5f;
+        private readonly float[] _roadBoundaries = { 15f, 12f };                 //Vertical | Horizontal
 
         private void OnDestroy()
         {
@@ -29,7 +32,7 @@ namespace Test_A.Gameplay
         {
             GameManager.Instance.OnSelect += VehicleSelected;
 
-            vehicleInfos = new VehicleInfo[vehicleTransforms.Length];
+            _vehicleInfos = new VehicleInfo[_vehicleTransforms.Length];
         }
 
         // Update is called once per frame
@@ -40,13 +43,16 @@ namespace Test_A.Gameplay
 
         private void VehicleSelected(int vehicleID, Vector2 slideDir)
         {
-            for (int i = 0; i < vehicleTransforms.Length; i++)
+            for (int i = 0; i < _vehicleTransforms.Length; i++)
             {
-                if (vehicleID == vehicleTransforms[i].GetInstanceID() && !vehicleInfos[i].hasInteracted)
+                if (vehicleID == _vehicleTransforms[i].GetInstanceID()
+                    // && !vehicleInfos[i].hasInteracted
+                    && (_vehicleInfos[i].vehicleStatus & (1 << 0)) == 0)
                 {
                     // Debug.Log($"Found Vehicle! | Vehicle ID : {vehicleID}");
-                    vehicleSetID = i;
-                    vehicleInfos[i].hasInteracted = true;
+                    _vehicleSetID = i;
+                    // vehicleInfos[i].hasInteracted = true;
+                    _vehicleInfos[i].vehicleStatus |= (1 << 0);
 
                     //Validate if the slide direction is matching the vehicle's orientation
                     // bool vehicleOrientationVertical = Mathf.Abs(vehicleTransforms[i].forward[2]) >= 0.9f ? true : false;
@@ -54,16 +60,18 @@ namespace Test_A.Gameplay
                     // + $" | slideDir: {slideDir.y} | slidedir Rounded: {Mathf.RoundToInt(slideDir.y)}"
                     // + $" | VehicleOrientation: {vehicleOrientationVertical}");
 
-                    if (Mathf.Abs(vehicleTransforms[i].forward[2]) >= 0.9f)
+                    if (Mathf.Abs(_vehicleTransforms[i].forward[2]) >= 0.9f)
                     {
-                        vehicleInfos[i].interactedDir.x = 0f;
+                        _vehicleInfos[i].interactedDir.x = 0f;
                         // vehicleInfos[i].interactedDir.y = Mathf.RoundToInt(slideDir.y);     //Dont work well
-                        vehicleInfos[i].interactedDir.y = (Mathf.Abs(slideDir.y) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.y) : 0f;
+                        _vehicleInfos[i].interactedDir.y = (Mathf.Abs(slideDir.y) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.y) : 0f;
+                        _vehicleInfos[i].vehicleStatus |= (1 << 1);
                     }
                     else
                     {
-                        vehicleInfos[i].interactedDir.x = (Mathf.Abs(slideDir.x) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.x) : 0f;
-                        vehicleInfos[i].interactedDir.y = 0f;
+                        _vehicleInfos[i].interactedDir.x = (Mathf.Abs(slideDir.x) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.x) : 0f;
+                        _vehicleInfos[i].interactedDir.y = 0f;
+                        _vehicleInfos[i].vehicleStatus &= ~(1 << 1);
                     }
 
                     // vehicleInfos[i].interactedDir = slideDir;
@@ -75,25 +83,39 @@ namespace Test_A.Gameplay
         private void MoveVehicle()
         {
             Vector3 vehiclePos;
-            for (int i = 0; i < vehicleInfos.Length; i++)
+            for (int i = 0; i < _vehicleInfos.Length; i++)
             {
-                if (vehicleInfos[i].hasInteracted)
+                // if (vehicleInfos[i].hasInteracted)
+                //Check if the vehicle has been interacted with and has not reached the road
+                if ((_vehicleInfos[i].vehicleStatus & (1 << 0)) != 0
+                    && (_vehicleInfos[i].vehicleStatus & (1 << 3)) == 0)
                 {
-                    vehiclePos = vehicleTransforms[i].transform.position;
+                    vehiclePos = _vehicleTransforms[i].transform.position;
 
                     // Testing
-                    // /*
-                    {
-                        vehiclePos.x += vehicleInfos[i].interactedDir.x * 2f;
-                        vehiclePos.z += vehicleInfos[i].interactedDir.y * 2f;
-                        vehicleTransforms[i].transform.position = vehiclePos;
-                        // vehicleTransforms[i].transform.position = vehiclePos + vehicleInfos[i].interactedDir * 10f;
-                    }
-                    // */
-
+                    vehiclePos.x = _vehicleInfos[i].interactedDir.x;
+                    vehiclePos.y = 0f;
+                    vehiclePos.z = _vehicleInfos[i].interactedDir.y;
+                    // vehiclePos += Time.deltaTime ;
+                    _vehicleTransforms[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
+                    // vehicleTransforms[i].transform.position = vehiclePos + vehicleInfos[i].interactedDir * 10f;
 
                     //Check if the vehicle has reached the "Road" and then disable it
-                    vehicleInfos[i].hasInteracted = false;
+                    //For Vertical Alignment
+                    if ((_vehicleInfos[i].vehicleStatus & (1 << 1)) != 0
+                        && (_vehicleTransforms[i].position.z >= _roadBoundaries[0]
+                            || _vehicleTransforms[i].position.z <= _roadBoundaries[0] * -1f))
+                    {
+                        // vehicleInfos[i].hasInteracted = false;
+                        // vehicleInfos[i].vehicleStatus = 0;
+                        _vehicleInfos[i].vehicleStatus |= (1 << 3);
+                    }
+                    //For Horizontal Alignment
+                    else if (_vehicleTransforms[i].position.x >= _roadBoundaries[1]
+                            || _vehicleTransforms[i].position.x <= _roadBoundaries[1] * -1f)
+                    {
+                        _vehicleInfos[i].vehicleStatus |= (1 << 3);
+                    }
 
                     // Debug.Log($"Vehicle Stats | ID: {i} | pos: {vehicleTransforms[i].transform.position} | "
                     // + $" interactedDir: {vehicleInfos[i].interactedDir}");
