@@ -60,8 +60,16 @@ CAR PARKING
     [=] Changing status accordingingly
     [=] Checking if the vehicle has reached the road or not
 
-
+-Scene
+    [=] Placing markers for road-turnings
+- VehicleController | Ferry Logic
+    [=] enum for VehicleStatus | RoadMarkers
+    [=] Keeping points in a readonly array and updating through it
+    [=] Markers for updating and keeping track of road-turnings
+    [=] [BUG] Fixing Vehicle interaction setting when clicked once even for wrong slide direction
 --------------------------------------------------------------------------------------------------------------
+- [DO] Vehicles can lerp to rotate towards the next marker, so that the rotation fo vehicle does not goes wrong
+
 - To check if the vehicles have reached the road or not?
     [=] Can use trigger | Would have to attach rigidbody to vehicles | would be unnecessary
     [=] Can just use co-ordinates, as the scene is not changing
