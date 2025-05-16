@@ -18,21 +18,43 @@ namespace Test_A.Gameplay
 
         private int _hitTransformID = 0;
 
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        //For countergin Camera's rotation //In X/Z pair
+        private float[] transformMatrix = new float[4] { 0.34f, 0.94f, 0.94f, -0.34f };      //20fY
+        // private float[] transformMatrix = new float[4] { -0.34f, 0.94f, 0.94f, 0.34f };      //-20fY
+        // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
+
         private void Start()
         {
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
         }
 
-
 #if DEBUGGING_TOUCH
         Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
+        Vector3 hitPos = Vector2.zero;
+        bool drawRay = false;
 #endif
         private void Update()
         {
             bool userInteracting;
 
-            // Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
+#if DEBUGGING_TOUCH
+            if (drawRay)
+            {
+                Vector3 drawDir = slideDir;
+                drawDir.z = slideDir.y;
+
+                // drawDir.x = drawDir.x * transformMatrix[1] + drawDir.z * transformMatrix[3];
+                // drawDir.z = drawDir.x * transformMatrix[0] + drawDir.z * transformMatrix[2];
+
+                drawDir.x *= 30f;
+                drawDir.y = 0.5f;
+                drawDir.z *= 30f;
+
+                Debug.DrawRay(hitPos, drawDir, Color.cyan);
+            }
+#else
+            Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
+#endif
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
             if (!userInteracting)
@@ -40,7 +62,14 @@ namespace Test_A.Gameplay
                 if (_selectionStatus == 1)
                 {
                     slideDir = (Mouse.current.position.value - interactPos).normalized;
+                    slideDir.x = slideDir.x * transformMatrix[1] + slideDir.y * transformMatrix[3];
+                    slideDir.y = slideDir.x * transformMatrix[0] + slideDir.y * transformMatrix[2];
+
                     GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
+
+#if DEBUGGING_TOUCH
+                    drawRay = true;
+#endif
                 }
                 _selectionStatus = 0;
                 return;
@@ -73,6 +102,9 @@ namespace Test_A.Gameplay
                 {
                     _selectionStatus = 1;
                     _hitTransformID = rayHit.transform.GetInstanceID();
+#if DEBUGGING_TOUCH
+                    hitPos = rayHit.point;
+#endif
                     // GameManager.Instance.OnSelect?.Invoke(rayHit.transform.GetInstanceID(), slideDir);
                 }
             }

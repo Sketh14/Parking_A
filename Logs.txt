@@ -38,3 +38,25 @@ CAR PARKING
 
 - Vehicle Prefab
     [=] Basic vehicle prefab for now
+
+--------------------------------------------------------------------------------------------------------------
+                                                    16 May 2025
+--------------------------------------------------------------------------------------------------------------
+- InputManager
+    [=] Debug Slide Direction
+    [=] Making threshold values
+    [=] Applying rotation to slideDir to coutner Camera's rotation
+- VehicleController
+    [=] Validating slideDir with Vehicle Orientation
+        {+} Using Mathf.RoundToInt to set the threshold for slideDir for now
+            <~> Too much chance to go in wrong direction
+        {+} Setting threshold to slideDireation of 0.75f
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+- Limit Values
+    [=] Taking Absolute values as the direction would not matter
+        {+} The vehicle can go forward/backward
+    [=] Threshold : 0.75 for both

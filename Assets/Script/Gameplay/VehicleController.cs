@@ -9,6 +9,9 @@ namespace Test_A.Gameplay
         internal struct VehicleInfo
         {
             public bool hasInteracted;
+
+            // 0: Interacted or Not | 1: Forwards/Backwards | 2: Left/Right
+            // public int vehicleStatus;
             public Vector2 interactedDir;
         }
 
@@ -16,7 +19,6 @@ namespace Test_A.Gameplay
         [SerializeField] private Transform[] vehicleTransforms;
         private VehicleInfo[] vehicleInfos;
         private int vehicleSetID;
-
 
         private void OnDestroy()
         {
@@ -47,7 +49,24 @@ namespace Test_A.Gameplay
                     vehicleInfos[i].hasInteracted = true;
 
                     //Validate if the slide direction is matching the vehicle's orientation
-                    vehicleInfos[i].interactedDir = slideDir;
+                    // bool vehicleOrientationVertical = Mathf.Abs(vehicleTransforms[i].forward[2]) >= 0.9f ? true : false;
+                    // Debug.Log($"Vehicle Orientation: {Mathf.Abs(vehicleTransforms[i].forward[2])} "
+                    // + $" | slideDir: {slideDir.y} | slidedir Rounded: {Mathf.RoundToInt(slideDir.y)}"
+                    // + $" | VehicleOrientation: {vehicleOrientationVertical}");
+
+                    if (Mathf.Abs(vehicleTransforms[i].forward[2]) >= 0.9f)
+                    {
+                        vehicleInfos[i].interactedDir.x = 0f;
+                        // vehicleInfos[i].interactedDir.y = Mathf.RoundToInt(slideDir.y);     //Dont work well
+                        vehicleInfos[i].interactedDir.y = (Mathf.Abs(slideDir.y) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.y) : 0f;
+                    }
+                    else
+                    {
+                        vehicleInfos[i].interactedDir.x = (Mathf.Abs(slideDir.x) - 0.75f) > 0f ? Mathf.RoundToInt(slideDir.x) : 0f;
+                        vehicleInfos[i].interactedDir.y = 0f;
+                    }
+
+                    // vehicleInfos[i].interactedDir = slideDir;
                 }
             }
         }
@@ -63,12 +82,14 @@ namespace Test_A.Gameplay
                     vehiclePos = vehicleTransforms[i].transform.position;
 
                     // Testing
-                    /*{
-                        vehiclePos.x = vehicleInfos[i].interactedDir.x * 2f;
-                        vehiclePos.z = vehicleInfos[i].interactedDir.y * 2f;
+                    // /*
+                    {
+                        vehiclePos.x += vehicleInfos[i].interactedDir.x * 2f;
+                        vehiclePos.z += vehicleInfos[i].interactedDir.y * 2f;
                         vehicleTransforms[i].transform.position = vehiclePos;
                         // vehicleTransforms[i].transform.position = vehiclePos + vehicleInfos[i].interactedDir * 10f;
-                    }*/
+                    }
+                    // */
 
 
                     //Check if the vehicle has reached the "Road" and then disable it
