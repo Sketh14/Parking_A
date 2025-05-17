@@ -87,7 +87,12 @@ CAR PARKING
     [=] Making adjustments according to the rectangle park
 - VehicleSpawner
     [=] Making adjustments according to the rectangle park
+
+- VehicleSpawner
+    [=] Collision Detection
 --------------------------------------------------------------------------------------------------------------
+- [DO] Vehicle Collision Detection
+    [=] Make sectors and add vehicles, for less load
 - [DO] Pooling System
 - [DO] Vehicle Placement around the parking lot
     [=] Can make a random placement logic, just checking if the car algined has a way to get out in any direction

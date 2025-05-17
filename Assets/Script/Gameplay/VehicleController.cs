@@ -19,7 +19,7 @@ namespace Test_A.Gameplay
         internal enum VehicleStatus { INTERACTED, ALIGNMENT, REACHED_ROAD, FERRY_AROUND }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
-        private Transform[] _vehicleTransforms;
+        // private Transform[] _vehicleTransforms;
         private VehicleInfo[] _vehicleInfos;
         private int _vehicleSetID;
 
@@ -39,8 +39,8 @@ namespace Test_A.Gameplay
 
             vehicleSpawner = new VehicleSpawner();
 
-            _vehicleTransforms = vehicleSpawner.SpawnVehicles();
-            _vehicleInfos = new VehicleInfo[_vehicleTransforms.Length];
+            vehicleSpawner.SpawnVehicles();
+            _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
         }
 
         // Update is called once per frame
@@ -53,9 +53,9 @@ namespace Test_A.Gameplay
         private void VehicleSelected(int vehicleID, Vector2 slideDir)
         {
             // Debug.Log($"slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
-            for (int i = 0; i < _vehicleTransforms.Length; i++)
+            for (int i = 0; i < vehicleSpawner.VehiclesSpawned.Count; i++)
             {
-                if (vehicleID == _vehicleTransforms[i].GetInstanceID()
+                if (vehicleID == vehicleSpawner.VehiclesSpawned[i].GetInstanceID()
                     // && !vehicleInfos[i].hasInteracted
                     && (_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) == 0)
                 {
@@ -64,12 +64,12 @@ namespace Test_A.Gameplay
                     // vehicleInfos[i].hasInteracted = true;
 
                     //Validate if the slide direction is matching the vehicle's orientation
-                    // bool vehicleOrientationVertical = Mathf.Abs(_vehicleTransforms[i].forward[2]) >= 0.9f ? true : false;
-                    // Debug.Log($"Vehicle Orientation: {Mathf.Abs(_vehicleTransforms[i].forward[2])} "
+                    // bool vehicleOrientationVertical = Mathf.Abs(vehicleSpawner.VehiclesSpawned[i].forward[2]) >= 0.9f ? true : false;
+                    // Debug.Log($"Vehicle Orientation: {Mathf.Abs(vehicleSpawner.VehiclesSpawned[i].forward[2])} "
                     // + $" | slideDir: {slideDir.y} | slidedir Rounded: {Mathf.RoundToInt(slideDir.y)}"
                     // + $" | VehicleOrientation: {vehicleOrientationVertical}");
 
-                    if (Mathf.Abs(_vehicleTransforms[i].forward[2]) >= 0.9f
+                    if (Mathf.Abs(vehicleSpawner.VehiclesSpawned[i].forward[2]) >= 0.9f
                         && (Mathf.Abs(slideDir.y) - 0.75f) > 0f)
                     {
                         _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.INTERACTED);
@@ -80,7 +80,7 @@ namespace Test_A.Gameplay
                         _vehicleInfos[i].InteractedDir.x = 0f;
                         _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.ALIGNMENT);
                     }
-                    else if (Mathf.Abs(_vehicleTransforms[i].forward[0]) >= 0.9f
+                    else if (Mathf.Abs(vehicleSpawner.VehiclesSpawned[i].forward[0]) >= 0.9f
                         && (Mathf.Abs(slideDir.x) - 0.75f) > 0f)
                     {
                         _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.INTERACTED);
@@ -107,13 +107,13 @@ namespace Test_A.Gameplay
                 if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) != 0
                     && (_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.REACHED_ROAD)) == 0)
                 {
-                    vehiclePos = _vehicleTransforms[i].transform.position;
+                    vehiclePos = vehicleSpawner.VehiclesSpawned[i].transform.position;
 
                     // Testing
                     vehiclePos.Set(_vehicleInfos[i].InteractedDir.x, 0f, _vehicleInfos[i].InteractedDir.y);
                     // vehiclePos.x = _vehicleInfos[i].InteractedDir.x;vehiclePos.y = 0f;vehiclePos.z = _vehicleInfos[i].InteractedDir.y;
                     // vehiclePos += Time.deltaTime ;
-                    _vehicleTransforms[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
+                    vehicleSpawner.VehiclesSpawned[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
                     // vehicleTransforms[i].transform.position = vehiclePos + vehicleInfos[i].interactedDir * 10f;
 
                     //Check if the vehicle has reached the "Road" and then disable it
@@ -123,13 +123,13 @@ namespace Test_A.Gameplay
                         // vehicleInfos[i].hasInteracted = false;
                         // vehicleInfos[i].vehicleStatus = 0;
 
-                        if (_vehicleTransforms[i].position.z >= _roadBoundaries[0])
+                        if (vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0])
                         {
                             _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.TOP_RIGHT;
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.REACHED_ROAD);
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.FERRY_AROUND);
                         }
-                        else if (_vehicleTransforms[i].position.z <= _roadBoundaries[0] * -1f)
+                        else if (vehicleSpawner.VehiclesSpawned[i].position.z <= _roadBoundaries[0] * -1f)
                         {
                             _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.BOTTOM_LEFT;
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.REACHED_ROAD);
@@ -139,13 +139,13 @@ namespace Test_A.Gameplay
                     //For Horizontal Alignment
                     else
                     {
-                        if (_vehicleTransforms[i].position.x >= _roadBoundaries[1])
+                        if (vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1])
                         {
                             _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.BOTTOM_RIGHT;
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.REACHED_ROAD);
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.FERRY_AROUND);
                         }
-                        else if (_vehicleTransforms[i].position.x <= _roadBoundaries[1] * -1f)
+                        else if (vehicleSpawner.VehiclesSpawned[i].position.x <= _roadBoundaries[1] * -1f)
                         {
                             _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.TOP_LEFT;
                             _vehicleInfos[i].VehicleStatus |= (1 << (int)VehicleStatus.REACHED_ROAD);
@@ -173,31 +173,31 @@ namespace Test_A.Gameplay
                     {
                         case (int)RoadMarkers.TOP_RIGHT:
                             vehiclePos.Set(1f, 0f, 0f);
-                            if (_vehicleTransforms[i].position.x >= _roadBoundaries[1])
+                            if (vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1])
                                 _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.BOTTOM_RIGHT;
                             break;
 
                         case (int)RoadMarkers.BOTTOM_RIGHT:
                             vehiclePos.Set(0f, 0f, -1f);
-                            if (_vehicleTransforms[i].position.z <= _roadBoundaries[0] * -1f)
+                            if (vehicleSpawner.VehiclesSpawned[i].position.z <= _roadBoundaries[0] * -1f)
                                 _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.BOTTOM_LEFT;
                             break;
 
                         case (int)RoadMarkers.BOTTOM_LEFT:
                             vehiclePos.Set(-1f, 0f, 0f);
-                            if (_vehicleTransforms[i].position.x <= _roadBoundaries[1] * -1f)
+                            if (vehicleSpawner.VehiclesSpawned[i].position.x <= _roadBoundaries[1] * -1f)
                                 _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.TOP_LEFT;
                             break;
 
                         case (int)RoadMarkers.TOP_LEFT:
                             vehiclePos.Set(0f, 0f, 1f);
-                            if (_vehicleTransforms[i].position.z >= _roadBoundaries[0])
+                            if (vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0])
                                 _vehicleInfos[i].MarkerIndex = (int)RoadMarkers.LEFT_PARKING;
                             break;
 
                         case (int)RoadMarkers.LEFT_PARKING:
                             vehiclePos.Set(0f, 0f, 1f);
-                            if (_vehicleTransforms[i].position.z >= _roadBoundaries[0] + 4f)
+                            if (vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] + 4f)
                                 _vehicleInfos[i].VehicleStatus &= ~(1 << (int)VehicleStatus.FERRY_AROUND);
                             break;
 
@@ -205,7 +205,7 @@ namespace Test_A.Gameplay
                             Debug.LogError($"Wrong Marker Indexx : {_vehicleInfos[i].MarkerIndex}");
                             break;
                     }
-                    _vehicleTransforms[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
+                    vehicleSpawner.VehiclesSpawned[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
                 }
             }
         }

@@ -59,6 +59,7 @@ namespace Test_A.Gameplay
 
         private void GetPooledObject(GameObject pooledObject)
         {
+            // Debug.Log($"Activating Pooled Object | Name: {pooledObject.name} | Active : {pooledObject.activeInHierarchy}");
             pooledObject.SetActive(true);
         }
 

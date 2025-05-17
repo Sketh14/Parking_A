@@ -23,7 +23,7 @@ namespace Test_A.Gameplay
         // private float[] transformMatrix = new float[4] { -0.34f, 0.94f, 0.94f, 0.34f };      //-20fY
         // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
 
-        [SerializeField] private const int _cVehicleLayerMask = (1 << 6);
+        private const int _cVehicleLayerMask = (1 << 6);
         private void Start()
         {
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
