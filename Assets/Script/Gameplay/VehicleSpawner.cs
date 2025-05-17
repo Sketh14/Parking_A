@@ -12,8 +12,8 @@ namespace Test_A.Gameplay
         // private readonly Vector2 _topLeft = new Vector2(-12f, 15f);
         // private readonly Vector2 _bottomRight = new Vector2(12f, -15f);
 
-        //Top-Left: {-12, 15} | Bottom-Right: {12, -15}
-        private readonly float[] _borderCoordinates = new float[] { -12f, 15f, 12f, -15f };
+        //Top-Left: {-6, 11} | Bottom-Right: {6, -11}
+        private readonly float[] _borderCoordinates = new float[] { -6f, 11f, 6f, -11f };
 
         //Single float array | Will access dimensions using offset
         private readonly float[] _vehicleDimensions = new float[] { 1f, 1f, 1f };
@@ -33,8 +33,8 @@ namespace Test_A.Gameplay
                 vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[PoolManager.PoolType.VEHICLE_1].Get().transform);
 
                 //Put vehicles between lot boundaries
-                xPos = Random.Range(-1f, 1f) * 11;
-                zPos = Random.Range(-1f, 1f) * 14;
+                xPos = Random.Range(-1f, 1f) * (_borderCoordinates[2] - 1f);
+                zPos = Random.Range(-1f, 1f) * (_borderCoordinates[1] - 1f);
                 yRot = (Random.Range(0f, 1f) > 0.7f) ? 90f : 0f;
 
                 spawnPos.Set(xPos, 0.58f, zPos);

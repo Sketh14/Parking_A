@@ -24,7 +24,7 @@ namespace Test_A.Gameplay
         private int _vehicleSetID;
 
         private const float _cVehicleSpeedMultiplier = 5f;
-        private readonly float[] _roadBoundaries = { 15f, 12f };                 //Vertical | Horizontal
+        private readonly float[] _roadBoundaries = { 11f, 6f };                 //Vertical | Horizontal
 
         public VehicleSpawner vehicleSpawner;
 

@@ -79,6 +79,14 @@ CAR PARKING
     [=] Readonly array to contain border co-ordinates
 - InputManager
     [=] Adding Layermask to raycasting | Fixing bug
+
+- Scene
+    [=] Making a rectangle parking lot to fit the window
+        {+} New Dimension : 6X11
+- VehicleController
+    [=] Making adjustments according to the rectangle park
+- VehicleSpawner
+    [=] Making adjustments according to the rectangle park
 --------------------------------------------------------------------------------------------------------------
 - [DO] Pooling System
 - [DO] Vehicle Placement around the parking lot
