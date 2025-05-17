@@ -19,12 +19,14 @@ namespace Test_A.Gameplay
         internal enum VehicleStatus { INTERACTED, ALIGNMENT, REACHED_ROAD, FERRY_AROUND }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
-        [SerializeField] private Transform[] _vehicleTransforms;
+        private Transform[] _vehicleTransforms;
         private VehicleInfo[] _vehicleInfos;
         private int _vehicleSetID;
 
         private const float _cVehicleSpeedMultiplier = 5f;
         private readonly float[] _roadBoundaries = { 15f, 12f };                 //Vertical | Horizontal
+
+        public VehicleSpawner vehicleSpawner;
 
         private void OnDestroy()
         {
@@ -35,6 +37,9 @@ namespace Test_A.Gameplay
         {
             GameManager.Instance.OnSelect += VehicleSelected;
 
+            vehicleSpawner = new VehicleSpawner();
+
+            _vehicleTransforms = vehicleSpawner.SpawnVehicles();
             _vehicleInfos = new VehicleInfo[_vehicleTransforms.Length];
         }
 
@@ -47,7 +52,7 @@ namespace Test_A.Gameplay
 
         private void VehicleSelected(int vehicleID, Vector2 slideDir)
         {
-            Debug.Log($"slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
+            // Debug.Log($"slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
             for (int i = 0; i < _vehicleTransforms.Length; i++)
             {
                 if (vehicleID == _vehicleTransforms[i].GetInstanceID()

@@ -181,11 +181,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1112697811}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &183676270 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
-  m_PrefabInstance: {fileID: 876447053}
+--- !u!1 &140670667
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 140670668}
+  - component: {fileID: 140670669}
+  m_Layer: 0
+  m_Name: PoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &140670668
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140670667}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 561823399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &140670669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140670667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c3ec01dd0697454487aa470e5a4a42a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prefabToPool:
+  - {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
 --- !u!1 &192373847
 GameObject:
   m_ObjectHideFlags: 0
@@ -717,6 +758,7 @@ Transform:
   - {fileID: 1971359754}
   - {fileID: 2139412490}
   - {fileID: 1504851106}
+  - {fileID: 140670668}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &776109335
@@ -845,7 +887,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.359999
+      value: -6
       objectReference: {fileID: 0}
     - target: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_LocalRotation.w
@@ -878,6 +920,10 @@ PrefabInstance:
     - target: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_Name
       value: Vehicle_H1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -954,11 +1000,6 @@ Transform:
   - {fileID: 1964210732}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &1333173579 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
-  m_PrefabInstance: {fileID: 1465534612333499591}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1376096611
 GameObject:
   m_ObjectHideFlags: 0
@@ -1598,9 +1639,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26bb80819ae86654ab3826d9e7927a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _vehicleTransforms:
-  - {fileID: 1333173579}
-  - {fileID: 183676270}
 --- !u!1001 &1465534612333499591
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1619,7 +1657,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.77
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 965591497918860958, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1652,6 +1690,10 @@ PrefabInstance:
     - target: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
       propertyPath: m_Name
       value: Vehicle_V1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

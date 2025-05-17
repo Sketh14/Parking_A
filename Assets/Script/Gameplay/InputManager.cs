@@ -23,6 +23,7 @@ namespace Test_A.Gameplay
         // private float[] transformMatrix = new float[4] { -0.34f, 0.94f, 0.94f, 0.34f };      //-20fY
         // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
 
+        [SerializeField] private const int _cVehicleLayerMask = (1 << 6);
         private void Start()
         {
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
@@ -55,6 +56,7 @@ namespace Test_A.Gameplay
 #else
             Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
 #endif
+
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
             if (!userInteracting)
@@ -98,7 +100,7 @@ namespace Test_A.Gameplay
                 Ray cameraRay = Camera.main.ScreenPointToRay(interactPos);
                 RaycastHit rayHit;
 
-                if (Physics.Raycast(cameraRay, out rayHit, 100f))
+                if (Physics.Raycast(cameraRay, out rayHit, 500f, _cVehicleLayerMask))
                 {
                     _selectionStatus = 1;
                     _hitTransformID = rayHit.transform.GetInstanceID();

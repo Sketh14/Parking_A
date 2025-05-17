@@ -67,7 +67,27 @@ CAR PARKING
     [=] Keeping points in a readonly array and updating through it
     [=] Markers for updating and keeping track of road-turnings
     [=] [BUG] Fixing Vehicle interaction setting when clicked once even for wrong slide direction
+
 --------------------------------------------------------------------------------------------------------------
+                                                    17 May 2025
+--------------------------------------------------------------------------------------------------------------
+- PoolManager
+    [=] Singleton PoolManager for managing objects
+    [=] Dictionary with ObjectPool for pooling vehicles for now
+- VehicleSpawner
+    [=] Non-Monobehvaiour class for spawning vehicles
+    [=] Readonly array to contain border co-ordinates
+- InputManager
+    [=] Adding Layermask to raycasting | Fixing bug
+--------------------------------------------------------------------------------------------------------------
+- [DO] Pooling System
+- [DO] Vehicle Placement around the parking lot
+    [=] Can make a random placement logic, just checking if the car algined has a way to get out in any direction
+- [Do] Vehicle shake
+    [=] After collision, shake the vehicle
+- [Do] Vehicle Collision Detection
+    [=] Raycast front and back from sides?
+        {+} Poking a little on the front and back to detect other vehicles
 - [DO] Vehicles can lerp to rotate towards the next marker, so that the rotation fo vehicle does not goes wrong
 
 - To check if the vehicles have reached the road or not?
