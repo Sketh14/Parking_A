@@ -97,6 +97,13 @@ CAR PARKING
     [=] Adding action to show Vehicles have been spawned fully
 - VehicleController
     [=] Adding callback for VehiclesSpawned
+
+-Scene
+    [=] Adding 2 more different vehicles
+- VehicleSpawner
+    [=] Different Vehicle Dimensions
+    [=] Checking for collisions by taking different vehicle dimensions and rotations
+    [=] Using Vehicle_Type to determine which random vehicle to spawn
 --------------------------------------------------------------------------------------------------------------
 - [DO] Vehicle Collision Detection
     [=] Make sectors and add vehicles, for less load

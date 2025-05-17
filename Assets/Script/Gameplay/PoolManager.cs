@@ -6,7 +6,7 @@ namespace Test_A.Gameplay
 {
     public class PoolManager : MonoBehaviour
     {
-        public enum PoolType { VEHICLE_1 = 0, VEHICLE_2, VEHICLE_3, VEHICLE_4, VEHICLE_5 }
+        public enum PoolType { VEHICLE_S = 0, VEHICLE_M, VEHICLE_L }
 
         #region Singleton
         private static PoolManager _instance;

@@ -17,7 +17,7 @@ namespace Test_A.Gameplay
         // private readonly float[] _borderCoordinates = new float[] { 3f, 3f };           //Test
 
         //Single float array | Will access dimensions using offset
-        private readonly float[] _vehicleDimensions = new float[] { 1f, 1f, 1f };
+        private readonly float[] _vehicleDimensions = new float[] { 1f, 1f, 1f, 2f, 1f, 2.5f };
 
         [SerializeField] private const int _cVehicleLayerMask = (1 << 6);
         private List<Transform> _vehiclesSpawned;
@@ -26,15 +26,16 @@ namespace Test_A.Gameplay
         public async void SpawnVehicles()
         {
             Debug.Log($"Spawning Vehicles");
+
+            Random.InitState(123456);
             _vehiclesSpawned = new List<Transform>();
+            PoolManager.PoolType vehicleType;
             Vector3 spawnPos = Vector3.zero, spawnRot = Vector3.zero, halfExtents = Vector3.zero;
-            bool lotFull = false;
+            // bool lotFull = false;
             float xPos = 0f, zPos = 0f, yRot = 0f;
 
             int noSpaceFound = 0;
             // RaycastHit boxCasthitInfo;
-
-            Random.InitState(123456);
 
             #region OverlapCapsuleNonAlloc
             /*
@@ -52,6 +53,8 @@ namespace Test_A.Gameplay
                 xPos = Random.Range(-1f, 1f) * (_borderCoordinates[0] - 1f);
                 zPos = Random.Range(-1f, 1f) * (_borderCoordinates[1] - 1f);
                 yRot = (Random.Range(0f, 1f) > 0.7f) ? 90f : 0f;
+
+                vehicleType = (PoolManager.PoolType)Random.Range(0, (int)PoolManager.PoolType.VEHICLE_L);
 
                 //Check for vehicle collisions
                 #region OverlapCapsuleNonAlloc
@@ -81,7 +84,12 @@ namespace Test_A.Gameplay
                 #endregion OverlapCapsuleNonAlloc
 
                 spawnPos.Set(xPos, 2f, zPos);         //y should be around 0.58f for now | Test: 0.7f
-                halfExtents.Set(0.7f, 0.35f, 0.7f);
+                spawnRot.Set(0f, yRot, 0f);
+
+                //For Offsetting dimensions array by 2
+                halfExtents.Set((_vehicleDimensions[0 + (int)vehicleType * 2] / 2) + 0.2f
+                    , 0.5f
+                    , (_vehicleDimensions[1 + (int)vehicleType * 2] / 2) + 0.2f);
 
                 //BoxCast does not take into account the starting collider if it starts within a collider
                 //BoxCast Forward
@@ -91,13 +99,12 @@ namespace Test_A.Gameplay
                 //BoxCast Down
                 if (!Physics.BoxCast(spawnPos, halfExtents, Vector3.down
                     // , out boxCasthitInfo
-                    , Quaternion.identity, 1f, _cVehicleLayerMask))
+                    , Quaternion.Euler(spawnRot), 1f, _cVehicleLayerMask))
                 {
-                    spawnRot.Set(0f, yRot, 0f);
                     spawnPos.y = 0.58f;
 
-                    _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[PoolManager.PoolType.VEHICLE_1].Get().transform);
-                    _vehiclesSpawned[i].name = $"Vehicle_{i}";
+                    _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[vehicleType].Get().transform);
+                    _vehiclesSpawned[i].name = $"{vehicleType}_{i}";
                     _vehiclesSpawned[i].position = spawnPos;
                     _vehiclesSpawned[i].localEulerAngles = spawnRot;
                     // Debug.Log($"vehilce Status | Name : {_vehiclesSpawned[i].name} "
@@ -112,11 +119,11 @@ namespace Test_A.Gameplay
                     // noSpaceFound++;
                     // if (noSpaceFound > 30)
                     // {
-                    Debug.Log($"Emergency Exit Hit : {noSpaceFound}");
+                    Debug.Log($"Maximum Limit for no space found Hit : {noSpaceFound}");
                     break;
                     // }
                 }
-                await Task.Delay(5);
+                await Task.Delay(5);            //Wait for Physics System to Update
             }
 
             GameManager.Instance.OnVehiclesSpawned?.Invoke();
