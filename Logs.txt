@@ -90,6 +90,13 @@ CAR PARKING
 
 - VehicleSpawner
     [=] Collision Detection
+
+- VehicleSpawner
+    [=] Setting a delay(10 ms) to collision detection checking so that the Physics System is updated
+- GameManager
+    [=] Adding action to show Vehicles have been spawned fully
+- VehicleController
+    [=] Adding callback for VehiclesSpawned
 --------------------------------------------------------------------------------------------------------------
 - [DO] Vehicle Collision Detection
     [=] Make sectors and add vehicles, for less load

@@ -13,8 +13,8 @@ namespace Test_A.Gameplay
         // private readonly Vector2 _bottomRight = new Vector2(12f, -15f);
 
         //Top-Left: {-6, 11} | Bottom-Right: {6, -11}
-        // private readonly float[] _borderCoordinates = new float[] { 6f, 11f };            //Original
-        private readonly float[] _borderCoordinates = new float[] { 3f, 3f };           //Test
+        private readonly float[] _borderCoordinates = new float[] { 6f, 11f };            //Original
+        // private readonly float[] _borderCoordinates = new float[] { 3f, 3f };           //Test
 
         //Single float array | Will access dimensions using offset
         private readonly float[] _vehicleDimensions = new float[] { 1f, 1f, 1f };
@@ -31,7 +31,7 @@ namespace Test_A.Gameplay
             bool lotFull = false;
             float xPos = 0f, zPos = 0f, yRot = 0f;
 
-            int vehicleCount = 0;
+            int noSpaceFound = 0;
             // RaycastHit boxCasthitInfo;
 
             Random.InitState(123456);
@@ -45,7 +45,7 @@ namespace Test_A.Gameplay
 
             //Keep filling until the necessary amount of vehicles are filled in the parking lot
             // while(!lotFull)
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 60;)
             {
 
                 //Put vehicles in random spots between lot boundaries
@@ -81,7 +81,7 @@ namespace Test_A.Gameplay
                 #endregion OverlapCapsuleNonAlloc
 
                 spawnPos.Set(xPos, 2f, zPos);         //y should be around 0.58f for now | Test: 0.7f
-                halfExtents.Set(0.5f, 0.35f, 0.5f);
+                halfExtents.Set(0.7f, 0.35f, 0.7f);
 
                 //BoxCast does not take into account the starting collider if it starts within a collider
                 //BoxCast Forward
@@ -97,19 +97,29 @@ namespace Test_A.Gameplay
                     spawnPos.y = 0.58f;
 
                     _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[PoolManager.PoolType.VEHICLE_1].Get().transform);
-                    _vehiclesSpawned[vehicleCount].name = $"Vehicle_{vehicleCount}";
-                    _vehiclesSpawned[vehicleCount].position = spawnPos;
-                    _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
-                    // Debug.Log($"vehilce Status | Name : {_vehiclesSpawned[vehicleCount].name} "
-                    // + $"| Active : {_vehiclesSpawned[vehicleCount].gameObject.activeInHierarchy}");
+                    _vehiclesSpawned[i].name = $"Vehicle_{i}";
+                    _vehiclesSpawned[i].position = spawnPos;
+                    _vehiclesSpawned[i].localEulerAngles = spawnRot;
+                    // Debug.Log($"vehilce Status | Name : {_vehiclesSpawned[i].name} "
+                    // + $"| Active : {_vehiclesSpawned[i].gameObject.activeInHierarchy}");
 
-                    vehicleCount++;
+                    i++;
+                    noSpaceFound = 0;
                 }
-                // else
-                //     Debug.Log($"Hit Info : {boxCasthitInfo.transform.name}");
-                await Task.Delay(1000);
+                else if (noSpaceFound++ > 30)
+                {
+                    //     Debug.Log($"Hit Info : {boxCasthitInfo.transform.name}");
+                    // noSpaceFound++;
+                    // if (noSpaceFound > 30)
+                    // {
+                    Debug.Log($"Emergency Exit Hit : {noSpaceFound}");
+                    break;
+                    // }
+                }
+                await Task.Delay(5);
             }
 
+            GameManager.Instance.OnVehiclesSpawned?.Invoke();
             //Tests
             /*{
                 // GameObject vehicle;

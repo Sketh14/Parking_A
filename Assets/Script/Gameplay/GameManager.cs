@@ -18,5 +18,6 @@ namespace Test_A.Gameplay
         #endregion Singleton
 
         public System.Action<int, Vector2> OnSelect;
+        public System.Action OnVehiclesSpawned;
     }
 }

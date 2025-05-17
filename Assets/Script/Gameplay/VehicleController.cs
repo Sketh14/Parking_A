@@ -27,6 +27,7 @@ namespace Test_A.Gameplay
         private readonly float[] _roadBoundaries = { 11f, 6f };                 //Vertical | Horizontal
 
         public VehicleSpawner vehicleSpawner;
+        private bool _vehiclesSpawned = false;
 
         private void OnDestroy()
         {
@@ -36,16 +37,22 @@ namespace Test_A.Gameplay
         private void Start()
         {
             GameManager.Instance.OnSelect += VehicleSelected;
+            GameManager.Instance.OnVehiclesSpawned += () =>
+            {
+                _vehiclesSpawned = true;
+                _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+            };
 
             vehicleSpawner = new VehicleSpawner();
 
             vehicleSpawner.SpawnVehicles();
-            _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+            // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (!_vehiclesSpawned) return;
             MoveVehicle();
             FerryAroundThePark();
         }
