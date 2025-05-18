@@ -17,6 +17,9 @@ CAR PARKING
         {+} If side, then to and fro
         {+} If frront/back, then that direction
     [=] Keep in mind, how a car turns, if going backwards, then turn to the direction of the road, not 360
+    [=] Moved only counts when the vehicle has moved, even if the player has slid the vehicle, if it just
+        collides with another vehicle, then it does not count
+	[=] A vehicle is divided into smaller 2 parts width wise, maybe same for the length
 
 
 --------------------------------------------------------------------------------------------------------------
@@ -104,7 +107,28 @@ CAR PARKING
     [=] Different Vehicle Dimensions
     [=] Checking for collisions by taking different vehicle dimensions and rotations
     [=] Using Vehicle_Type to determine which random vehicle to spawn
+
 --------------------------------------------------------------------------------------------------------------
+                                                    18 May 2025
+--------------------------------------------------------------------------------------------------------------
+- Scene
+    [=] Making snap settings to 0.05 on Y
+    [=] Changing road prefab positions
+    [=] Changing Vehicle size
+        {+} Reducing by just a little on all sides so as to not collide with others and also fit in the grid-system
+- VehicleSpawner
+    [=] Changing road co-ordinates accordingly
+    [=] Making grid-fill system
+        {+} Making grid | Choosing random vehicle | Validating chosen cell
+
+--------------------------------------------------------------------------------------------------------------
+- [DO] Divide into smaller sections
+    [=] Move every 0.05 intervals
+    [=] For Small Vehicle | Center will always be multiple of 0.5
+    [=] For Medium Vehicle | Center will always in interval of 0.5 starting from the (-0.75 | 0.75)
+    [=] For Large Vehicle | Center will always in interval of 0.5 starting from the (-1 | 1)
+    [=] Since every Vehicle has the same width and only the length differs
+        {+} Need to only change the length value, breadth value can remain the same
 - [DO] Vehicle Collision Detection
     [=] Make sectors and add vehicles, for less load
 - [DO] Pooling System

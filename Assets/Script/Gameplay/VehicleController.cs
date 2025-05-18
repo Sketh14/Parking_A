@@ -45,7 +45,8 @@ namespace Test_A.Gameplay
 
             vehicleSpawner = new VehicleSpawner();
 
-            vehicleSpawner.SpawnVehicles();
+            // vehicleSpawner.SpawnVehicles();
+            vehicleSpawner.SpawnVehicles2();
             // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
         }
 

@@ -13,15 +13,27 @@ namespace Test_A.Gameplay
         // private readonly Vector2 _bottomRight = new Vector2(12f, -15f);
 
         //Top-Left: {-6, 11} | Bottom-Right: {6, -11}
-        private readonly float[] _borderCoordinates = new float[] { 6f, 11f };            //Original
-        // private readonly float[] _borderCoordinates = new float[] { 3f, 3f };           //Test
+        private readonly float[] _borderCoordinates;
 
         //Single float array | Will access dimensions using offset
-        private readonly float[] _vehicleDimensions = new float[] { 1f, 1f, 1f, 2f, 1f, 2.5f };
+        private readonly float[] _vehicleDimensions;
 
-        [SerializeField] private const int _cVehicleLayerMask = (1 << 6);
+        private const int _cVehicleLayerMask = (1 << 6);
         private List<Transform> _vehiclesSpawned;
         public List<Transform> VehiclesSpawned { get => _vehiclesSpawned; }
+
+        private byte _gridX = 22, _gridY = 42;
+
+        public VehicleSpawner()
+        {
+            _borderCoordinates = new float[] { 6.1f, 11.1f };            //Original
+            // _borderCoordinates = new float[] { 3f, 3f };           //Test
+
+            _vehicleDimensions = new float[] { 1f, 1f, 1f, 2f, 1f, 2.5f };
+
+            // SpawnVehicles();
+            // SpawnVehicles2();
+        }
 
         public async void SpawnVehicles()
         {
@@ -123,7 +135,7 @@ namespace Test_A.Gameplay
                     break;
                     // }
                 }
-                await Task.Delay(5);            //Wait for Physics System to Update
+                await Task.Delay(10);            //Wait for Physics System to Update
             }
 
             GameManager.Instance.OnVehiclesSpawned?.Invoke();
@@ -144,9 +156,82 @@ namespace Test_A.Gameplay
             }*/
         }
 
-        private void CheckIfValidPlacement()
+        public void SpawnVehicles2()
         {
+            //Create a grid of 22 x 42 cells
+            byte[] gridMap = new byte[_gridX * _gridY];
 
+            int gridMapIndex = 0;
+            //Initialize Array to all spots being empty
+            for (; gridMapIndex < gridMap.Length; gridMapIndex++)
+                gridMap[gridMapIndex] = 0;
+
+            int vehicleType, neighbourX, neighbourY;
+            bool cellOccupied = false;
+            Random.InitState(123456);
+
+            for (gridMapIndex = 0; gridMapIndex < 1; gridMapIndex++)
+            {
+                //Choose a random vehicle 
+                // 0: Blank | 1-3: Vehicle Index
+                // vehicleType = Random.Range(0, 4);           //Original
+                vehicleType = 1;              //Test | Only include small vehicles
+
+                //Fill the associated cells: Left,Right,Up,Down accordingly
+                //- As we are going left to right from the top
+                //  [=] Checking from the top-left of a cell and including other cells should do
+                //      as we will never be going the opposite way
+                //  [=] Maybe when back-tracking is implemented
+                switch (vehicleType)
+                {
+                    //Blank Space
+                    case 0: continue;
+
+                    //Small Vehicle
+                    case 1:
+                        //Check if the selected cell is already occupied
+                        //If not, then check if all the neighbour cells to fill are occupied or not
+                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                        {
+                            //Check Up/Down pairs
+                            for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                            {
+                                // Debug.Log($"gridMapIndex: {gridMapIndex} | neighbourX: {neighbourX} | neighbourY: {neighbourY}"
+                                //     + $"| [gridMapIndex + nX + nY * 22]: {gridMapIndex + neighbourX + neighbourY * 22}");
+                                if (gridMap[gridMapIndex + neighbourX + neighbourY * 22] != 0)
+                                {
+                                    cellOccupied = true;
+                                    break;
+                                }
+                            }
+                        }
+                        //Skip Over and reset the cellOccupied counter
+                        if (cellOccupied) { cellOccupied = false; continue; }
+                        break;
+
+                    //Medium Vehicle
+                    case 2:
+                        break;
+
+                    //Long Vehicle
+                    case 3:
+                        break;
+
+                    default:
+                        Debug.LogError($"Wrong Vehicle Type: {vehicleType}");
+                        continue;
+                }
+
+
+                //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
+
+                // If true, then place the vehicle
+                // If false, then choose another vehicle | leave the spot empty
+            }
+        }
+
+        private void CheckIfValidPlacement(int topLeftIndex, PoolManager.PoolType vehicleType)
+        {
         }
     }
 }
