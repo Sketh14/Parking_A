@@ -122,6 +122,23 @@ CAR PARKING
         {+} Making grid | Choosing random vehicle | Validating chosen cell
 
 --------------------------------------------------------------------------------------------------------------
+                                                    26 May 2025
+--------------------------------------------------------------------------------------------------------------
+- VehicleSpawner
+    [=] Adding const for grid dimensions
+    [=] Checking horizontal | vertical collisions separately
+
+- VehicleSpawner
+    [=] Assinging a random orientation and checking according to it
+    [=] Check current cell and then cell in the chosen direction
+    [=] After check is done, placing the vehicle in that section only
+    [=] Leaving 1 cell gap from border for any wall placement
+    [=] Setting position and rotation of the vehicles also
+- PoolManager
+    [=] Adding BLANK to PoolType
+
+--------------------------------------------------------------------------------------------------------------
+- [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
 - [DO] Divide into smaller sections
     [=] Move every 0.05 intervals
     [=] For Small Vehicle | Center will always be multiple of 0.5

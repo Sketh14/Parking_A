@@ -6,7 +6,7 @@ namespace Test_A.Gameplay
 {
     public class PoolManager : MonoBehaviour
     {
-        public enum PoolType { VEHICLE_S = 0, VEHICLE_M, VEHICLE_L }
+        public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L }
 
         #region Singleton
         private static PoolManager _instance;
@@ -45,7 +45,7 @@ namespace Test_A.Gameplay
                     maxSize: 30
                 );
 
-                PrefabPool.Add((PoolType)i, objectPool);
+                PrefabPool.Add((PoolType)(i + 1), objectPool);
                 // Debug.Log($"Creating Prefab Pool | Name : {poolHolder.name} | i: {0} | PoolType: {(PoolType)i} | Count: {PrefabPool[PoolType.VEHICLE_1].CountAll}");
             }
         }
