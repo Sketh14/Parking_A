@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+
 using Random = UnityEngine.Random;
+using Math = System.Math;
 
 namespace Test_A.Gameplay
 {
@@ -11,6 +13,8 @@ namespace Test_A.Gameplay
     {
         // private readonly Vector2 _topLeft = new Vector2(-12f, 15f);
         // private readonly Vector2 _bottomRight = new Vector2(12f, -15f);
+
+        //Top-Left Vehicle Center: {-5.5, 10.5} | Bottom-Right: {5.5, -10.5}
 
         //Top-Left: {-6, 11} | Bottom-Right: {6, -11}
         private readonly float[] _borderCoordinates;
@@ -22,7 +26,7 @@ namespace Test_A.Gameplay
         private List<Transform> _vehiclesSpawned;
         public List<Transform> VehiclesSpawned { get => _vehiclesSpawned; }
 
-        private byte _gridX = 22, _gridY = 42;
+        private const byte _cGridX = 22, _cGridY = 42;
 
         public VehicleSpawner()
         {
@@ -159,7 +163,7 @@ namespace Test_A.Gameplay
         public void SpawnVehicles2()
         {
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[_gridX * _gridY];
+            byte[] gridMap = new byte[_cGridX * _cGridY];
 
             int gridMapIndex = 0;
             //Initialize Array to all spots being empty
@@ -191,22 +195,43 @@ namespace Test_A.Gameplay
                     case 1:
                         //Check if the selected cell is already occupied
                         //If not, then check if all the neighbour cells to fill are occupied or not
-                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
+
+                        //Check horizontal pairs
+                        for (neighbourX = 1; neighbourX >= -1; neighbourX *= -1)
                         {
-                            //Check Up/Down pairs
-                            for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                            //Bounds Check
+                            if (gridMapIndex + neighbourX < 0 || gridMapIndex + neighbourX > _cGridX)
+                                continue;
+                            else if (gridMap[gridMapIndex + neighbourX] != 0)
+                            {
+                                cellOccupied = true;
+                                break;
+                            }
+                            // gridMap[gridMapIndex + neighbourX] = (byte)vehicleType;
+                        }
+
+                        if (cellOccupied)
+                            continue;
+                        else
+                        {
+                            //Check vertical pairs
+                            for (neighbourY = 1; neighbourY >= -1; neighbourY *= -1)
                             {
                                 // Debug.Log($"gridMapIndex: {gridMapIndex} | neighbourX: {neighbourX} | neighbourY: {neighbourY}"
                                 //     + $"| [gridMapIndex + nX + nY * 22]: {gridMapIndex + neighbourX + neighbourY * 22}");
-                                if (gridMap[gridMapIndex + neighbourX + neighbourY * 22] != 0)
-                                {
-                                    cellOccupied = true;
+
+                                //Bounds Check
+                                if (gridMapIndex + neighbourY < 0 || gridMapIndex + (neighbourY * _cGridX) > _cGridX * _cGridY)
+                                    continue;
+                                // 1 down/up will be on the next line, so multiply by gridX
+                                else if (gridMap[gridMapIndex + (neighbourY * _cGridX)] != 0)                                
                                     break;
-                                }
+                                
+                                // gridMap[gridMapIndex + neighbourY * _cGridX] = (byte)vehicleType;                             
                             }
                         }
+
                         //Skip Over and reset the cellOccupied counter
-                        if (cellOccupied) { cellOccupied = false; continue; }
                         break;
 
                     //Medium Vehicle
@@ -221,7 +246,7 @@ namespace Test_A.Gameplay
                         Debug.LogError($"Wrong Vehicle Type: {vehicleType}");
                         continue;
                 }
-
+                cellOccupied = false;
 
                 //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
 
