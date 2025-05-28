@@ -6,7 +6,6 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Math = System.Math;
 
-
 namespace Test_A.Gameplay
 {
     [Serializable]
@@ -15,7 +14,7 @@ namespace Test_A.Gameplay
         // private readonly Vector2 _topLeft = new Vector2(-12f, 15f);
         // private readonly Vector2 _bottomRight = new Vector2(12f, -15f);
 
-        //Top-Left Vehicle Center: {-4.5, 9.5} | Bottom-Right: {4.5, -9.5}
+        //Top-Left Vehicle Center: {-5.5, 10.5} | Bottom-Right: {5.5, -10.5}
 
         //Top-Left: {-6, 11} | Bottom-Right: {6, -11}
         private readonly float[] _borderCoordinates;
@@ -162,7 +161,7 @@ namespace Test_A.Gameplay
             }*/
         }
 
-        public void SpawnVehicles2()
+        public async void SpawnVehicles2()
         {
             //Create a grid of 22 x 42 cells
             byte[] gridMap = new byte[_cGridX * _cGridY];
@@ -172,31 +171,38 @@ namespace Test_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
-            int vehicleType, vehicleCount = 0, neighbourX, neighbourY;
+            int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
             int xDir, yDir;
             Vector3 spawnPos, spawnRot;
             bool cellOccupied = false;
             Random.InitState(123456);
 
-            //0: Right | 1: Down | 2: Left | 3: Up
-            int vehicleOrientation;
 
             // 1 cell gap for boundary
-            for (gridMapIndex = 23; gridMapIndex < 24; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < 110; gridMapIndex++)
             {
+                //Check if the space is occupied or not | Skip if occupied
+                if (gridMap[gridMapIndex] != 0)
+                    continue;
+
                 xDir = 1; yDir = 1;
-                cellOccupied = false;
+                // cellOccupied = false;
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
-                // vehicleOrientation = Random.Range(0, 4);         //Original
-                vehicleOrientation = 1;
+
+                //Random Orientation
+                //0: Left | 1: Right | 2: Up | 3: Down
+                vehicleOrientation = Random.Range(0, 4);         //Original
 
                 //Choose a random vehicle 
                 // 0: Blank | 1-3: Vehicle Index
                 // vehicleType = Random.Range(0, 4);           //Original
+
+                vehicleOrientation = 3;                             //Test
                 vehicleType = 1;              //Test | Only include small vehicles
+                gridMapIndex = 109;              //Test
                 Debug.Log($"vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
-                + $" | gridMapIndex: {gridMapIndex}");
+                + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
 
                 //Fill the associated cells: Left,Right,Up,Down accordingly
                 //- As we are going left to right from the top
@@ -232,27 +238,31 @@ namespace Test_A.Gameplay
                         {
                             //Check Left
                             case 0:
-                                xDir = 1;
+                                xDir = -1;
                                 spawnRot.y = -90f;
 
                                 //By default, the car will be placed in the left-orientation
-                                spawnPos.x = (gridMapIndex % _cGridY) + (_cGridX / 4);
-                                // spawnPos.z = (gridMapIndex / _cGridY) + (_cGridY / 4) - (0.5f * 2);
-                                break;
+                                // spawnPos.x = -5.5f * Mathf.Clamp(gridMapIndex % _cGridX, 1, _cGridX);  // + (_cGridX / 4);
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX) * 0.5f;
+                                goto case 4;
 
                             //Check Right
                             case 1:
-                                xDir = -1;
+                                xDir = 1;
                                 spawnRot.y = 90f;
-                                spawnPos.x = (gridMapIndex % _cGridY) + (_cGridX / 4) + 0.5f;
-                                // spawnPos.z = (gridMapIndex / _cGridY) + (_cGridY / 4) - (0.5f * 2);
+
+                                // spawnPos.x = (_cGridX / 4) * -1.0f * (gridMapIndex / _cGridX - 1) + (gridMapIndex % _cGridX) + 0.5f;  // + (_cGridX / 4) + 0.5f;
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX) * 0.5f + 0.5f;  // + (_cGridX / 4) + 0.5f;
+                                // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % _cGridX)} | top-left: {(_cGridX / 4.0f * -1.0f)} ");
                                 goto case 4;
 
                             //Check Horizontal Pairs
                             case 4:
-                                //Both will be down in Y for horizontal
-                                spawnPos.z = (gridMapIndex / _cGridY) + (_cGridY / 4) - 0.5f;
+                                //Both will be down in Y for horizontal pair
+                                spawnPos.z = (_cGridY / 4.0f) - gridMapIndex / (_cGridX - 1) * 0.5f - 0.5f;   // + (_cGridY / 4) - 0.5f;
+                                // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (_cGridX - 1)} | top-left: {_cGridY / 4.0f} ");
 
+                                //Check if vehicle can be placed
                                 // for (neighbourX = 0; neighbourX <= xLimit; neighbourX += (1 * xLimit))
                                 for (neighbourX = 0; neighbourX < 2; neighbourX++)
                                 {
@@ -260,21 +270,29 @@ namespace Test_A.Gameplay
                                     for (neighbourY = 0; neighbourY < 2; neighbourY++)
                                     {
                                         //Bounds Check
-                                        if (gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX) < 0
-                                            || gridMapIndex + (neighbourX * xDir) > _cGridX)
-                                            continue;
-                                        else if (gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] != 0)
+                                        if ((gridMapIndex % _cGridX) >= 0 && (gridMapIndex % _cGridX) < _cGridX                 //X-Check
+                                            && (gridMapIndex / _cGridX) >= 0 && (gridMapIndex / _cGridX) < _cGridY)             //Y-Check
                                         {
-                                            cellOccupied = true;
-                                            break;
+                                            // Debug.Log($"Bounds: {gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)}");
+                                            goto case 6;
                                         }
-                                        else
-                                            gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                                        //Cell Filled Check
+                                        else if (gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] != 0)
+                                            goto case 6;
+                                        // else
+                                        //     gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
                                     }
                                 }
 
+                                //Fill the cells
+                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                                {
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                        gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                                }
+
                                 _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                                _vehiclesSpawned[vehicleCount].name = $"{vehicleType}_{vehicleCount}";
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{vehicleCount}";
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
 
@@ -283,36 +301,71 @@ namespace Test_A.Gameplay
 
                             //Check up
                             case 2:
-                                //Check vertical pairs
-                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
-                                {
-                                    // Debug.Log($"gridMapIndex: {gridMapIndex} | loopIndex: {loopIndex} "
-                                    //     + $"| [gridMapIndex + loopIndex * yDir * 22]: {gridMapIndex + loopIndex * yDir * 22}");
+                                yDir = -1;
+                                spawnRot.y = 0f;
 
-                                    //Bounds Check
-                                    if (gridMapIndex + (neighbourX * yDir * _cGridX) < 0
-                                        || gridMapIndex + (neighbourX * yDir * _cGridX) > _cGridX * _cGridY)
-                                        continue;
-                                    // 1 down/up will be on the next line, so multiply by gridX
-                                    else if (gridMap[gridMapIndex + (neighbourX * yDir * _cGridX)] != 0)
-                                    {
-                                        cellOccupied = true;
-                                        break;
-                                    }
-
-                                    gridMap[gridMapIndex + (neighbourX * yDir * _cGridX)] = (byte)vehicleType;
-                                }
-                                break;
+                                spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / (_cGridX - 1)) * 0.5f;
+                                goto case 5;
 
                             // Check down
                             case 3:
-                                yDir = -1;
-                                goto case 2;
+                                yDir = 1;
+                                spawnRot.y = 180f;
 
+                                spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / (_cGridX - 1)) * 0.5f - 0.5f;
+                                goto case 5;
+
+                            //Check vertical pairs
+                            case 5:
+                                //Both will be right in X for Vertical pair
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX) * 0.5f + 0.5f;
+                                xDir = 1;
+
+                                //Check if vehicle can be placed
+                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                                {
+                                    //Check the cells down below also
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                    {
+                                        // Debug.Log($"gridMapIndex: {gridMapIndex} | loopIndex: {loopIndex} "
+                                        //     + $"| [gridMapIndex + loopIndex * yDir * 22]: {gridMapIndex + loopIndex * yDir * 22}");
+
+                                        //Bounds Check
+                                        if ((gridMapIndex % _cGridX) >= 0 && (gridMapIndex % _cGridX) < _cGridX                 //X-Check
+                                            && (gridMapIndex / _cGridX) >= 0 && (gridMapIndex / _cGridX) < _cGridY)             //Y-Check
+                                        {
+                                            Debug.Log($"Bounds: {gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)}");
+                                            goto case 6;
+                                        }
+                                        //Cell Filled Check
+                                        else if (gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)] != 0)
+                                            goto case 6;
+                                        // else
+                                        //     gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                                    }
+                                }
+
+                                //Fill the cells
+                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                                {
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                        gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)] = (byte)vehicleType;
+                                }
+
+                                _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{vehicleCount}";
+                                _vehiclesSpawned[vehicleCount].position = spawnPos;
+                                _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+
+                                vehicleCount++;
+                                break;
+
+                            //Cell Occupied | Out Of Bounds
+                            case 6:
+                                cellOccupied = false;       //Reset value
+                                continue;
                         }
-
-                        if (cellOccupied)
-                            continue;
+                        // if (cellOccupied) continue;
 
                         //Skip Over and reset the cellOccupied counter
                         break;
@@ -375,6 +428,8 @@ namespace Test_A.Gameplay
 
                 // If true, then place the vehicle
                 // If false, then choose another vehicle | leave the spot empty
+
+                await Task.Yield();
             }
         }
 

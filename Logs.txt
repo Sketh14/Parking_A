@@ -138,6 +138,14 @@ CAR PARKING
     [=] Adding BLANK to PoolType
 
 --------------------------------------------------------------------------------------------------------------
+                                                    28 May 2025
+--------------------------------------------------------------------------------------------------------------
+- VehicleSpawner
+    [=] Fixing spawn poistion code for small vehicles
+    [=] Logic for vertical spawn of small vehicles 
+    [=] Bounds Check/Cells Filled logic update
+
+--------------------------------------------------------------------------------------------------------------
 - [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
 - [DO] Divide into smaller sections
     [=] Move every 0.05 intervals
