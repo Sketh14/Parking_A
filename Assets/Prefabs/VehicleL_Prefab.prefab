@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563618058008219524}
+  - component: {fileID: 2313152616617442363}
   m_Layer: 6
   m_Name: VehicleL_Prefab
   m_TagString: Untagged
@@ -35,6 +36,27 @@ Transform:
   - {fileID: 5174420799720924996}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2313152616617442363
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487504617563494611}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9, y: 0.5, z: 1.9}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3329555774848260129
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,7 +151,6 @@ GameObject:
   - component: {fileID: 1911404064894863042}
   - component: {fileID: 172509617426256764}
   - component: {fileID: 2598679117706664809}
-  - component: {fileID: 2503254707305622809}
   m_Layer: 6
   m_Name: VehicleL_Mesh
   m_TagString: Untagged
@@ -202,27 +223,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2503254707305622809
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3868112052256499383}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3984742162360591096
 GameObject:
   m_ObjectHideFlags: 0

@@ -170,6 +170,13 @@ CAR PARKING
 - GameManager
     [=] Removing OnVehicleSpawned
 
+- Project
+    [=] Fixing Vehicle prefabs | Moving collider to parents
+- Scripts
+    [=] VehicleController
+        {+} Correct vehicle direction when entering a road
+        {+} Turning logic for road
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
