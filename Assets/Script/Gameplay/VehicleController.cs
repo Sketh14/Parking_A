@@ -11,6 +11,7 @@ namespace Test_A.Gameplay
             // public bool hasInteracted;
             public Vector2 InteractedDir;
             public int MarkerIndex;
+            public int VehicleType;
 
             /// <summary> 0: Interacted or Not | 1: Vertical/Horizontal | 2: Reached Road Or Not | 3: Ferry Around The Road</summary>
             public int VehicleStatus;
@@ -29,6 +30,8 @@ namespace Test_A.Gameplay
         public VehicleSpawner vehicleSpawner;
         private bool _vehiclesSpawned = false;
 
+        private const int _cVehicleLayerMask = (1 << 6);
+
         private void OnDestroy()
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
@@ -41,23 +44,30 @@ namespace Test_A.Gameplay
             vehicleSpawner = new VehicleSpawner();
 
             // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
-            vehicleSpawner.SpawnVehicles2(InitializeVehicleData);
+            vehicleSpawner.SpawnVehicles2((vehicleTypes) => InitializeVehicleData(vehicleTypes));
             // vehicleSpawner.SpanwVehiclesTest();
             // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
         }
 
-        private void InitializeVehicleData()
+        private void InitializeVehicleData(in int[] vehicleTypes)
         {
             _vehiclesSpawned = true;
             _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+            for (int i = 0; i < _vehicleInfos.Length; i++)
+                _vehicleInfos[i].VehicleType = vehicleTypes[i];
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (!_vehiclesSpawned) return;
             MoveVehicle();
             FerryAroundThePark();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_vehiclesSpawned) return;
+            CheckCollisions();
         }
 
         private void VehicleSelected(int vehicleID, Vector2 slideDir)
@@ -231,6 +241,88 @@ namespace Test_A.Gameplay
                             break;
                     }
                     vehicleSpawner.VehiclesSpawned[i].transform.position += vehiclePos * _cVehicleSpeedMultiplier * Time.deltaTime;
+                }
+            }
+        }
+
+        private void CheckCollisions()
+        {
+            /*             
+                |   | i | i |   |
+                -----------------
+                | - | x | x | - |
+                -----------------
+                | - | x | x | - |
+                -----------------
+                | - | x | x | - |
+                -----------------
+                |   | i | i |   |   
+
+                -> We would only need to check in the direction the vehicle is travelling, as the vehicle will not 
+                    move sideways anyway. Removing the side checks will be okay
+                -> If we keep the side checks, if the vehicle moves parallel to another vehicle on the next cell
+                    , then the check would return true
+                -> No need to check the opposite travelling direction also, as the vehicle moving in one direction
+                    cant hit anything in its opposite direction
+                -> In case of collisions, the vehicle colliding can check for the collided vehicle, no need for extra
+                    checks from the collided vehicle, about which vehicle hit. Can manipulate hit-vehicle from hitInfo.
+            */
+
+            Vector3 rayStartPos;
+            RaycastHit colliderHitInfo;
+            for (int i = 0; i < _vehicleInfos.Length; i++)
+            {
+                //Check if the vehicle has been interacted with 
+                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) != 0)
+                {
+                    rayStartPos = vehicleSpawner.VehiclesSpawned[i].position;
+
+                    //Check Orientation
+                    //Vertical Alignment
+                    if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.ALIGNMENT)) != 0)
+                    {
+                        /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
+                        {
+                            case PoolManager.PoolType.VEHICLE_S:
+                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                                break;
+                            case PoolManager.PoolType.VEHICLE_M:
+                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                                break;
+                            case PoolManager.PoolType.VEHICLE_L:
+                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                                break;
+                        }*/
+                        rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                    }
+                    //Horizontal Alignment
+                    else
+                    {
+                        /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
+                        {
+                            case PoolManager.PoolType.VEHICLE_S:
+                                rayStartPos.x += 0.75f;          //Vehicle_3
+                                break;
+                            case PoolManager.PoolType.VEHICLE_M:
+                                rayStartPos.x += 0.75f;          //Vehicle_3
+                                break;
+                            case PoolManager.PoolType.VEHICLE_L:
+                                rayStartPos.x += 0.75f;          //Vehicle_3
+                                break;
+                        }*/
+                        rayStartPos.x += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                    }
+
+                    // Debug.Log($"Checking Vehicle | index: {i} | name: {vehicleSpawner.VehiclesSpawned[i].name}"
+                    // + $" | rayPos: {rayStartPos} | Pos: {vehicleSpawner.VehiclesSpawned[i].position}");
+                    for (int j = 1; j >= -2; j -= 3)
+                    {
+                        rayStartPos.x += 0.25f * j;
+                        if (Physics.Raycast(rayStartPos, Vector3.forward, out colliderHitInfo, 0.25f))
+                        {
+                            // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}");
+                        }
+                    }
                 }
             }
         }

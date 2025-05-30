@@ -177,8 +177,22 @@ CAR PARKING
         {+} Correct vehicle direction when entering a road
         {+} Turning logic for road
 
+- Scripts
+    [=] VehicleController
+        {+} Checking collisions with raycasts
+            <~> Different ray positions for different vehicle types
+            <~> Up detection
+        {+} Adding VehicleType to VehicleInfo
+    [=] VehicleSpawner
+        {+} Sending vehicleTypes list back to VehicleController
+
 
 --------------------------------------------------------------------------------------------------------------
+- [DO] [IMP] Boundary Checks
+- [DO] [IMP] Collision Checks
+    [=] When vehicle is moving
+        {+} Check if collided wth another vehicle
+        {+} Check if there is another vehicle on the road, before entering the road
 - [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
 - [DO] Divide into smaller sections
     [=] Move every 0.05 intervals

@@ -1,5 +1,5 @@
 // #define EMERGENCY_LOOP_EXIT
-// #define SPAWN_LOOP_TEST
+#define SPAWN_LOOP_TEST
 
 using System;
 using System.Collections.Generic;
@@ -164,7 +164,7 @@ namespace Test_A.Gameplay
             }*/
         }
 
-        public async void SpawnVehicles2(Action onVehiclesSpawned)
+        public async void SpawnVehicles2(Action<int[]> onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{_cGridX}x{_cGridY}] | Size: {_cGridX * _cGridY}");
             //Create a grid of 22 x 42 cells
@@ -175,6 +175,7 @@ namespace Test_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
+            List<int> addedVehicleTypes = new List<int>();
             Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
@@ -187,11 +188,13 @@ namespace Test_A.Gameplay
 #endif
 
             // 1 cell gap for boundary
-            for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
-            // for (gridMapIndex = 0; gridMapIndex < 100; gridMapIndex++)
+            // for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
+            for (gridMapIndex = 100; gridMapIndex < 122; gridMapIndex++)
             {
                 //Check if the space is occupied or not | Skip if occupied
-                if (gridMap[gridMapIndex] != 0)
+                if (gridMap[gridMapIndex] != 0
+                    || (gridMapIndex % _cGridX) == 0 || (gridMapIndex % _cGridX) == (_cGridX - 1)    //Vertical Gaps
+                    || (gridMapIndex / _cGridX) == 0 || (gridMapIndex / _cGridX) == _cGridY)
                     continue;
 #if EMERGENCY_LOOP_EXIT
                 else
@@ -209,8 +212,8 @@ namespace Test_A.Gameplay
 
 #if SPAWN_LOOP_TEST
                 // vehicleOrientation = Random.Range(0, 2);         //Original
-                // vehicleOrientation = 2;                             //Test
-                // vehicleType = 3;              //Test | Only include small vehicles
+                vehicleOrientation = 2;                             //Test
+                vehicleType = 3;              //Test | Only include small vehicles
                 // gridMapIndex = 0;              //Test
                 // Debug.Log($"[CELL CHECK] vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
@@ -319,9 +322,10 @@ namespace Test_A.Gameplay
                                 }
 
                                 _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{vehicleCount}";
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -387,9 +391,10 @@ namespace Test_A.Gameplay
                                 }
 
                                 _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{vehicleCount}";
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -506,6 +511,7 @@ namespace Test_A.Gameplay
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                                 // Debug.Log($"Vehicle Pos: {_vehiclesSpawned[vehicleCount].position}");
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -569,6 +575,7 @@ namespace Test_A.Gameplay
                                 _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -664,6 +671,7 @@ namespace Test_A.Gameplay
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                                 // Debug.Log($"Vehicle Pos: {_vehiclesSpawned[vehicleCount].position}");
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -726,6 +734,7 @@ namespace Test_A.Gameplay
                                 _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
                                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                                addedVehicleTypes.Add(vehicleType);
 
                                 vehicleCount++;
                                 break;
@@ -751,7 +760,7 @@ namespace Test_A.Gameplay
             }
 
             Debug.Log($"Spawning Finished");
-            onVehiclesSpawned?.Invoke();
+            onVehiclesSpawned?.Invoke(addedVehicleTypes.ToArray());
         }
 
         //Test if vehicles spawn within bounds
