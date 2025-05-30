@@ -248,13 +248,13 @@ namespace Test_A.Gameplay
         private void CheckCollisions()
         {
             /*             
-                |   | i | i |   |
-                -----------------
-                | - | x | x | - |
-                -----------------
-                | - | x | x | - |
-                -----------------
-                | - | x | x | - |
+                |   | i | i |   |       |   | i | i | i |   |
+                -----------------       ---------------------
+                | - | x | x | - |       | - | x | x | x | - |
+                -----------------       ---------------------
+                | - | x | x | - |       | - | x | x | x | - |
+                -----------------       ---------------------
+                | - | x | x | - |       |   | i | i | i |   |
                 -----------------
                 |   | i | i |   |   
 
@@ -268,60 +268,68 @@ namespace Test_A.Gameplay
                     checks from the collided vehicle, about which vehicle hit. Can manipulate hit-vehicle from hitInfo.
             */
 
-            Vector3 rayStartPos;
+            Vector3 rayStartPos, rayDir;
             RaycastHit colliderHitInfo;
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
                 //Check if the vehicle has been interacted with 
-                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) != 0)
+                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) == 0)
+                    continue;
+
+                rayStartPos = vehicleSpawner.VehiclesSpawned[i].position;
+                rayDir = Vector3.zero;
+
+                //Check Orientation
+                //Vertical Alignment
+                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.ALIGNMENT)) != 0)
                 {
-                    rayStartPos = vehicleSpawner.VehiclesSpawned[i].position;
+                    /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
+                    {
+                        case PoolManager.PoolType.VEHICLE_S:
+                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                            break;
+                        case PoolManager.PoolType.VEHICLE_M:
+                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                            break;
+                        case PoolManager.PoolType.VEHICLE_L:
+                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
+                            break;
+                    }*/
+                    rayStartPos.z += 0.235f * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
+                    rayDir.z = _vehicleInfos[i].InteractedDir.y;
+                }
+                //Horizontal Alignment
+                else
+                {
+                    /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
+                    {
+                        case PoolManager.PoolType.VEHICLE_S:
+                            rayStartPos.x += 0.75f;          //Vehicle_3
+                            break;
+                        case PoolManager.PoolType.VEHICLE_M:
+                            rayStartPos.x += 0.75f;          //Vehicle_3
+                            break;
+                        case PoolManager.PoolType.VEHICLE_L:
+                            rayStartPos.x += 0.75f;          //Vehicle_3
+                            break;
+                    }*/
+                    rayStartPos.x += 0.235f * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
+                    rayDir.x = _vehicleInfos[i].InteractedDir.x;
+                }
 
-                    //Check Orientation
-                    //Vertical Alignment
-                    if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.ALIGNMENT)) != 0)
+                // Debug.Log($"Checking Vehicle | index: {i} | name: {vehicleSpawner.VehiclesSpawned[i].name}"
+                // + $" | interactedDir: {_vehicleInfos[i].InteractedDir}"
+                // + $" | rayPos: {rayStartPos} | Pos: {vehicleSpawner.VehiclesSpawned[i].position}");
+                for (int j = 1; j >= -2; j -= 3)
+                {
+                    //Using Opposite, as the 2nd component is to be shifted up/down
+                    rayStartPos.x += 0.25f * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
+                    rayStartPos.z += 0.25f * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
+                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.25f))
                     {
-                        /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
-                        {
-                            case PoolManager.PoolType.VEHICLE_S:
-                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                                break;
-                            case PoolManager.PoolType.VEHICLE_M:
-                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                                break;
-                            case PoolManager.PoolType.VEHICLE_L:
-                                rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                                break;
-                        }*/
-                        rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                    }
-                    //Horizontal Alignment
-                    else
-                    {
-                        /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
-                        {
-                            case PoolManager.PoolType.VEHICLE_S:
-                                rayStartPos.x += 0.75f;          //Vehicle_3
-                                break;
-                            case PoolManager.PoolType.VEHICLE_M:
-                                rayStartPos.x += 0.75f;          //Vehicle_3
-                                break;
-                            case PoolManager.PoolType.VEHICLE_L:
-                                rayStartPos.x += 0.75f;          //Vehicle_3
-                                break;
-                        }*/
-                        rayStartPos.x += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                    }
-
-                    // Debug.Log($"Checking Vehicle | index: {i} | name: {vehicleSpawner.VehiclesSpawned[i].name}"
-                    // + $" | rayPos: {rayStartPos} | Pos: {vehicleSpawner.VehiclesSpawned[i].position}");
-                    for (int j = 1; j >= -2; j -= 3)
-                    {
-                        rayStartPos.x += 0.25f * j;
-                        if (Physics.Raycast(rayStartPos, Vector3.forward, out colliderHitInfo, 0.25f))
-                        {
-                            // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}");
-                        }
+                        Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}");
                     }
                 }
             }

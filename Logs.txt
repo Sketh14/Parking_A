@@ -186,6 +186,13 @@ CAR PARKING
     [=] VehicleSpawner
         {+} Sending vehicleTypes list back to VehicleController
 
+- Scripts
+    [=] VehicleController
+        {+} Collision Detection | Changing to early block
+        {+} Down/Left/Right detection
+        {+} Setting rayDir according to the interacted direction
+        {+} Using interacted direction to shift start-pos of raycast
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
