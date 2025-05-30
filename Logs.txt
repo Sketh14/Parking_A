@@ -157,6 +157,8 @@ CAR PARKING
 - VehicleSpawner
     [=] Fixing bounds check logic again
 
+- VehicleSpawner
+    [=] Vehicle_3 spawn position logic
 
 
 --------------------------------------------------------------------------------------------------------------
