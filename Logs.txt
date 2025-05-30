@@ -165,6 +165,11 @@ CAR PARKING
 - Project
     [=] Changing vehicle prefabs
 
+- VehicleController
+    [=] Moving OnVehicleSpawned code to a dedicated function and passing as callback to VehicleSpawner
+- GameManager
+    [=] Removing OnVehicleSpawned
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] Need to check in lower cells also, as the vehicles are 2 cells wide

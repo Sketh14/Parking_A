@@ -37,17 +37,19 @@ namespace Test_A.Gameplay
         private void Start()
         {
             GameManager.Instance.OnSelect += VehicleSelected;
-            GameManager.Instance.OnVehiclesSpawned += () =>
-            {
-                _vehiclesSpawned = true;
-                _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
-            };
 
             vehicleSpawner = new VehicleSpawner();
 
-            // vehicleSpawner.SpawnVehicles();
-            vehicleSpawner.SpawnVehicles2();
+            // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
+            vehicleSpawner.SpawnVehicles2(InitializeVehicleData);
+            // vehicleSpawner.SpanwVehiclesTest();
             // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+        }
+
+        private void InitializeVehicleData()
+        {
+            _vehiclesSpawned = true;
+            _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
         }
 
         // Update is called once per frame

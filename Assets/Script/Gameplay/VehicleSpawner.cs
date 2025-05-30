@@ -43,7 +43,7 @@ namespace Test_A.Gameplay
             // SpawnVehicles2();
         }
 
-        public async void SpawnVehicles()
+        public async void SpawnVehicles(Action onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles");
 
@@ -146,7 +146,7 @@ namespace Test_A.Gameplay
                 await Task.Delay(10);            //Wait for Physics System to Update
             }
 
-            GameManager.Instance.OnVehiclesSpawned?.Invoke();
+            // GameManager.Instance.OnVehiclesSpawned?.Invoke();
             //Tests
             /*{
                 // GameObject vehicle;
@@ -164,7 +164,7 @@ namespace Test_A.Gameplay
             }*/
         }
 
-        public async void SpawnVehicles2()
+        public async void SpawnVehicles2(Action onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{_cGridX}x{_cGridY}] | Size: {_cGridX * _cGridY}");
             //Create a grid of 22 x 42 cells
@@ -751,6 +751,7 @@ namespace Test_A.Gameplay
             }
 
             Debug.Log($"Spawning Finished");
+            onVehiclesSpawned?.Invoke();
         }
 
         //Test if vehicles spawn within bounds
