@@ -204,6 +204,7 @@ namespace Test_A.Gameplay
                 xDir = 1; yDir = 1;
                 // cellOccupied = false;
                 spawnPos = Vector3.zero;
+                spawnPos.y = 0.28f;
                 spawnRot = Vector3.zero;
 
 #if SPAWN_LOOP_TEST

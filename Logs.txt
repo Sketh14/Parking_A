@@ -160,6 +160,11 @@ CAR PARKING
 - VehicleSpawner
     [=] Vehicle_3 spawn position logic
 
+- VehicleSpawner
+    [=] Adding y-position
+- Project
+    [=] Changing vehicle prefabs
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
