@@ -181,7 +181,7 @@ namespace Test_A.Gameplay
 
             // 1 cell gap for boundary
             for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
-            // for (gridMapIndex = 0; gridMapIndex < 1; gridMapIndex++)
+            // for (gridMapIndex = 13; gridMapIndex < 17; gridMapIndex++)
             {
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0)
@@ -201,9 +201,10 @@ namespace Test_A.Gameplay
                 // vehicleType = Random.Range(0, 4);           //Original
 
                 //<============================== TEST ==============================>
-                // vehicleOrientation = 3;                             //Test
-                vehicleType = 1;              //Test | Only include small vehicles
-                // gridMapIndex = 109;              //Test
+                // vehicleOrientation = Random.Range(0, 2);         //Original
+                // vehicleOrientation = 0;                             //Test
+                vehicleType = 2;              //Test | Only include small vehicles
+                // gridMapIndex = 21;              //Test
                 // Debug.Log($"[CELL CHECK] vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
                 //<============================== TEST ==============================>
@@ -390,47 +391,178 @@ namespace Test_A.Gameplay
 
                     //Medium Vehicle
                     case 2:
-                        //Check if the selected cell is already occupied
-                        //If not, then check if all the neighbour cells to fill are occupied or not
+                        /*  Orientations
+                                    Main                        Top                         Bottom                      Right                       Left
+                            |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                            |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                            |   |   | x |   |   |       |   |   | x | x |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |  
+                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                            |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |
+                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                            |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |  
 
-                        if (vehicleOrientation == 0)
+                        */
+                        switch (vehicleOrientation)
                         {
-                            //Check horizontal pairs
-                            for (neighbourX = 1; neighbourX >= -1; neighbourX *= -1)
-                            {
-                                //Bounds Check
-                                if (gridMapIndex + neighbourX < 0 || gridMapIndex + neighbourX > _cGridX)
-                                    continue;
-                                else if (gridMap[gridMapIndex + neighbourX] != 0)
+                            //Check Left
+                            case 0:
+                                xDir = -1;
+                                spawnRot.y = -90f;
+
+                                //By default, the car will be placed in the left-orientation
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) - 0.25f + (gridMapIndex % _cGridX * 0.5f);
+                                // Debug.Log($"(_cGridX / 4.0f * -1.0f): {(_cGridX / 4.0f * -1.0f) - 0.25f} | (gridMapIndex % _cGridX * 0.5f): {(gridMapIndex % _cGridX * 0.5f)}");
+                                goto case 4;
+
+                            //Check Right
+                            case 1:
+                                xDir = 1;
+                                spawnRot.y = 90f;
+
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) - 0.25f + (gridMapIndex % _cGridX * 0.5f) + 1.0f;  // + (_cGridX / 4) + 0.5f;
+                                goto case 4;
+
+                            //Check Horizontal Pairs
+                            case 4:
+                                //Both will be down in Y for horizontal pair
+                                spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / _cGridX * 0.5f) - 0.5f;   // + (_cGridY / 4) - 0.5f;
+                                // Debug.Log($"spawnPos: {spawnPos} | mod: {gridMapIndex / (_cGridX - 1)} | top-left: {_cGridY / 4.0f} ");
+
+                                //Check if vehicle can be placed
+                                for (neighbourX = 0; neighbourX < 3; neighbourX++)
                                 {
-                                    cellOccupied = true;
-                                    break;
+                                    //Check the cells down below also
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                    {
+                                        // indexToCheck = gridMapIndex + (neighbourX * xDir);
+                                        indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
+                                        // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
+                                        //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                        //     + $" | indexToCheck: {indexToCheck}");
+
+                                        //Bounds Check
+                                        /*if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                            || (xDir == -1 && ((gridMapIndex + (neighbourX * xDir)) % _cGridX) == 0)           //On the same line Left
+                                            || (xDir == 1 && ((gridMapIndex + (neighbourX * xDir)) / _cGridX) >= _cGridX - 1)           //On the same line Right
+                                            || (gridMapIndex + _cGridX) >= (_cGridX * _cGridY))          //One down Out-of-Range
+                                        {
+                                            // Debug.Log($"[OUT OF BOUNDS] (gridMapIndex / _cGridX): {indexToCheck / _cGridX}"
+                                            // + $" | (gridMapIndex % _cGridX):{indexToCheck % _cGridX}"
+                                            // + $" | Bounds: {indexToCheck}");
+                                            goto case 6;
+                                        }*/
+                                        if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                            || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX))           //On the same line check
+                                        // || (((indexToCheck % _cGridX) == 0 || (indexToCheck % _cGridX) == 0)           //On the same line check
+                                        {
+                                            // Debug.Log($"[OUT OF BOUNDS] (gridMapIndex / _cGridX): {indexToCheck / _cGridX}"
+                                            // + $" | (gridMapIndex % _cGridX):{indexToCheck % _cGridX}"
+                                            // + $" | Bounds: {indexToCheck}");
+                                            goto case 6;
+                                        }
+                                        //Cell Filled Check
+                                        else if (gridMap[indexToCheck] != 0)
+                                            goto case 6;
+                                    }
                                 }
-                                // gridMap[gridMapIndex + neighbourX] = (byte)vehicleType;
-                            }
-                        }
-                        else
-                        {
+
+                                //Check if cell is filled
+                                /*for (neighbourX = 0; neighbourX < 3; neighbourX++)
+                                {
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                    {
+                                        indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
+                                        if (gridMap[indexToCheck] != 0)
+                                            goto case 6;
+                                    }
+                                }*/
+
+                                //Fill the cells
+                                for (neighbourX = 0; neighbourX < 3; neighbourX++)
+                                {
+                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                        gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                                }
+
+                                _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
+                                _vehiclesSpawned[vehicleCount].position = spawnPos;
+                                _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                                // Debug.Log($"Vehicle Pos: {_vehiclesSpawned[vehicleCount].position}");
+
+                                vehicleCount++;
+                                break;
+
+                            //Check up
+                            case 2:
+                                yDir = -1;
+                                spawnRot.y = 0f;
+
+                                spawnPos.z = (_cGridY / 4.0f) + 0.25f - (gridMapIndex / _cGridX * 0.5f);
+                                goto case 5;
+
+                            // Check down
+                            case 3:
+                                yDir = 1;
+                                spawnRot.y = 180f;
+
+                                spawnPos.z = (_cGridY / 4.0f) + 0.25f - (gridMapIndex / _cGridX * 0.5f) - 1.0f;
+                                goto case 5;
+
                             //Check vertical pairs
-                            for (neighbourY = 1; neighbourY >= -1; neighbourY *= -1)
-                            {
-                                // Debug.Log($"gridMapIndex: {gridMapIndex} | neighbourX: {neighbourX} | neighbourY: {neighbourY}"
-                                //     + $"| [gridMapIndex + nX + nY * 22]: {gridMapIndex + neighbourX + neighbourY * 22}");
+                            case 5:
+                                //Both will be right in X for Vertical pair
+                                spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX * 0.5f) + 0.5f;
+                                xDir = 1;
 
-                                //Bounds Check
-                                if (gridMapIndex + neighbourY < 0 || gridMapIndex + (neighbourY * _cGridX) > _cGridX * _cGridY)
-                                    continue;
-                                // 1 down/up will be on the next line, so multiply by gridX
-                                else if (gridMap[gridMapIndex + (neighbourY * _cGridX)] != 0)
-                                    break;
+                                //Check if vehicle can be placed
+                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                                {
+                                    //Check the cells down below also
+                                    for (neighbourY = 0; neighbourY < 3; neighbourY++)
+                                    {
+                                        indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX);
 
-                                // gridMap[gridMapIndex + neighbourY * _cGridX] = (byte)vehicleType;                             
-                            }
+                                        // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
+                                        //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                        //     + $" | indexToCheck: {indexToCheck}");
 
+                                        //Bounds Check
+                                        if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                            || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX))      //On the same line check
+                                                                                                                                            // || ((indexToCheck % _cGridX) == 0           //On the same line check
+                                        {
+                                            // Debug.Log($"[OUT OF BOUNDS] indexToCheck:{indexToCheck}");
+                                            goto case 6;
+                                        }
+                                        //Cell Filled Check
+                                        else if (gridMap[indexToCheck] != 0)
+                                            goto case 6;
+                                    }
+                                }
+
+                                //Fill the cells
+                                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                                {
+                                    for (neighbourY = 0; neighbourY < 3; neighbourY++)
+                                        gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)] = (byte)vehicleType;
+                                }
+
+                                _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                                _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
+                                _vehiclesSpawned[vehicleCount].position = spawnPos;
+                                _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+
+                                vehicleCount++;
+                                break;
+
+                            //Cell Occupied | Out Of Bounds
+                            case 6:
+                                cellOccupied = false;       //Reset value
+                                continue;
                         }
-
-                        if (cellOccupied)
-                            continue;
                         break;
 
                     //Long Vehicle
