@@ -204,6 +204,11 @@ CAR PARKING
         {+} Adding readonly array to store Vehicle Sizes for rounding position
         {+} Not using the rounding method, as not reliable if the frame drops
 
+- Scripts
+    [=] VehicleController
+        {+} Increasing rayStart position offset to 0.1
+        {+} Setting other components of final position using vehicleSpawner array
+        {+} Changing Func signature to Vec3 from float to change the entire Vec3 position
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks

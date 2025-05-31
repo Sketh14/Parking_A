@@ -31,7 +31,7 @@ namespace Test_A.Gameplay
         public VehicleSpawner vehicleSpawner;
         private bool _vehiclesSpawned = false;
 
-        private Func<float, float> _roundPosition;
+        private Func<Vector3, Vector3> _roundPosition;
 
         private const int _cVehicleLayerMask = (1 << 6);
         private const float _cGridCellSize = 0.25f;
@@ -288,29 +288,34 @@ namespace Test_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.ALIGNMENT)) != 0)
                 {
-                    rayStartPos.z += (_cGridCellSize - 0.015f) * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.z += (_cGridCellSize - 0.1f) * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
 
-                    _roundPosition = (posToChange) => posToChange + (0.05f * -1f * _vehicleInfos[i].InteractedDir.y)
-                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.y);
-
-                    // _roundPosition = (posToChange) => Mathf.Ceil((int)(posToChange / _cGridCellSize) + (0.5f * _vehicleInfos[i].InteractedDir.y));
-                    /*      //Not reliable,if the frames drop, then the vehicle will slide into the other one while colliding
+                    _roundPosition = (posToChange) =>
                     {
-                        float finalVal = Mathf.Ceil((int)(posToChange / _cGridCellSize) + (0.5f * _vehicleInfos[i].InteractedDir.y));
-                        Debug.Log($"_roundPosition(vehiclePos.z): {finalVal} | Dir: {_vehicleInfos[i].InteractedDir.y}");
-                        return finalVal;
+                        posToChange.z = posToChange.z + (0.05f * -1f * _vehicleInfos[i].InteractedDir.y)
+                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.y);
+                        posToChange.x = vehicleSpawner.VehiclesSpawned[i].position.x;
+                        posToChange.y = vehicleSpawner.VehiclesSpawned[i].position.y;
+                        return posToChange;
                     };
-                    */
                 }
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += (_cGridCellSize - 0.015f) * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.x += (_cGridCellSize - 0.1f) * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
-                    _roundPosition = (posToChange) => Mathf.Floor(posToChange / _cGridCellSize);
+
+                    _roundPosition = (posToChange) =>
+                    {
+                        posToChange.x = posToChange.x + (0.05f * -1f * _vehicleInfos[i].InteractedDir.x)
+                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.x);
+                        posToChange.z = vehicleSpawner.VehiclesSpawned[i].position.z;
+                        posToChange.y = vehicleSpawner.VehiclesSpawned[i].position.y;
+                        return posToChange;
+                    };
                 }
 
                 // Debug.Log($"Checking Vehicle | index: {i} | name: {vehicleSpawner.VehiclesSpawned[i].name}"
@@ -326,11 +331,11 @@ namespace Test_A.Gameplay
                         _vehicleInfos[i].VehicleStatus = 0;
 
                         // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}"
-                        //     + $"zPos: {vehicleSpawner.VehiclesSpawned[i].position.z}");
+                        //     + $" | zPos: {vehicleSpawner.VehiclesSpawned[i].position.z}");
                         //Round down position to multiples of _cGridCellSize when stopping the vehicle
                         vehiclePos = vehicleSpawner.VehiclesSpawned[i].position;
                         // vehiclePos.z = _roundPosition(vehiclePos.z) * _cGridCellSize;
-                        vehiclePos.z = _roundPosition(colliderHitInfo.point.z);
+                        vehiclePos = _roundPosition(colliderHitInfo.point);
                         vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
                         break;
