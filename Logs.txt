@@ -221,6 +221,9 @@ CAR PARKING
     [=] VehicleSpawner
         {+} Combining spawn case blocks for into one switch controlled by vehicleOrientation
 
+- Scripts
+    [=] VehicleSpawner
+        {+} Boundary Check when spawn checking
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks
