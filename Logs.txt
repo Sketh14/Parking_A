@@ -210,6 +210,14 @@ CAR PARKING
         {+} Setting other components of final position using vehicleSpawner array
         {+} Changing Func signature to Vec3 from float to change the entire Vec3 position
 
+- Project
+    [=] Adding Environment layer
+- Scripts
+    [=] VehicleController
+        {+} Adding Environment to Collision-Check layer mask
+        {+} Adding layer-mask to Raycast check
+
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks

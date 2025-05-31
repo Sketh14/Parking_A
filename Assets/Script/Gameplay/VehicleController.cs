@@ -33,7 +33,7 @@ namespace Test_A.Gameplay
 
         private Func<Vector3, Vector3> _roundPosition;
 
-        private const int _cVehicleLayerMask = (1 << 6);
+        private const int _cCollisionCheckLayerMask = (1 << 6) | (1 << 7);
         private const float _cGridCellSize = 0.25f;
 
         private void OnDestroy()
@@ -326,7 +326,7 @@ namespace Test_A.Gameplay
                     //Using Opposite, as the 2nd component is to be shifted up/down
                     rayStartPos.x += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
                     rayStartPos.z += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
-                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.25f))
+                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.25f, _cCollisionCheckLayerMask))
                     {
                         _vehicleInfos[i].VehicleStatus = 0;
 
