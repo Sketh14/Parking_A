@@ -1,5 +1,5 @@
 // #define EMERGENCY_LOOP_EXIT
-#define SPAWN_LOOP_TEST
+// #define SPAWN_LOOP_TEST
 
 using System;
 using System.Collections.Generic;
@@ -188,8 +188,11 @@ namespace Test_A.Gameplay
 #endif
 
             // 1 cell gap for boundary
-            // for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
+#if !SPAWN_LOOP_TEST
+            for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
+#else
             for (gridMapIndex = 100; gridMapIndex < 122; gridMapIndex++)
+#endif
             {
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0
@@ -210,21 +213,23 @@ namespace Test_A.Gameplay
                 spawnPos.y = 0.28f;
                 spawnRot = Vector3.zero;
 
-#if SPAWN_LOOP_TEST
-                // vehicleOrientation = Random.Range(0, 2);         //Original
-                vehicleOrientation = 2;                             //Test
-                vehicleType = 3;              //Test | Only include small vehicles
-                // gridMapIndex = 0;              //Test
-                // Debug.Log($"[CELL CHECK] vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
-                // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
-#else
-                //Random Orientation
-                //0: Left | 1: Right | 2: Up | 3: Down
-                vehicleOrientation = Random.Range(0, 4);         //Original
-
+#if !SPAWN_LOOP_TEST
                 //Choose a random vehicle 
                 // 0: Blank | 1-3: Vehicle Index
                 vehicleType = Random.Range(0, 4);           //Original
+
+                if (vehicleType == 0) continue;
+
+                //Random Orientation
+                //0: Left | 1: Right | 2: Up | 3: Down
+                vehicleOrientation = Random.Range(0, 4);         //Original
+#else
+                // vehicleOrientation = Random.Range(0, 2);         //Original
+                vehicleOrientation = 1;                             //Test
+                vehicleType = 2;              //Test | Only include small vehicles
+                // gridMapIndex = 0;              //Test
+                // Debug.Log($"[CELL CHECK] vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
+                // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
 #endif
 
                 //Fill the associated cells: Left,Right,Up,Down accordingly
@@ -238,6 +243,7 @@ namespace Test_A.Gameplay
 
                 // <------------ {(_cGridX / 4),(_cGridY / 4)} ------------> Top-Left placement of a car
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
+                /*
                 switch (vehicleType)
                 {
                     //Blank Space
@@ -245,15 +251,15 @@ namespace Test_A.Gameplay
 
                     //Small Vehicle
                     case 1:
-                        /*  Orientations
-                                Main                 Top               Bottom             Right              Left
-                            |   |   |   |       |   | x | x |      |   |   |   |      |   |   |   |      |   |   |   |  
-                            -------------       -------------      -------------      -------------      -------------
-                            |   | x |   |       |   | x | x |      |   | x | x |      |   | x | x |      | x | x |   |  
-                            -------------       -------------      -------------      -------------      -------------
-                            |   |   |   |       |   |   |   |      |   | x | x |      |   | x | x |      | x | x |   |  
+                        //  Orientations
+                        //        Main                 Top               Bottom             Right              Left
+                        //    |   |   |   |       |   | x | x |      |   |   |   |      |   |   |   |      |   |   |   |  
+                        //    -------------       -------------      -------------      -------------      -------------
+                        //    |   | x |   |       |   | x | x |      |   | x | x |      |   | x | x |      | x | x |   |  
+                        //    -------------       -------------      -------------      -------------      -------------
+                        //    |   |   |   |       |   |   |   |      |   | x | x |      |   | x | x |      | x | x |   |  
 
-                        */
+
                         //Check if the selected cell is already occupied
                         //If not, then check if all the neighbour cells to fill are occupied or not
 
@@ -411,19 +417,18 @@ namespace Test_A.Gameplay
 
                     //Medium Vehicle
                     case 2:
-                        /*  Orientations
-                                    Main                        Top                         Bottom                      Right                       Left
-                            |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
-                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
-                            |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
-                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
-                            |   |   | x |   |   |       |   |   | x | x |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |  
-                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
-                            |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |
-                            ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
-                            |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |  
-
-                        */
+                        //  Orientations
+                        //          Main                        Top                         Bottom                      Right                       Left
+                        //  |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                        //  ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                        //  |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                        //  ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                        //  |   |   | x |   |   |       |   |   | x | x |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |  
+                        //  ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                        //  |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |
+                        //  ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                        //  |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                        //
                         switch (vehicleOrientation)
                         {
                             //Check Left
@@ -463,16 +468,17 @@ namespace Test_A.Gameplay
                                         //     + $" | indexToCheck: {indexToCheck}");
 
                                         //Bounds Check
-                                        /*if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
-                                            || (xDir == -1 && ((gridMapIndex + (neighbourX * xDir)) % _cGridX) == 0)           //On the same line Left
-                                            || (xDir == 1 && ((gridMapIndex + (neighbourX * xDir)) / _cGridX) >= _cGridX - 1)           //On the same line Right
-                                            || (gridMapIndex + _cGridX) >= (_cGridX * _cGridY))          //One down Out-of-Range
-                                        {
-                                            // Debug.Log($"[OUT OF BOUNDS] (gridMapIndex / _cGridX): {indexToCheck / _cGridX}"
-                                            // + $" | (gridMapIndex % _cGridX):{indexToCheck % _cGridX}"
-                                            // + $" | Bounds: {indexToCheck}");
-                                            goto case 6;
-                                        }*/
+                                        //if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                        //    || (xDir == -1 && ((gridMapIndex + (neighbourX * xDir)) % _cGridX) == 0)           //On the same line Left
+                                        //    || (xDir == 1 && ((gridMapIndex + (neighbourX * xDir)) / _cGridX) >= _cGridX - 1)           //On the same line Right
+                                        //    || (gridMapIndex + _cGridX) >= (_cGridX * _cGridY))          //One down Out-of-Range
+                                        //{
+                                        //    // Debug.Log($"[OUT OF BOUNDS] (gridMapIndex / _cGridX): {indexToCheck / _cGridX}"
+                                        //    // + $" | (gridMapIndex % _cGridX):{indexToCheck % _cGridX}"
+                                        //    // + $" | Bounds: {indexToCheck}");
+                                        //    goto case 6;
+                                        //}
+
                                         if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
                                             || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX))           //On the same line check
                                         // || (((indexToCheck % _cGridX) == 0 || (indexToCheck % _cGridX) == 0)           //On the same line check
@@ -489,15 +495,15 @@ namespace Test_A.Gameplay
                                 }
 
                                 //Check if cell is filled
-                                /*for (neighbourX = 0; neighbourX < 3; neighbourX++)
-                                {
-                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
-                                    {
-                                        indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
-                                        if (gridMap[indexToCheck] != 0)
-                                            goto case 6;
-                                    }
-                                }*/
+                                //for (neighbourX = 0; neighbourX < 3; neighbourX++)
+                                //{
+                                //    for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                //    {
+                                //        indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
+                                //        if (gridMap[indexToCheck] != 0)
+                                //            goto case 6;
+                                //    }
+                                //}
 
                                 //Fill the cells
                                 for (neighbourX = 0; neighbourX < 3; neighbourX++)
@@ -589,22 +595,22 @@ namespace Test_A.Gameplay
 
                     //Long Vehicle
                     case 3:
-                        /*  Orientations
-                                        Main                                Top                                 Bottom                              Right                               Left
-                            |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   | x |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |  
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
-                            -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
-                            |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
-                        */
+                        //  Orientations
+                        //              Main                                Top                                 Bottom                              Right                               Left
+                        //  |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   | x |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |  
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                        //  -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                        //  |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+
                         switch (vehicleOrientation)
                         {
                             //Check Left
@@ -750,7 +756,194 @@ namespace Test_A.Gameplay
                         Debug.LogError($"Wrong Vehicle Type: {vehicleType}");
                         continue;
                 }
+                */
 
+                //Small Vehicle
+                /*  Orientations
+                        Main                 Top               Bottom             Right              Left
+                    |   |   |   |       |   | x | x |      |   |   |   |      |   |   |   |      |   |   |   |  
+                    -------------       -------------      -------------      -------------      -------------
+                    |   | x |   |       |   | x | x |      |   | x | x |      |   | x | x |      | x | x |   |  
+                    -------------       -------------      -------------      -------------      -------------
+                    |   |   |   |       |   |   |   |      |   | x | x |      |   | x | x |      | x | x |   |  
+
+                */
+
+                //Medium Vehicle
+                /*  Orientations
+                            Main                        Top                         Bottom                      Right                       Left
+                    |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                    ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                    |   |   |   |   |   |       |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+                    ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                    |   |   | x |   |   |       |   |   | x | x |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |  
+                    ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                    |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   | x | x | x |      | x | x | x |   |   |
+                    ---------------------       ---------------------      ---------------------      ---------------------      ---------------------
+                    |   |   |   |   |   |       |   |   |   |   |   |      |   |   | x | x |   |      |   |   |   |   |   |      |   |   |   |   |   |  
+
+                */
+
+                //Long Vehicle
+                /*  Orientations
+                                Main                                Top                                 Bottom                              Right                               Left
+                    |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   |   |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   | x |   |   |   |       |   |   |   | x | x |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |  
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   | x | x | x | x |      | x | x | x | x |   |   |   |
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                    -----------------------------       -----------------------------      -----------------------------      -----------------------------      -----------------------------
+                    |   |   |   |   |   |   |   |       |   |   |   |   |   |   |   |      |   |   |   | x | x |   |   |      |   |   |   |   |   |   |   |      |   |   |   |   |   |   |   |  
+                */
+
+                switch (vehicleOrientation)
+                {
+                    //Check Left
+                    case 0:
+                        xDir = -1;
+                        spawnRot.y = -90f;
+
+                        //By default, the car will be placed in the left-orientation
+                        spawnPos.x = (_cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % _cGridX * 0.5f);
+                        goto case 4;
+
+                    //Check Right
+                    case 1:
+                        xDir = 1;
+                        spawnRot.y = 90f;
+
+                        spawnPos.x = (_cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % _cGridX * 0.5f) + (0.5f * vehicleType);
+                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % _cGridX)} | top-left: {(_cGridX / 4.0f * -1.0f)} ");
+                        goto case 4;
+
+                    //Check Horizontal Pairs
+                    case 4:
+                        //Both will be down in Y for horizontal pair
+                        spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / _cGridX * 0.5f) - 0.5f;
+                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (_cGridX - 1)} | top-left: {_cGridY / 4.0f} ");
+
+                        //Check if vehicle can be placed
+                        for (neighbourX = 0; neighbourX < (2 + vehicleType); neighbourX++)
+                        {
+                            //Check the cells down below also
+                            for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                            {
+                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
+                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
+                                //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                //     + $" | indexToCheck: {indexToCheck}");
+
+                                //Bounds Check
+                                if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                    || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX))
+                                {
+                                    // Debug.Log($"(gridMapIndex / _cGridX): {indexToCheck / _cGridX} | (gridMapIndex % _cGridX):{indexToCheck % _cGridX} "
+                                    // + $"| Bounds: {indexToCheck}");
+                                    goto case 6;
+                                }
+                                //Cell Filled Check
+                                else if (gridMap[indexToCheck] != 0)
+                                    goto case 6;
+                                // else
+                                //     gridMap[indexToCheck] = (byte)vehicleType;
+                            }
+                        }
+
+                        //Fill the cells
+                        for (neighbourX = 0; neighbourX < (2 + vehicleType); neighbourX++)
+                        {
+                            for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                        }
+
+                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
+                        _vehiclesSpawned[vehicleCount].position = spawnPos;
+                        _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                        addedVehicleTypes.Add(vehicleType);
+
+                        vehicleCount++;
+                        break;
+
+                    //Check up
+                    case 2:
+                        yDir = -1;
+                        spawnRot.y = 0f;
+
+                        spawnPos.z = (_cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / _cGridX * 0.5f);
+                        goto case 5;
+
+                    // Check down
+                    case 3:
+                        yDir = 1;
+                        spawnRot.y = 180f;
+
+                        spawnPos.z = (_cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / _cGridX * 0.5f) - (0.5f * vehicleType);
+                        goto case 5;
+
+                    //Check vertical pairs
+                    case 5:
+                        //Both will be right in X for Vertical pair
+                        spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX * 0.5f) + 0.5f;
+                        xDir = 1;
+
+                        //Check if vehicle can be placed
+                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                        {
+                            //Check the cells down below also
+                            for (neighbourY = 0; neighbourY < (2 + vehicleType); neighbourY++)
+                            {
+                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX);
+
+                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
+                                //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                //     + $" | indexToCheck: {indexToCheck}");
+
+                                //Bounds Check
+                                // - No matter what the value, this (indexToCheck % _cGridX) will always be between (0 - _cGridX)
+                                if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
+                                    || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX))
+                                {
+                                    // Debug.Log($"[OUT OF BOUNDS] indexToCheck:{indexToCheck}");
+                                    goto case 6;
+                                }
+                                //Cell Filled Check
+                                else if (gridMap[indexToCheck] != 0)
+                                    goto case 6;
+                            }
+                        }
+
+                        //Fill the cells
+                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                        {
+                            for (neighbourY = 0; neighbourY < (2 + vehicleType); neighbourY++)
+                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)] = (byte)vehicleType;
+                        }
+
+                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{gridMapIndex}";
+                        _vehiclesSpawned[vehicleCount].position = spawnPos;
+                        _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
+                        addedVehicleTypes.Add(vehicleType);
+
+                        vehicleCount++;
+                        break;
+
+                    //Cell Occupied | Out Of Bounds
+                    case 6:
+                        cellOccupied = false;       //Reset value
+                        continue;
+
+                    default:
+                        Debug.LogError($"Vehicle Spawner | Wrong Vehicle Orientation: {vehicleOrientation} | VehicleType: {vehicleType}");
+                        continue;
+                }
                 //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
 
                 // If true, then place the vehicle

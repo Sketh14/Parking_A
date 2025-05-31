@@ -217,6 +217,9 @@ CAR PARKING
         {+} Adding Environment to Collision-Check layer mask
         {+} Adding layer-mask to Raycast check
 
+- Scripts
+    [=] VehicleSpawner
+        {+} Combining spawn case blocks for into one switch controlled by vehicleOrientation
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
