@@ -26,11 +26,15 @@ namespace Test_A.Gameplay
 
         private const float _cVehicleSpeedMultiplier = 5f;
         private readonly float[] _roadBoundaries = { 11f, 6f };                 //Vertical | Horizontal
+        private readonly float[] _vehicleSizes = { 0.5f, 0.75f, 1.0f };                 //Vertical | Horizontal
 
         public VehicleSpawner vehicleSpawner;
         private bool _vehiclesSpawned = false;
 
+        private Func<float, float> _roundPosition;
+
         private const int _cVehicleLayerMask = (1 << 6);
+        private const float _cGridCellSize = 0.25f;
 
         private void OnDestroy()
         {
@@ -268,12 +272,13 @@ namespace Test_A.Gameplay
                     checks from the collided vehicle, about which vehicle hit. Can manipulate hit-vehicle from hitInfo.
             */
 
-            Vector3 rayStartPos, rayDir;
+            Vector3 rayStartPos, rayDir, vehiclePos;
             RaycastHit colliderHitInfo;
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
-                //Check if the vehicle has been interacted with 
-                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) == 0)
+                //Check if the vehicle has been interacted with or have reached the road
+                if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.INTERACTED)) == 0
+                    || (_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.REACHED_ROAD)) != 0)
                     continue;
 
                 rayStartPos = vehicleSpawner.VehiclesSpawned[i].position;
@@ -283,40 +288,29 @@ namespace Test_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & (1 << (int)VehicleStatus.ALIGNMENT)) != 0)
                 {
-                    /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
-                    {
-                        case PoolManager.PoolType.VEHICLE_S:
-                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                            break;
-                        case PoolManager.PoolType.VEHICLE_M:
-                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                            break;
-                        case PoolManager.PoolType.VEHICLE_L:
-                            rayStartPos.z += 0.25f * (_vehicleInfos[i].VehicleType + 1);          //Vehicle_3
-                            break;
-                    }*/
-                    rayStartPos.z += 0.235f * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.z += (_cGridCellSize - 0.015f) * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
+
+                    _roundPosition = (posToChange) => posToChange + (0.05f * -1f * _vehicleInfos[i].InteractedDir.y)
+                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.y);
+
+                    // _roundPosition = (posToChange) => Mathf.Ceil((int)(posToChange / _cGridCellSize) + (0.5f * _vehicleInfos[i].InteractedDir.y));
+                    /*      //Not reliable,if the frames drop, then the vehicle will slide into the other one while colliding
+                    {
+                        float finalVal = Mathf.Ceil((int)(posToChange / _cGridCellSize) + (0.5f * _vehicleInfos[i].InteractedDir.y));
+                        Debug.Log($"_roundPosition(vehiclePos.z): {finalVal} | Dir: {_vehicleInfos[i].InteractedDir.y}");
+                        return finalVal;
+                    };
+                    */
                 }
                 //Horizontal Alignment
                 else
                 {
-                    /*switch ((PoolManager.PoolType)_vehicleInfos[i].VehicleType)
-                    {
-                        case PoolManager.PoolType.VEHICLE_S:
-                            rayStartPos.x += 0.75f;          //Vehicle_3
-                            break;
-                        case PoolManager.PoolType.VEHICLE_M:
-                            rayStartPos.x += 0.75f;          //Vehicle_3
-                            break;
-                        case PoolManager.PoolType.VEHICLE_L:
-                            rayStartPos.x += 0.75f;          //Vehicle_3
-                            break;
-                    }*/
-                    rayStartPos.x += 0.235f * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.x += (_cGridCellSize - 0.015f) * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.y = vehicleSpawner.VehiclesSpawned[i].position.y;
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
+                    _roundPosition = (posToChange) => Mathf.Floor(posToChange / _cGridCellSize);
                 }
 
                 // Debug.Log($"Checking Vehicle | index: {i} | name: {vehicleSpawner.VehiclesSpawned[i].name}"
@@ -325,11 +319,21 @@ namespace Test_A.Gameplay
                 for (int j = 1; j >= -2; j -= 3)
                 {
                     //Using Opposite, as the 2nd component is to be shifted up/down
-                    rayStartPos.x += 0.25f * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
-                    rayStartPos.z += 0.25f * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
+                    rayStartPos.x += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
+                    rayStartPos.z += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
                     if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.25f))
                     {
-                        Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}");
+                        _vehicleInfos[i].VehicleStatus = 0;
+
+                        // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}"
+                        //     + $"zPos: {vehicleSpawner.VehiclesSpawned[i].position.z}");
+                        //Round down position to multiples of _cGridCellSize when stopping the vehicle
+                        vehiclePos = vehicleSpawner.VehiclesSpawned[i].position;
+                        // vehiclePos.z = _roundPosition(vehiclePos.z) * _cGridCellSize;
+                        vehiclePos.z = _roundPosition(colliderHitInfo.point.z);
+                        vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
+
+                        break;
                     }
                 }
             }
