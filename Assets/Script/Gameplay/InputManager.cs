@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 #endif
 
-namespace Test_A.Gameplay
+namespace Parking_A.Gameplay
 {
     public class InputManager : MonoBehaviour
     {
@@ -107,6 +107,7 @@ namespace Test_A.Gameplay
 #if DEBUGGING_TOUCH
                     hitPos = rayHit.point;
 #endif
+                    // Debug.Log($"_hitTransformID: {_hitTransformID}");
                     // GameManager.Instance.OnSelect?.Invoke(rayHit.transform.GetInstanceID(), slideDir);
                 }
             }

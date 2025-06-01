@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Test_A.Gameplay
+namespace Parking_A.Gameplay
 {
     public class GameManager : MonoBehaviour
     {

@@ -224,6 +224,16 @@ CAR PARKING
 - Scripts
     [=] VehicleSpawner
         {+} Boundary Check when spawn checking
+
+--------------------------------------------------------------------------------------------------------------
+                                                    01 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] EnvironmentSpawner
+        {+} Boundary spawning logic
+    [=] VehicleSpawner
+        {+} Moving grid dimensions from UniversalConstant
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Test_A.Gameplay
+namespace Parking_A.Gameplay
 {
     public class PoolManager : MonoBehaviour
     {
-        public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L }
+        public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY }
 
         #region Singleton
         private static PoolManager _instance;

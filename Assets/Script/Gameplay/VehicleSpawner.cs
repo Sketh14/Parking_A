@@ -8,8 +8,9 @@ using UnityEngine;
 
 using Random = UnityEngine.Random;
 using Math = System.Math;
+using Parking_A.Global;
 
-namespace Test_A.Gameplay
+namespace Parking_A.Gameplay
 {
     [Serializable]
     public class VehicleSpawner
@@ -29,7 +30,7 @@ namespace Test_A.Gameplay
         private List<Transform> _vehiclesSpawned;
         public List<Transform> VehiclesSpawned { get => _vehiclesSpawned; }
 
-        private const byte _cGridX = 22, _cGridY = 42;
+        // private const byte _cGridX = 22, _cGridY = 42;
 
         public VehicleSpawner()
         {
@@ -166,9 +167,9 @@ namespace Test_A.Gameplay
 
         public async void SpawnVehicles2(Action<int[]> onVehiclesSpawned)
         {
-            Debug.Log($"Spawning Vehicles | gridMap[{_cGridX}x{_cGridY}] | Size: {_cGridX * _cGridY}");
+            Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[_cGridX * _cGridY];
+            byte[] gridMap = new byte[UniversalConstant._cGridX * UniversalConstant._cGridY];
 
             int gridMapIndex = 0, indexToCheck;
             //Initialize Array to all spots being empty
@@ -189,15 +190,15 @@ namespace Test_A.Gameplay
 
             // 1 cell gap for boundary
 #if !SPAWN_LOOP_TEST
-            for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._cGridX * UniversalConstant._cGridY; gridMapIndex++)
 #else
             for (gridMapIndex = 100; gridMapIndex < 122; gridMapIndex++)
 #endif
             {
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0
-                    || (gridMapIndex % _cGridX) == 0 || (gridMapIndex % _cGridX) == (_cGridX - 1)    //Vertical Gaps
-                    || (gridMapIndex / _cGridX) == 0 || (gridMapIndex / _cGridX) == (_cGridY - 1))
+                    || (gridMapIndex % UniversalConstant._cGridX) == 0 || (gridMapIndex % UniversalConstant._cGridX) == (UniversalConstant._cGridX - 1)    //Vertical Gaps
+                    || (gridMapIndex / UniversalConstant._cGridX) == 0 || (gridMapIndex / UniversalConstant._cGridX) == (UniversalConstant._cGridY - 1))
                     continue;
 #if EMERGENCY_LOOP_EXIT
                 else
@@ -241,7 +242,7 @@ namespace Test_A.Gameplay
                 // Subtracting "0.5" as then the car will be sitting inside the border, if not then it will be on the border
                 // Also "0.5" is taken as 1 cell is divided into 4 parts, so intervals of "0.5"
 
-                // <------------ {(_cGridX / 4),(_cGridY / 4)} ------------> Top-Left placement of a car
+                // <------------ {(UniversalConstant._cGridX / 4),(UniversalConstant._cGridY / 4)} ------------> Top-Left placement of a car
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
                 //Small Vehicle
@@ -296,7 +297,7 @@ namespace Test_A.Gameplay
                         spawnRot.y = -90f;
 
                         //By default, the car will be placed in the left-orientation
-                        spawnPos.x = (_cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % _cGridX * 0.5f);
+                        spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % UniversalConstant._cGridX * 0.5f);
                         goto case 4;
 
                     //Check Right
@@ -304,15 +305,15 @@ namespace Test_A.Gameplay
                         xDir = 1;
                         spawnRot.y = 90f;
 
-                        spawnPos.x = (_cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % _cGridX * 0.5f) + (0.5f * vehicleType);
-                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % _cGridX)} | top-left: {(_cGridX / 4.0f * -1.0f)} ");
+                        spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + (0.5f * vehicleType);
+                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
                         goto case 4;
 
                     //Check Horizontal Pairs
                     case 4:
                         //Both will be down in Y for horizontal pair
-                        spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / _cGridX * 0.5f) - 0.5f;
-                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (_cGridX - 1)} | top-left: {_cGridY / 4.0f} ");
+                        spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - 0.5f;
+                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
 
                         //Check if vehicle can be placed
                         for (neighbourX = 0; neighbourX < (2 + vehicleType); neighbourX++)
@@ -320,18 +321,18 @@ namespace Test_A.Gameplay
                             //Check the cells down below also
                             for (neighbourY = 0; neighbourY < 2; neighbourY++)
                             {
-                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX);
-                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
-                                //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * UniversalConstant._cGridX);
+                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
+                                //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
                                 //     + $" | indexToCheck: {indexToCheck}");
 
                                 //Bounds Check
-                                if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
-                                    || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX)      //On the same line check
-                                    || (indexToCheck % _cGridX) == 0 || (indexToCheck % _cGridX) == (_cGridX - 1)    //Vertical Gaps
-                                    || (indexToCheck / _cGridX) == 0 || (indexToCheck / _cGridX) == (_cGridY - 1))      //Horizontal Gaps
+                                if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * UniversalConstant._cGridY)      //Out of Range
+                                    || (indexToCheck / UniversalConstant._cGridX) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX)) / UniversalConstant._cGridX)      //On the same line check
+                                    || (indexToCheck % UniversalConstant._cGridX) == 0 || (indexToCheck % UniversalConstant._cGridX) == (UniversalConstant._cGridX - 1)    //Vertical Gaps
+                                    || (indexToCheck / UniversalConstant._cGridX) == 0 || (indexToCheck / UniversalConstant._cGridX) == (UniversalConstant._cGridY - 1))      //Horizontal Gaps
                                 {
-                                    // Debug.Log($"(gridMapIndex / _cGridX): {indexToCheck / _cGridX} | (gridMapIndex % _cGridX):{indexToCheck % _cGridX} "
+                                    // Debug.Log($"(gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
                                     // + $"| Bounds: {indexToCheck}");
                                     goto case 6;
                                 }
@@ -347,7 +348,7 @@ namespace Test_A.Gameplay
                         for (neighbourX = 0; neighbourX < (2 + vehicleType); neighbourX++)
                         {
                             for (neighbourY = 0; neighbourY < 2; neighbourY++)
-                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * _cGridX)] = (byte)vehicleType;
+                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * UniversalConstant._cGridX)] = (byte)vehicleType;
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
@@ -364,7 +365,7 @@ namespace Test_A.Gameplay
                         yDir = -1;
                         spawnRot.y = 0f;
 
-                        spawnPos.z = (_cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / _cGridX * 0.5f);
+                        spawnPos.z = (UniversalConstant._cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / UniversalConstant._cGridX * 0.5f);
                         goto case 5;
 
                     // Check down
@@ -372,13 +373,13 @@ namespace Test_A.Gameplay
                         yDir = 1;
                         spawnRot.y = 180f;
 
-                        spawnPos.z = (_cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / _cGridX * 0.5f) - (0.5f * vehicleType);
+                        spawnPos.z = (UniversalConstant._cGridY / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - (0.5f * vehicleType);
                         goto case 5;
 
                     //Check vertical pairs
                     case 5:
                         //Both will be right in X for Vertical pair
-                        spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX * 0.5f) + 0.5f;
+                        spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + 0.5f;
                         xDir = 1;
 
                         //Check if vehicle can be placed
@@ -387,18 +388,18 @@ namespace Test_A.Gameplay
                             //Check the cells down below also
                             for (neighbourY = 0; neighbourY < (2 + vehicleType); neighbourY++)
                             {
-                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX);
+                                indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant._cGridX);
 
-                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%_cGridX): {indexToCheck % _cGridX}"
-                                //     + $" | (indexToCheck/_cGridX): {indexToCheck / _cGridX}"
+                                // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
+                                //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
                                 //     + $" | indexToCheck: {indexToCheck}");
 
                                 //Bounds Check
-                                // - No matter what the value, this (indexToCheck % _cGridX) will always be between (0 - _cGridX)
-                                if (indexToCheck < 0 || indexToCheck >= (_cGridX * _cGridY)      //Out of Range
-                                    || (indexToCheck / _cGridX) != ((gridMapIndex + (neighbourY * yDir * _cGridX)) / _cGridX)      //On the same line check
-                                    || (indexToCheck % _cGridX) == 0 || (indexToCheck % _cGridX) == (_cGridX - 1)    //Vertical Gaps
-                                    || (indexToCheck / _cGridX) == 0 || (indexToCheck / _cGridX) == (_cGridY - 1))      //Horizontal Gaps
+                                // - No matter what the value, this (indexToCheck % UniversalConstant._cGridX) will always be between (0 - UniversalConstant._cGridX)
+                                if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * UniversalConstant._cGridY)      //Out of Range
+                                    || (indexToCheck / UniversalConstant._cGridX) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX)) / UniversalConstant._cGridX)      //On the same line check
+                                    || (indexToCheck % UniversalConstant._cGridX) == 0 || (indexToCheck % UniversalConstant._cGridX) == (UniversalConstant._cGridX - 1)    //Vertical Gaps
+                                    || (indexToCheck / UniversalConstant._cGridX) == 0 || (indexToCheck / UniversalConstant._cGridX) == (UniversalConstant._cGridY - 1))      //Horizontal Gaps
                                 {
                                     // Debug.Log($"[OUT OF BOUNDS] indexToCheck:{indexToCheck}");
                                     goto case 6;
@@ -413,7 +414,7 @@ namespace Test_A.Gameplay
                         for (neighbourX = 0; neighbourX < 2; neighbourX++)
                         {
                             for (neighbourY = 0; neighbourY < (2 + vehicleType); neighbourY++)
-                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * _cGridX)] = (byte)vehicleType;
+                                gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant._cGridX)] = (byte)vehicleType;
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
@@ -449,9 +450,9 @@ namespace Test_A.Gameplay
         //Test if vehicles spawn within bounds
         public void SpanwVehiclesTest()
         {
-            Debug.Log($"Spawning Test Vehicles | gridMap[{_cGridX}x{_cGridY}] | Size: {_cGridX * _cGridY}");
+            Debug.Log($"Spawning Test Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[_cGridX * _cGridY];
+            byte[] gridMap = new byte[UniversalConstant._cGridX * UniversalConstant._cGridY];
 
             int gridMapIndex = 0, vehicleCount = 0;
             //Initialize Array to all spots being empty
@@ -461,17 +462,17 @@ namespace Test_A.Gameplay
             Vector3 spawnPos, spawnRot;
             int vehicleType;
 
-            for (gridMapIndex = 0; gridMapIndex < _cGridX * _cGridY; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._cGridX * UniversalConstant._cGridY; gridMapIndex++)
             {
-                if (gridMapIndex % _cGridX != 0) continue;
+                if (gridMapIndex % UniversalConstant._cGridX != 0) continue;
 
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
 
                 vehicleType = 1;              //Test | Only include small vehicles
 
-                spawnPos.x = (_cGridX / 4.0f * -1.0f) + (gridMapIndex % _cGridX * 0.5f) + 0.25f;
-                spawnPos.z = (_cGridY / 4.0f) - (gridMapIndex / _cGridX * 0.5f) - 0.25f;   // + (_cGridY / 4) - 0.5f;
+                spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + 0.25f;
+                spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - 0.25f;   // + (UniversalConstant._cGridY / 4) - 0.5f;
 
 
                 _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
