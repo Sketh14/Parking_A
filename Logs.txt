@@ -246,6 +246,11 @@ CAR PARKING
         {+} Only keeping 1 direction for both pairs, as it would not make sense
         {+} Leaving the last cell inn horizontal to avoid going over
 
+- Scripts
+    [=] EnvironmentSpawner
+        {+} Evaluate 1 side first and then move to the other side
+        {+} Fill Left-Side first
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks
