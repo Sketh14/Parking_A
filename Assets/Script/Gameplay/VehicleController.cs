@@ -48,9 +48,12 @@ namespace Parking_A.Gameplay
             vehicleSpawner = new VehicleSpawner();
 
             // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
-            vehicleSpawner.SpawnVehicles2((vehicleTypes) => InitializeVehicleData(vehicleTypes));
             // vehicleSpawner.SpanwVehiclesTest();
             // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+
+            // vehicleSpawner.SpawnVehicles2((vehicleTypes) => InitializeVehicleData(vehicleTypes));
+            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
+            envSpawner.SpawnEnvironment((values) => { });
         }
 
         private void InitializeVehicleData(in int[] vehicleTypes)

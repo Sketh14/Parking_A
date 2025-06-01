@@ -182,7 +182,6 @@ namespace Parking_A.Gameplay
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
             int xDir, yDir;
             Vector3 spawnPos, spawnRot;
-            bool cellOccupied = false;
 
 #if EMERGENCY_LOOP_EXIT
             int emergencyExit = 0;
@@ -428,7 +427,6 @@ namespace Parking_A.Gameplay
 
                     //Cell Occupied | Out Of Bounds
                     case 6:
-                        cellOccupied = false;       //Reset value
                         continue;
 
                     default:

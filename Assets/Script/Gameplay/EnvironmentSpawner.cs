@@ -27,8 +27,8 @@ namespace Parking_A.Gameplay
 
             Random.InitState(123456);
 
-            int boundaryOrientation, vehicleCount = 0, neighbourX, neighbourY;
-            int xDir, yDir;
+            int boundaryOrientation, neighbourX, neighbourY;
+            int yDir;
             Vector3 spawnPos, spawnRot;
 
             GameObject boundaryObject;
@@ -46,9 +46,9 @@ namespace Parking_A.Gameplay
                 |   | x |   |      |   |   |   |  
             */
 
-            // 1 cell gap for boundary
+            // 1 cell gap for last-boundary
 #if !SPAWN_HORIZONTAL_TEST
-            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._cGridX * 2; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < (UniversalConstant._cGridX * 2) - 1; gridMapIndex++)
 #else
             for (gridMapIndex = 0; gridMapIndex < 22; gridMapIndex++)
 #endif
@@ -63,20 +63,15 @@ namespace Parking_A.Gameplay
                     emergencyExit++;
                 }
 #endif
-
-                xDir = 1;
                 spawnPos = Vector3.zero;
-                spawnPos.y = 0.28f;
-                spawnRot = Vector3.zero;
 
 #if !SPAWN_HORIZONTAL_TEST
                 //Random Orientation
-                //0: Left | 1: Right
-                boundaryOrientation = Random.Range(0, 3);         //Original
+                //0: Left/Right
+                boundaryOrientation = Random.Range(0, 2);         //Original
 
-                if (boundaryOrientation == 2) continue;
+                if (boundaryOrientation == 0) continue;
 #else
-                // boundaryOrientation = Random.Range(0, 2);         //Original
                 boundaryOrientation = 1;                             //Test
                 // gridMapIndex = 0;              //Test
                 // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
@@ -85,75 +80,43 @@ namespace Parking_A.Gameplay
                 // <------------ {(UniversalConstant._cGridX / 4),(UniversalConstant._cGridY / 4)} ------------> Top-Left placement of a car
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
+                spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + 0.5f;
+                // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
 
-                switch (boundaryOrientation)
+                //Both will be down in Y for horizontal pair
+                spawnPos.z = (UniversalConstant._cGridY / 4.0f) - 0.25f
+                    - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
+                // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
+
+                //Check if boundary can be placed
+                for (neighbourX = 0; neighbourX < 2; neighbourX++)
                 {
-                    //Check Left
-                    case 0:
-                        xDir = -1;
+                    indexToCheck = gridMapIndex + neighbourX;
+                    // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
+                    //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
+                    //     + $" | indexToCheck: {indexToCheck}");
 
-                        //By default, the car will be placed in the left-orientation
-                        spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f);
-                        goto case 4;
-
-                    //Check Right
-                    case 1:
-                        xDir = 1;
-
-                        spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + 0.5f;
-                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
-                        goto case 4;
-
-                    //Check Horizontal Pairs
-                    case 4:
-                        //Both will be down in Y for horizontal pair
-                        spawnPos.z = (UniversalConstant._cGridY / 4.0f) - 0.25f
-                            - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
-                        // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
-
-                        //Check if vehicle can be placed
-                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
-                        {
-                            indexToCheck = gridMapIndex + (neighbourX * xDir);
-                            // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
-                            //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
-                            //     + $" | indexToCheck: {indexToCheck}");
-
-                            //Bounds Check
-                            if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY * 2))      //Out of Range
-                            {
-                                // Debug.Log($"(gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
-                                // + $"| Bounds: {indexToCheck}");
-                                goto case 6;
-                            }
-                            //Cell Filled Check
-                            else if (gridMap[indexToCheck] != 0)
-                                goto case 6;
-                        }
-
-                        //Fill the cells
-                        for (neighbourX = 0; neighbourX < 2; neighbourX++)
-                            gridMap[gridMapIndex + (neighbourX * xDir)] = (byte)PoolManager.PoolType.BOUNDARY;
-                        // gridMap[gridMapIndex + (neighbourX * xDir) +
-                        //     (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) * (gridMapIndex / UniversalConstant._cGridX))]
-                        //     = (byte)PoolManager.PoolType.BOUNDARY;
-
-                        boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
-                        boundaryObject.name = $"BoundaryI{gridMapIndex}";
-                        boundaryObject.transform.position = spawnPos;
-                        boundaryObject.transform.localEulerAngles = spawnRot;
-
-                        vehicleCount++;
-                        break;
-
-                    //Cell Occupied | Out Of Bounds
-                    case 6:
+                    //Bounds Check
+                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY * 2))      //Out of Range
+                    {
+                        // Debug.Log($"(gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
+                        // + $"| Bounds: {indexToCheck}");
                         continue;
-
-                    default:
-                        Debug.LogError($"Vehicle Spawner | Wrong Vehicle Orientation: {boundaryOrientation}");
+                    }
+                    //Cell Occupied
+                    else if (gridMap[indexToCheck] != 0)
                         continue;
                 }
+
+                //Fill the cells
+                for (neighbourX = 0; neighbourX < 2; neighbourX++)
+                    gridMap[gridMapIndex + neighbourX] = (byte)PoolManager.PoolType.BOUNDARY;
+
+                boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
+                boundaryObject.name = $"BoundaryI{gridMapIndex}";
+                boundaryObject.transform.position = spawnPos;
+                boundaryObject.transform.rotation = Quaternion.identity;
+
                 //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
 
                 // If true, then place the vehicle
@@ -163,119 +126,89 @@ namespace Parking_A.Gameplay
             }
 
             /*
-            #if !SPAWN_VERTICAL_TEST
-                        for (gridMapIndex = 0; gridMapIndex < UniversalConstant._cGridY * 2; gridMapIndex++)
-            #else
+#if !SPAWN_VERTICAL_TEST
+            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._cGridY * 2; gridMapIndex++)
+#else
                         for (gridMapIndex = 0; gridMapIndex < 22; gridMapIndex++)
-            #endif
-                        {
-                            //Check if the space is occupied or not | Skip if occupied
-                            if (gridMap[gridMapIndex] != 0)
-                                continue;
-            #if EMERGENCY_LOOP_EXIT
-                            else
-                            {
-                                if (emergencyExit >= 50) { Debug.Log($"Emergency Break: {emergencyExit}"); break; }
-                                emergencyExit++;
-                            }
-            #endif
+#endif
+            {
+                //Check if the space is occupied or not | Skip if occupied
+                if (gridMap[gridMapIndex] != 0)
+                    continue;
+#if EMERGENCY_LOOP_EXIT
+                else
+                {
+                    if (emergencyExit >= 50) { Debug.Log($"Emergency Break: {emergencyExit}"); break; }
+                    emergencyExit++;
+                }
+#endif
 
-                            xDir = 1; yDir = 1;
-                            spawnPos = Vector3.zero;
-                            spawnPos.y = 0.28f;
-                            spawnRot = Vector3.zero;
-                            spawnRot.y = 90f;
+                yDir = 1;
+                spawnPos = Vector3.zero;
+                spawnRot = Vector3.zero;
+                spawnRot.y = 90f;
 
-            #if !SPAWN_VERTICAL_TEST
-                            //Random Orientation
-                            //2: Up | 3: Down
-                            boundaryOrientation = Random.Range(2, 5);         //Original
+#if !SPAWN_VERTICAL_TEST
+                //Random Orientation: Up/ Down
+                boundaryOrientation = Random.Range(0, 2);         //Original
 
-                            if (boundaryOrientation == 4) continue;
-            #else
-                            boundaryOrientation = 1;                             //Test
-                            // gridMapIndex = 0;              //Test
-                            // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
-                            // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
-            #endif
-                            // <------------ {(UniversalConstant._cGridX / 4),(UniversalConstant._cGridY / 4)} ------------> Top-Left placement of a car
-                            // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
+                if (boundaryOrientation == 2) continue;
+#else
+                boundaryOrientation = 1;                             //Test
+                // gridMapIndex = 0;              //Test
+                // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
+                // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
+#endif
+                // <------------ {(UniversalConstant._cGridX / 4),(UniversalConstant._cGridY / 4)} ------------> Top-Left placement of a car
+                // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
-                            switch (boundaryOrientation)
-                            {
-                                //Check up
-                                case 2:
-                                    yDir = -1;
-                                    spawnRot.y = 90f;
+                yDir = 1;
 
-                                    spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f);
-                                    goto case 5;
+                spawnRot.y = 90f;
+                spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - 0.5f;
 
-                                // Check down
-                                case 3:
-                                    yDir = 1;
-                                    spawnRot.y = 90f;
+                //Both will be right in X for Vertical pair
+                spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) - 0.25f;
 
-                                    spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - 0.5f;
-                                    goto case 5;
+                //Check if vehicle can be placed
+                for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                {
+                    indexToCheck = gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX);
 
-                                //Check vertical pairs
-                                case 5:
-                                    //Both will be right in X for Vertical pair
-                                    spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) - 0.25f;
+                    // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
+                    //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
+                    //     + $" | indexToCheck: {indexToCheck}");
 
-                                    //Check if vehicle can be placed
-                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
-                                    {
-                                        indexToCheck = gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX);
+                    // - No matter what the value, this (indexToCheck % UniversalConstant._cGridX) will always be between (0 - UniversalConstant._cGridX)
+                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY * 2))      //Out of Range
+                    {
+                        // Debug.Log($"[OUT OF BOUNDS] indexToCheck:{indexToCheck}");
+                        continue;
+                    }
+                    //Cell Occupied
+                    else if (gridMap[indexToCheck] != 0)
+                        continue;
+                }
 
-                                        // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
-                                        //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
-                                        //     + $" | indexToCheck: {indexToCheck}");
+                //Fill the cells
+                for (neighbourY = 0; neighbourY < 2; neighbourY++)
+                    gridMap[gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX)] = (byte)PoolManager.PoolType.BOUNDARY;
 
-                                        //Bounds Check
-                                        // - No matter what the value, this (indexToCheck % UniversalConstant._cGridX) will always be between (0 - UniversalConstant._cGridX)
-                                        if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY * 2))      //Out of Range
-                                        {
-                                            // Debug.Log($"[OUT OF BOUNDS] indexToCheck:{indexToCheck}");
-                                            goto case 6;
-                                        }
-                                        //Cell Filled Check
-                                        else if (gridMap[indexToCheck] != 0)
-                                            goto case 6;
-                                    }
+                boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
+                boundaryObject.name = $"BoundaryI{gridMapIndex}";
+                boundaryObject.transform.position = spawnPos;
+                boundaryObject.transform.localEulerAngles = spawnRot;
 
-                                    //Fill the cells
-                                    for (neighbourY = 0; neighbourY < 2; neighbourY++)
-                                        gridMap[gridMapIndex + (neighbourY * yDir * UniversalConstant._cGridX)] = (byte)PoolManager.PoolType.BOUNDARY;
+                //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
 
-                                    boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
-                                    boundaryObject.name = $"BoundaryI{gridMapIndex}";
-                                    boundaryObject.transform.position = spawnPos;
-                                    boundaryObject.transform.localEulerAngles = spawnRot;
+                // If true, then place the vehicle
+                // If false, then choose another vehicle | leave the spot empty
 
-                                    vehicleCount++;
-                                    break;
-
-                                //Cell Occupied | Out Of Bounds
-                                case 6:
-                                    continue;
-
-                                default:
-                                    Debug.LogError($"Vehicle Spawner | Wrong Vehicle Orientation: {boundaryOrientation}");
-                                    continue;
-                            }
-
-                            //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
-
-                            // If true, then place the vehicle
-                            // If false, then choose another vehicle | leave the spot empty
-
-                            await Task.Yield();
-                        }
-            */
-
+                await Task.Yield();
+            }
             Debug.Log($"Spawning Finished");
+            // */
         }
+
     }
 }

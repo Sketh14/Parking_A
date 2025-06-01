@@ -231,8 +231,20 @@ CAR PARKING
 - Scripts
     [=] EnvironmentSpawner
         {+} Boundary spawning logic
+            <~> Horizontal spawning | Offset according to gridMapIndex for lower objects
+        {+} 2 passes for horizontal/vertical spawning separately
+            <~> Only checking in the specific direction for that pass
     [=] VehicleSpawner
         {+} Moving grid dimensions from UniversalConstant
+    [=] PoolManager
+        {+} Adding Boundary to PoolType enum
+- Project
+    [=] Making a prefab for Boundary
+
+- Scripts
+    [=] EnvironmentSpawner
+        {+} Only keeping 1 direction for both pairs, as it would not make sense
+        {+} Leaving the last cell inn horizontal to avoid going over
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
