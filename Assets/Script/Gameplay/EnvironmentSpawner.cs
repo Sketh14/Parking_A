@@ -1,6 +1,6 @@
 #define EMERGENCY_LOOP_EXIT
 // #define SPAWN_HORIZONTAL_TEST
-#define SPAWN_VERTICAL_TEST
+// #define SPAWN_VERTICAL_TEST
 
 using System;
 
@@ -18,7 +18,7 @@ namespace Parking_A.Gameplay
         {
             Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[(UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY * 2)];
+            byte[] gridMap = new byte[(UniversalConstant._cGridX * 2) + ((UniversalConstant._cGridY - 1) * 2)];         //Additional 2 cells just in case
 
             int gridMapIndex = 0, indexToCheck;
             //Initialize Array to all spots being empty
@@ -28,7 +28,6 @@ namespace Parking_A.Gameplay
             Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;
-            int yDir;
             Vector3 spawnPos, spawnRot;
 
             GameObject boundaryObject;
@@ -67,11 +66,10 @@ namespace Parking_A.Gameplay
 
 #if !SPAWN_HORIZONTAL_TEST
                 //Random Orientation: Left/Right
-                boundaryOrientation = Random.Range(0, 2);         //Original
-
-                if (boundaryOrientation == 0) continue;
+                boundaryOrientation = Random.Range(0, 4);         //Original
+                if (boundaryOrientation < 3) continue;
 #else
-                boundaryOrientation = 1;                             //Test
+                boundaryOrientation = 3;                             //Test
                 // gridMapIndex = 0;              //Test
                 // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
@@ -112,7 +110,7 @@ namespace Parking_A.Gameplay
                     gridMap[gridMapIndex + neighbourX] = (byte)PoolManager.PoolType.BOUNDARY;
 
                 boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
-                boundaryObject.name = $"BoundaryH_I{gridMapIndex}";
+                boundaryObject.name = $"BoundaryH_I[{gridMapIndex}]";
                 boundaryObject.transform.position = spawnPos;
                 boundaryObject.transform.rotation = Quaternion.identity;
 
@@ -126,7 +124,9 @@ namespace Parking_A.Gameplay
 
             // /*
 #if !SPAWN_VERTICAL_TEST
-            for (gridMapIndex = UniversalConstant._cGridX * 2; gridMapIndex < gridMap.Length; gridMapIndex++)
+            for (gridMapIndex = UniversalConstant._cGridX * 2;
+                gridMapIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2;       //Avoid top/bottom boudnaries
+                gridMapIndex++)
 #else
             for (gridMapIndex = 44; gridMapIndex < 86; gridMapIndex++)
 #endif
@@ -134,28 +134,27 @@ namespace Parking_A.Gameplay
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0)
                 {
-                    Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
+                    // Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
                     continue;
                 }
 #if EMERGENCY_LOOP_EXIT
                 else
                 {
-                    if (emergencyExit >= 50) { Debug.Log($"Emergency Break: {emergencyExit}"); break; }
+                    if (emergencyExit >= 250) { Debug.Log($"Emergency Break: {emergencyExit}"); break; }
                     emergencyExit++;
                 }
 #endif
 
-                yDir = 1;
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
                 spawnRot.y = 90f;
 
 #if !SPAWN_VERTICAL_TEST
                 //Random Orientation: Up/ Down
-                boundaryOrientation = Random.Range(0, 2);         //Original
-                if (boundaryOrientation == 0) continue;
+                boundaryOrientation = Random.Range(0, 4);         //Original
+                if (boundaryOrientation < 3) continue;
 #else
-                boundaryOrientation = 1;                             //Test
+                boundaryOrientation = 3;                             //Test
                 // gridMapIndex = 0;              //Test
                 // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
@@ -164,12 +163,15 @@ namespace Parking_A.Gameplay
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
                 spawnRot.y = 90f;
-                spawnPos.z = (UniversalConstant._cGridY / 4.0f) - ((gridMapIndex - UniversalConstant._cGridX * 2) % UniversalConstant._cGridY * 0.5f) - 0.5f;
+                spawnPos.z = (UniversalConstant._cGridY / 4.0f) - ((gridMapIndex - UniversalConstant._cGridX * 2) % (UniversalConstant._cGridY - 2) * 0.5f) - 1.0f;       //Extra 0.5f to offset above boundary
                 // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
 
                 //Both will be right in X for Vertical pair
-                // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + ((UniversalConstant._cGridX - 1) * 0.5f) + 0.25f;       // For objects on the left-side
-                spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f;        // For objects on the left-side
+                // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f + ((UniversalConstant._cGridX - 1) * 0.5f);       // For objects on the left-side
+                // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f;        // For objects on the left-side
+                spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f
+                    + ((gridMapIndex - (UniversalConstant._cGridX * 2)) / (UniversalConstant._cGridY - 2)
+                        * (UniversalConstant._cGridX - 1) * 0.5f);        // For both-sides
 
                 //Check if vehicle can be placed
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)
@@ -196,7 +198,7 @@ namespace Parking_A.Gameplay
                     gridMap[gridMapIndex + neighbourY] = (byte)PoolManager.PoolType.BOUNDARY;
 
                 boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
-                boundaryObject.name = $"BoundaryV_I{gridMapIndex}";
+                boundaryObject.name = $"BoundaryV_I[{gridMapIndex}]";
                 boundaryObject.transform.position = spawnPos;
                 boundaryObject.transform.localEulerAngles = spawnRot;
 
