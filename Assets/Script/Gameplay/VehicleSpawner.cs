@@ -9,6 +9,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Math = System.Math;
 using Parking_A.Global;
+using System.Linq.Expressions;
 
 namespace Parking_A.Gameplay
 {
@@ -188,23 +189,20 @@ namespace Parking_A.Gameplay
                     * UniversalConstant._cGridX * (UniversalConstant._cGridY - 2))] = boundaryData[bIndex];
             }
             //Left / Right
-            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2, alternator = 0;
+            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2;
                 bDataIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
                 bDataIndex++)
             {
                 gridMap[bIndex] = boundaryData[bDataIndex];
 
-                alternator++;
-                // Debug.Log($" Before: bIndex:[{bIndex}] | Alt[{alternator}] | Mod:[{alternator % 2}] | Mod-1:[{(alternator - 1) % 2}]");
-                bIndex += ((UniversalConstant._cGridX - 1) * (alternator % 2)) + ((alternator - 1) % 2);
+                // bIndex += UniversalConstant._cGridX
+                //     - (bDataIndex - (UniversalConstant._cGridX * 2)) / (UniversalConstant._cGridY - 2)
+                //         * (bDataIndex - UniversalConstant._cGridX) + (UniversalConstant._cGridX - 1);
+                bIndex += UniversalConstant._cGridX;
+                // Debug.Log($"bIndex: {bIndex} | bDataIndex: {bDataIndex} | gridMap[bIndex]: {boundaryData[bDataIndex]}");
 
-                /*
-                Debug.Log($" B[{bIndex} | {bIndex % (UniversalConstant._cGridX - 1)}] | ");
-                bIndex += (UniversalConstant._cGridX - 1) * (bIndex % (UniversalConstant._cGridX - 1));
-                Debug.Log($" A1[{bIndex} | {Mathf.Clamp01(bIndex % UniversalConstant._cGridX)} | {(bIndex + 1) % UniversalConstant._cGridX}] | ");
-                bIndex += 1 * (int)Mathf.Clamp01((bIndex + 1) % UniversalConstant._cGridX);
-                Debug.Log($" A2[{bIndex}] | ");
-                */
+                if (bIndex == UniversalConstant._cGridX * (UniversalConstant._cGridY - 1))
+                    bIndex = UniversalConstant._cGridX - 1;
             }
 
 #if DEBUG_GRID_BOUNDARY_TOP_BOTTOM
@@ -228,16 +226,17 @@ namespace Parking_A.Gameplay
 #endif
 
 
-#if !DEBUG_GRID_BOUNDARY_LEFT_RIGHT
-
-            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2, alternator = 0;
+#if DEBUG_GRID_BOUNDARY_LEFT_RIGHT
+            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2;
                 bDataIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
                 bDataIndex++)
             {
                 debugGrid.Append($" [{bIndex}]: {gridMap[bIndex]} |");
 
-                alternator++;
-                bIndex += ((UniversalConstant._cGridX - 1) * (alternator % 2)) + ((alternator - 1) % 2);
+                bIndex += UniversalConstant._cGridX;
+
+                if (bIndex == UniversalConstant._cGridX * (UniversalConstant._cGridY - 1))
+                    bIndex = UniversalConstant._cGridX - 1;
             }
 
             Debug.Log("gridMap: \n" + debugGrid.ToString());

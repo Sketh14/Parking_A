@@ -277,6 +277,11 @@ CAR PARKING
         {+} Filling up grid data with boundary data
         {+} Top/Bottom done
         {+} Left/Right alternating done
+        
+- Scripts
+    [=] VehicleSpawner
+        {+} Left/Right Boundary data fill
+        {+} Toggling value to the right hand side
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
