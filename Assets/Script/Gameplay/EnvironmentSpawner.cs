@@ -16,7 +16,7 @@ namespace Parking_A.Gameplay
     {
         private const string _randomSeed = "SKETH";
 
-        public async void SpawnEnvironment(Action<int[]> onVehiclesSpawned)
+        public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
@@ -214,6 +214,8 @@ namespace Parking_A.Gameplay
             }
             Debug.Log($"Spawning Finished");
             // */
+
+            onBoundarySpawned?.Invoke(gridMap);
         }
 
     }

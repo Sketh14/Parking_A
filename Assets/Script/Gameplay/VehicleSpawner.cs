@@ -166,7 +166,7 @@ namespace Parking_A.Gameplay
             }*/
         }
 
-        public async void SpawnVehicles2(Action<int[]> onVehiclesSpawned)
+        public async void SpawnVehicles2(byte[] boundaryData, Action<int[]> onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
@@ -176,6 +176,72 @@ namespace Parking_A.Gameplay
             //Initialize Array to all spots being empty
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
+
+            //Initialize Boundary Data
+#if !DEBUG_GRID_BOUNDARY
+            System.Text.StringBuilder debugGrid = new System.Text.StringBuilder();
+#endif
+            //Top / Bottom
+            for (int bIndex = 0; bIndex < UniversalConstant._cGridX * 2; bIndex++)
+            {
+                gridMap[bIndex + (bIndex / UniversalConstant._cGridX
+                    * UniversalConstant._cGridX * (UniversalConstant._cGridY - 2))] = boundaryData[bIndex];
+            }
+            //Left / Right
+            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2, alternator = 0;
+                bDataIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
+                bDataIndex++)
+            {
+                gridMap[bIndex] = boundaryData[bDataIndex];
+
+                alternator++;
+                // Debug.Log($" Before: bIndex:[{bIndex}] | Alt[{alternator}] | Mod:[{alternator % 2}] | Mod-1:[{(alternator - 1) % 2}]");
+                bIndex += ((UniversalConstant._cGridX - 1) * (alternator % 2)) + ((alternator - 1) % 2);
+
+                /*
+                Debug.Log($" B[{bIndex} | {bIndex % (UniversalConstant._cGridX - 1)}] | ");
+                bIndex += (UniversalConstant._cGridX - 1) * (bIndex % (UniversalConstant._cGridX - 1));
+                Debug.Log($" A1[{bIndex} | {Mathf.Clamp01(bIndex % UniversalConstant._cGridX)} | {(bIndex + 1) % UniversalConstant._cGridX}] | ");
+                bIndex += 1 * (int)Mathf.Clamp01((bIndex + 1) % UniversalConstant._cGridX);
+                Debug.Log($" A2[{bIndex}] | ");
+                */
+            }
+
+#if DEBUG_GRID_BOUNDARY_TOP_BOTTOM
+
+#if DEBUG_GB_1
+            for (int i = 0; i < UniversalConstant._cGridX * 2; i++)
+            {
+                if (i == UniversalConstant._cGridX)
+                    debugGrid.Append($"\n");
+                debugGrid.Append($" {gridMap[i]} |");
+            }
+#endif
+
+#if !DEBUG_GB_2
+            int startDebugIndex = UniversalConstant._cGridX * (UniversalConstant._cGridY - 1);
+            for (int i = startDebugIndex; i < startDebugIndex + UniversalConstant._cGridX; i++)
+                debugGrid.Append($" [{i}]: {gridMap[i]} |");
+#endif
+
+            Debug.Log("gridMap: \n" + debugGrid.ToString());
+#endif
+
+
+#if !DEBUG_GRID_BOUNDARY_LEFT_RIGHT
+
+            for (int bIndex = UniversalConstant._cGridX, bDataIndex = UniversalConstant._cGridX * 2, alternator = 0;
+                bDataIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
+                bDataIndex++)
+            {
+                debugGrid.Append($" [{bIndex}]: {gridMap[bIndex]} |");
+
+                alternator++;
+                bIndex += ((UniversalConstant._cGridX - 1) * (alternator % 2)) + ((alternator - 1) % 2);
+            }
+
+            Debug.Log("gridMap: \n" + debugGrid.ToString());
+#endif
 
             List<int> addedVehicleTypes = new List<int>();
             Random.InitState(_randomSeed.GetHashCode());

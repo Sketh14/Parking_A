@@ -269,21 +269,30 @@ CAR PARKING
         {+} Adding string to generate random seed
     [=] VehicleSpawner
         {+} Adding string to generate random seed
+
+- Scripts
+    [=] VehicleController
+        {+} Sending boundary data to VehicleSpawner
+    [=] VehicleSpawner
+        {+} Filling up grid data with boundary data
+        {+} Top/Bottom done
+        {+} Left/Right alternating done
 --------------------------------------------------------------------------------------------------------------
+- [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks
     [=] When vehicle is moving
-        {+} Check if collided wth another vehicle
+        {+} Check if collided wth another vehicle  [DONE FOR NOW]
         {+} Check if there is another vehicle on the road, before entering the road
     [=] What happens when the vehicle collides?
         {+} Reset the collision check
         {+} Do something to the collider and the one colliding
             <~> Shake the colliding vehicle
     [=] 2 conditions can give to collisions
-        {+} When a vehicle is moving towards another vehicle
+        {+} When a vehicle is moving towards another vehicle  [DONE FOR NOW]
         {+} When a vehicle is moving into the road and another vehicle is in front
-- [DO] Need to check in lower cells also, as the vehicles are 2 cells wide
-- [DO] Divide into smaller sections
+- Need to check in lower cells also, as the vehicles are 2 cells wide
+- [DO] [DONE FOR NOW] Divide into smaller sections
     [=] Move every 0.05 intervals
     [=] For Small Vehicle | Center will always be multiple of 0.5
     [=] For Medium Vehicle | Center will always in interval of 0.5 starting from the (-0.75 | 0.75)
@@ -291,16 +300,18 @@ CAR PARKING
     [=] Since every Vehicle has the same width and only the length differs
         {+} Need to only change the length value, breadth value can remain the same
 - [DO] Vehicle Collision Detection
-    [=] Make sectors and add vehicles, for less load
-- [DO] Pooling System
-- [DO] Vehicle Placement around the parking lot
+    [=] Make sectors and add vehicles, for less load [DONE FOR NOW]
+    [=] [IMP] Detect collisions while getting on road
+- [DO] [DONE FOR NOW] Pooling System 
+- [DO] [DONE FOR NOW] Vehicle Placement around the parking lot
     [=] Can make a random placement logic, just checking if the car algined has a way to get out in any direction
 - [Do] Vehicle shake
     [=] After collision, shake the vehicle
-- [Do] Vehicle Collision Detection
+- [Do]  [DONE FOR NOW] Vehicle Collision Detection
     [=] Raycast front and back from sides?
         {+} Poking a little on the front and back to detect other vehicles
-- [DO] Vehicles can lerp to rotate towards the next marker, so that the rotation fo vehicle does not goes wrong
+- [DO] [DONE FOR NOW]Vehicles can lerp to rotate towards the next marker, so that the rotation fo vehicle does not goes wrong
+    [=] Simply rotating the vehicle
 
 - To check if the vehicles have reached the road or not?
     [=] Can use trigger | Would have to attach rigidbody to vehicles | would be unnecessary

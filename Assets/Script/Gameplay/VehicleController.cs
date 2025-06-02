@@ -45,15 +45,43 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect += VehicleSelected;
 
+            InitializeLevel();
+        }
+
+        private async void InitializeLevel()
+        {
+            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             vehicleSpawner = new VehicleSpawner();
 
-            // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
-            // vehicleSpawner.SpanwVehiclesTest();
-            // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+            byte[] boundaryData = null;
 
-            // vehicleSpawner.SpawnVehicles2((vehicleTypes) => InitializeVehicleData(vehicleTypes));
-            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
-            envSpawner.SpawnEnvironment((values) => { });
+            try
+            {
+                await envSpawner.SpawnBoundary((values) => boundaryData = values);
+            }
+            //Cannot initialize boundary | Stop level generation, show some message and restart
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+
+            try
+            {
+                // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
+                // vehicleSpawner.SpanwVehiclesTest();
+                // _vehicleInfos = new VehicleInfo[vehicleSpawner.VehiclesSpawned.Count];
+                if (boundaryData == null)
+                {
+                    Debug.LogError($"Boundary Data is null");
+                    return;
+                }
+                vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) => InitializeVehicleData(vehicleTypes));
+            }
+            //Cannot initialize vehicles | Stop level generation, show some message and restart
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         private void InitializeVehicleData(in int[] vehicleTypes)
