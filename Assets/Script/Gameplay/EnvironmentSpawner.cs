@@ -14,6 +14,8 @@ namespace Parking_A.Gameplay
 {
     public class EnvironmentSpawner
     {
+        private const string _randomSeed = "SKETH";
+
         public async void SpawnEnvironment(Action<int[]> onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
@@ -25,7 +27,8 @@ namespace Parking_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
-            Random.InitState(123456);
+            Random.InitState(_randomSeed.GetHashCode());
+            // Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;
             Vector3 spawnPos, spawnRot;
@@ -53,7 +56,7 @@ namespace Parking_A.Gameplay
 #endif
             {
                 //Check if the space is occupied or not | Skip if occupied
-                if (gridMap[gridMapIndex] != 0)
+                if (gridMap[gridMapIndex] != 0 || (gridMapIndex == UniversalConstant._cGridX - 1))
                     continue;
 #if EMERGENCY_LOOP_EXIT
                 else
@@ -66,7 +69,7 @@ namespace Parking_A.Gameplay
 
 #if !SPAWN_HORIZONTAL_TEST
                 //Random Orientation: Left/Right
-                boundaryOrientation = Random.Range(0, 4);         //Original
+                boundaryOrientation = Random.Range(0, 5);         //Original
                 if (boundaryOrientation < 3) continue;
 #else
                 boundaryOrientation = 3;                             //Test
@@ -125,14 +128,14 @@ namespace Parking_A.Gameplay
             // /*
 #if !SPAWN_VERTICAL_TEST
             for (gridMapIndex = UniversalConstant._cGridX * 2;
-                gridMapIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2;       //Avoid top/bottom boudnaries
+                gridMapIndex < (UniversalConstant._cGridX * 2) + (UniversalConstant._cGridY - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
                 gridMapIndex++)
 #else
-            for (gridMapIndex = 44; gridMapIndex < 86; gridMapIndex++)
+            for (gridMapIndex = 44; gridMapIndex < 45; gridMapIndex++)
 #endif
             {
                 //Check if the space is occupied or not | Skip if occupied
-                if (gridMap[gridMapIndex] != 0)
+                if (gridMap[gridMapIndex] != 0 || gridMapIndex == UniversalConstant._cGridY - 3 + (UniversalConstant._cGridX * 2))          //Avoid Last cell
                 {
                     // Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
                     continue;
@@ -155,7 +158,7 @@ namespace Parking_A.Gameplay
                 if (boundaryOrientation < 3) continue;
 #else
                 boundaryOrientation = 3;                             //Test
-                // gridMapIndex = 0;              //Test
+                // gridMapIndex = 83;              //Test
                 // Debug.Log($"[CELL CHECK] boundaryOrientation: {boundaryOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
 #endif

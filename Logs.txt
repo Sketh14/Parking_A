@@ -259,6 +259,16 @@ CAR PARKING
         {+} Increasing chances to spawn spaces in boundaries (3:1)
         {+} Adding gaps to vertical placement for avoiding top/down boundaries
         {+} Making/Fixing logic for spawn position
+
+- Scripts
+    [=] EnvironmentSpawner
+        {+} Fixing Horizontal spawn
+            <~> Leaving last top cell
+        {+} Fixing Vertical spawn
+            <~> Leaving last bottom cells
+        {+} Adding string to generate random seed
+    [=] VehicleSpawner
+        {+} Adding string to generate random seed
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks
