@@ -314,6 +314,20 @@ CAR PARKING
         {+} Adding gamestatus
     [=] VehicleController
         {+} Toggling Game-status accordingly
+
+- Script
+    [=] GameConfigScriptableObject
+        {+} SO for setting Game Configurations
+    [=] MainMenuController
+        {+} Toggle logic for randomisation
+    [=] VehicleController
+        {+} Adding logic for randomizing levels
+- Project
+    [=] Adding a Game Config SO
+- Scene
+    [=] Main Menu
+        {+} Adding a toggle to randomize levels
+    [=] Adding reference to Game-Config
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks

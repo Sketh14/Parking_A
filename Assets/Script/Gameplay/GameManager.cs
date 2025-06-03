@@ -17,6 +17,7 @@ namespace Parking_A.Gameplay
                 Destroy(this.gameObject);
 
             RandomSeed = "";
+
         }
         #endregion Singleton
 

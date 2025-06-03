@@ -31,6 +31,8 @@ namespace Parking_A.Gameplay
         public VehicleSpawner vehicleSpawner;
         private bool _vehiclesSpawned = false;
 
+        [SerializeField] private GameConfigScriptableObject _mainGameConfig;
+
         private Func<Vector3, Vector3> _roundPosition;
 
         private const int _cCollisionCheckLayerMask = (1 << 6) | (1 << 7);
@@ -50,7 +52,15 @@ namespace Parking_A.Gameplay
 
         private async void InitializeLevel()
         {
-            GameManager.Instance.RandomSeed = "SKETH";
+            if (_mainGameConfig.RandomizeLevel)
+            {
+                string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
+                    + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
+                GameManager.Instance.RandomSeed = tempRandomSeed;
+                Debug.Log($"Selected Random Seed: {tempRandomSeed}");
+            }
+            else
+                GameManager.Instance.RandomSeed = "SKETH";
 
             EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             vehicleSpawner = new VehicleSpawner();
