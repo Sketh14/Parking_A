@@ -293,6 +293,27 @@ CAR PARKING
         {+} Fixing Horizontal Boundary check | Offsetting properly
         {+} Finishing Horizontal | Vertical exits check
         {+} Changing naming for vehicles
+
+- Scripts
+    [=] VehicleSpawner | EnvironmentSpawner
+        {+} Using string from GameManager as random seed
+    [=] GameManager
+        {+} Adding random seed string
+
+- Scene
+    [=] Main Menu
+        {+} Basic Main Menu 
+- Project
+    [=] Adding Circle_256 png
+- Scripts
+    [=] Main Menu Controller
+        {+} Basic controller for Main-Menu
+    [=] UniversalConstant
+        {+} Added enums for Scenes | Game Status
+    [=] GameManager
+        {+} Adding gamestatus
+    [=] VehicleController
+        {+} Toggling Game-status accordingly
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks

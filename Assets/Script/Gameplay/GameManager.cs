@@ -1,3 +1,4 @@
+using Parking_A.Global;
 using UnityEngine;
 
 namespace Parking_A.Gameplay
@@ -20,6 +21,7 @@ namespace Parking_A.Gameplay
         #endregion Singleton
 
         public string RandomSeed;
+        public UniversalConstant.GameStatus GameStatus;
         public System.Action<int, Vector2> OnSelect;
     }
 }

@@ -57,6 +57,7 @@ namespace Parking_A.Gameplay
 
             byte[] boundaryData = null;
 
+            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
             try
             {
                 await envSpawner.SpawnBoundary((values) => boundaryData = values);
@@ -67,6 +68,7 @@ namespace Parking_A.Gameplay
                 Debug.LogException(ex);
             }
 
+            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNING;
             try
             {
                 // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
@@ -84,6 +86,8 @@ namespace Parking_A.Gameplay
             {
                 Debug.LogException(ex);
             }
+
+            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
         }
 
         private void InitializeVehicleData(in int[] vehicleTypes)

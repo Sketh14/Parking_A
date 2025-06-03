@@ -1,5 +1,5 @@
 // #define MOBILE_CONTROLS
-#define DEBUGGING_TOUCH
+// #define DEBUGGING_TOUCH
 
 using UnityEngine;
 
@@ -59,7 +59,8 @@ namespace Parking_A.Gameplay
 
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
-            if (!userInteracting)
+            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
+                 && !userInteracting)
             {
                 if (_selectionStatus == 1)
                 {
@@ -78,7 +79,8 @@ namespace Parking_A.Gameplay
             }
 #else
             userInteracting = (Touch.activeTouches.Count > 0);
-            if (!userInteracting)
+            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
+                && !userInteracting)
             {
                 if(_selectionStatus == 1){
                 slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;
