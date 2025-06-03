@@ -18,7 +18,7 @@ namespace Parking_A.Gameplay
 
         public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
         {
-            Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
+            Debug.Log($"Spawning Boundary | gridMap[{UniversalConstant._cGridX}x{UniversalConstant._cGridY}] | Size: {UniversalConstant._cGridX * UniversalConstant._cGridY}");
             //Create a grid of 22 x 42 cells
             byte[] gridMap = new byte[(UniversalConstant._cGridX * 2) + ((UniversalConstant._cGridY - 1) * 2)];         //Additional 2 cells just in case
 
@@ -135,7 +135,8 @@ namespace Parking_A.Gameplay
 #endif
             {
                 //Check if the space is occupied or not | Skip if occupied
-                if (gridMap[gridMapIndex] != 0 || gridMapIndex == UniversalConstant._cGridY - 3 + (UniversalConstant._cGridX * 2))          //Avoid Last cell
+                if (gridMap[gridMapIndex] != 0
+                    || gridMapIndex == UniversalConstant._cGridY - 3 + (UniversalConstant._cGridX * 2))          //Avoid Last cell
                 {
                     // Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
                     continue;
@@ -167,11 +168,12 @@ namespace Parking_A.Gameplay
 
                 spawnRot.y = 90f;
                 spawnPos.z = (UniversalConstant._cGridY / 4.0f) - ((gridMapIndex - UniversalConstant._cGridX * 2) % (UniversalConstant._cGridY - 2) * 0.5f) - 1.0f;       //Extra 0.5f to offset above boundary
-                // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
+                                                                                                                                                                          // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
 
                 //Both will be right in X for Vertical pair
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f + ((UniversalConstant._cGridX - 1) * 0.5f);       // For objects on the left-side
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f;        // For objects on the left-side
+                // If cGridX:22 | cGridY:42, then 84 would be on the right side, as 40/40 is 1
                 spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f
                     + ((gridMapIndex - (UniversalConstant._cGridX * 2)) / (UniversalConstant._cGridY - 2)
                         * (UniversalConstant._cGridX - 1) * 0.5f);        // For both-sides
@@ -212,7 +214,7 @@ namespace Parking_A.Gameplay
 
                 await Task.Yield();
             }
-            Debug.Log($"Spawning Finished");
+            Debug.Log($"Spawning Boundary Finished");
             // */
 
             onBoundarySpawned?.Invoke(gridMap);

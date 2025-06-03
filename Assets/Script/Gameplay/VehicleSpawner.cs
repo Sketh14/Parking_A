@@ -198,11 +198,11 @@ namespace Parking_A.Gameplay
                 // bIndex += UniversalConstant._cGridX
                 //     - (bDataIndex - (UniversalConstant._cGridX * 2)) / (UniversalConstant._cGridY - 2)
                 //         * (bDataIndex - UniversalConstant._cGridX) + (UniversalConstant._cGridX - 1);
+                // Debug.Log($"bIndex: {bIndex} | bDataIndex: {bDataIndex} | gridMap[{bIndex}]: {boundaryData[bDataIndex]}");
                 bIndex += UniversalConstant._cGridX;
-                // Debug.Log($"bIndex: {bIndex} | bDataIndex: {bDataIndex} | gridMap[bIndex]: {boundaryData[bDataIndex]}");
 
                 if (bIndex == UniversalConstant._cGridX * (UniversalConstant._cGridY - 1))
-                    bIndex = UniversalConstant._cGridX - 1;
+                    bIndex = (UniversalConstant._cGridX * 2) - 1;
             }
 
 #if DEBUG_GRID_BOUNDARY_TOP_BOTTOM
@@ -244,7 +244,7 @@ namespace Parking_A.Gameplay
 
             List<int> addedVehicleTypes = new List<int>();
             Random.InitState(_randomSeed.GetHashCode());
-            Random.InitState(123456);
+            // Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
             int xDir, yDir;
@@ -295,9 +295,9 @@ namespace Parking_A.Gameplay
                 vehicleOrientation = 1;                             //Test
                 vehicleType = 2;              //Test | Only include small vehicles
                 // gridMapIndex = 0;              //Test
+#endif
                 // Debug.Log($"[CELL CHECK] vehicleType: {vehicleType} | vehicleOrientation: {vehicleOrientation}"
                 // + $" | gridMapIndex: {gridMapIndex} | gridMap[gridMapIndex]:{gridMap[gridMapIndex]}");
-#endif
 
                 //Fill the associated cells: Left,Right,Up,Down accordingly
                 //- As we are going left to right from the top
@@ -381,6 +381,30 @@ namespace Parking_A.Gameplay
                         spawnPos.z = (UniversalConstant._cGridY / 4.0f) - (gridMapIndex / UniversalConstant._cGridX * 0.5f) - 0.5f;
                         // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
 
+                        // /*
+                        //Check if vehicle can exit the parking lot
+                        for (neighbourX = 0, neighbourY = 0; neighbourX < 2; neighbourX++)
+                        {
+                            // Debug.Log($"neighbourX: {neighbourX} | 0:{(gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX + ((UniversalConstant._cGridX - 1) * neighbourX)}"
+                            //     + $" | 1: {((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + UniversalConstant._cGridX + ((UniversalConstant._cGridX - 1) * neighbourX)}"
+                            //     + $" | grid[0]: {gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + ((UniversalConstant._cGridX - 1) * neighbourX)]}"
+                            //     + $" | grid[1]: {gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + UniversalConstant._cGridX + ((UniversalConstant._cGridX - 1) * neighbourX)]}");
+                            //Check if gridMapIndex | (gridMapIndex + gridX) has boundary on the same row or not
+                            if (gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX)
+                                + ((UniversalConstant._cGridX - 1) * neighbourX)] != 0
+                                || gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + UniversalConstant._cGridX
+                                + ((UniversalConstant._cGridX - 1) * neighbourX)] != 0)
+                                neighbourY++;
+                        }
+
+                        // If both sides are blocked then dont continue
+                        if (neighbourY > 1)
+                        {
+                            // Debug.Log($"Skipping Spawn | neighbourY: {neighbourY}");
+                            goto case 6;
+                        }
+                        // */
+
                         //Check if vehicle can be placed
                         for (neighbourX = 0; neighbourX < (2 + vehicleType); neighbourX++)
                         {
@@ -398,7 +422,7 @@ namespace Parking_A.Gameplay
                                     || (indexToCheck % UniversalConstant._cGridX) == 0 || (indexToCheck % UniversalConstant._cGridX) == (UniversalConstant._cGridX - 1)    //Vertical Gaps
                                     || (indexToCheck / UniversalConstant._cGridX) == 0 || (indexToCheck / UniversalConstant._cGridX) == (UniversalConstant._cGridY - 1))      //Horizontal Gaps
                                 {
-                                    // Debug.Log($"(gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
+                                    // Debug.Log($"([OUT OF BOUNDS] gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
                                     // + $"| Bounds: {indexToCheck}");
                                     goto case 6;
                                 }
@@ -418,7 +442,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I{gridMapIndex}O{vehicleOrientation}";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);
@@ -447,6 +471,23 @@ namespace Parking_A.Gameplay
                         //Both will be right in X for Vertical pair
                         spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._cGridX * 0.5f) + 0.5f;
                         xDir = 1;
+
+                        //Check if vehicle can exit the parking lot
+                        for (neighbourX = 0, neighbourY = 0; neighbourX < 2; neighbourX++)
+                        {
+                            // Debug.Log($"neighbourX: {neighbourX} | 0:{gridMapIndex % UniversalConstant._cGridX}"
+                            //     + $" | 1: {(gridMapIndex + 1) % UniversalConstant._cGridX}");
+                            //Check if gridMapIndex | (gridMapIndex + gridX) has boundary on the same row or not
+                            if (gridMap[(gridMapIndex % UniversalConstant._cGridX)
+                                + (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) * neighbourX)] != 0
+                                || gridMap[((gridMapIndex + 1) % UniversalConstant._cGridX)
+                                + (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) * neighbourX)] != 0)
+                                neighbourY++;
+                        }
+
+                        // If both sides are blocked then dont continue
+                        if (neighbourY > 1)
+                            goto case 6;
 
                         //Check if vehicle can be placed
                         for (neighbourX = 0; neighbourX < 2; neighbourX++)
@@ -484,7 +525,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I{gridMapIndex}O{vehicleOrientation}";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);

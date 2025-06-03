@@ -282,6 +282,17 @@ CAR PARKING
     [=] VehicleSpawner
         {+} Left/Right Boundary data fill
         {+} Toggling value to the right hand side
+
+--------------------------------------------------------------------------------------------------------------
+                                                    03 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Vehicle Boundary check | Check if vehicle can exit the parking lot
+        {+} Check if vehicle has exit on either sides
+        {+} Fixing Horizontal Boundary check | Offsetting properly
+        {+} Finishing Horizontal | Vertical exits check
+        {+} Changing naming for vehicles
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
