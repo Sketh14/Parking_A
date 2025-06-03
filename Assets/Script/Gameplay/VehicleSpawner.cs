@@ -31,7 +31,7 @@ namespace Parking_A.Gameplay
         private List<Transform> _vehiclesSpawned;
         public List<Transform> VehiclesSpawned { get => _vehiclesSpawned; }
 
-        private const string _randomSeed = "AVIN";
+        // private const string _randomSeed = "AVIN";
         // private const byte _cGridX = 22, _cGridY = 42;
 
         public VehicleSpawner()
@@ -243,7 +243,7 @@ namespace Parking_A.Gameplay
 #endif
 
             List<int> addedVehicleTypes = new List<int>();
-            Random.InitState(_randomSeed.GetHashCode());
+            Random.InitState(GameManager.Instance.RandomSeed.GetHashCode());
             // Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;

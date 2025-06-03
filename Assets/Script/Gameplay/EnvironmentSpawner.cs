@@ -14,7 +14,7 @@ namespace Parking_A.Gameplay
 {
     public class EnvironmentSpawner
     {
-        private const string _randomSeed = "SKETH";
+        // private const string _randomSeed = "SKETH";
 
         public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
         {
@@ -27,7 +27,7 @@ namespace Parking_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
-            Random.InitState(_randomSeed.GetHashCode());
+            Random.InitState(GameManager.Instance.RandomSeed.GetHashCode());
             // Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;

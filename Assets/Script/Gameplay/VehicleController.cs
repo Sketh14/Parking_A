@@ -50,6 +50,8 @@ namespace Parking_A.Gameplay
 
         private async void InitializeLevel()
         {
+            GameManager.Instance.RandomSeed = "SKETH";
+
             EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             vehicleSpawner = new VehicleSpawner();
 

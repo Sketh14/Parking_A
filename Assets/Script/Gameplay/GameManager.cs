@@ -14,9 +14,12 @@ namespace Parking_A.Gameplay
                 _instance = this;
             else
                 Destroy(this.gameObject);
+
+            RandomSeed = "";
         }
         #endregion Singleton
 
+        public string RandomSeed;
         public System.Action<int, Vector2> OnSelect;
     }
 }
