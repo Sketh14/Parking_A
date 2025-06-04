@@ -29,8 +29,9 @@ namespace Parking_A.Gameplay
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
         }
 
+        Vector2 interactPos = Vector2.zero;
 #if DEBUGGING_TOUCH
-        Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
+        Vector2 slideDir = Vector2.zero;
         Vector3 hitPos = Vector2.zero;
         bool drawRay = false;
 #endif
@@ -54,13 +55,13 @@ namespace Parking_A.Gameplay
                 Debug.DrawRay(hitPos, drawDir, Color.cyan);
             }
 #else
-            Vector2 interactPos = Vector2.zero, slideDir = Vector2.zero;
+            Vector2 slideDir = Vector2.zero;
 #endif
 
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
-                 && !userInteracting)
+                 || !userInteracting)
             {
                 if (_selectionStatus == 1)
                 {
@@ -80,7 +81,7 @@ namespace Parking_A.Gameplay
 #else
             userInteracting = (Touch.activeTouches.Count > 0);
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
-                && !userInteracting)
+                || !userInteracting)
             {
                 if(_selectionStatus == 1){
                 slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;

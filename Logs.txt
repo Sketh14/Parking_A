@@ -327,7 +327,14 @@ CAR PARKING
 - Scene
     [=] Main Menu
         {+} Adding a toggle to randomize levels
-    [=] Adding reference to Game-Config
+    [=] Adding reference to Game-
+    
+--------------------------------------------------------------------------------------------------------------
+                                                    04 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] InputManager
+        {+} Fixing Slide controls | First click/touch pos
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
