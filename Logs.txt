@@ -335,6 +335,10 @@ CAR PARKING
 - Scripts
     [=] InputManager
         {+} Fixing Slide controls | First click/touch pos
+
+- Project
+    [=] Bounary Prefab
+        {+} Fixing collider size 
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks

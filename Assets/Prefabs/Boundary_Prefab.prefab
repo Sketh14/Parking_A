@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1170930768604261346}
   - component: {fileID: 1794937793285821219}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Boundary_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,8 +52,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1, y: 0.5, z: 0.15}
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!1 &6175343814170586964
 GameObject:
   m_ObjectHideFlags: 0
@@ -65,7 +65,7 @@ GameObject:
   - component: {fileID: 6237304762972891867}
   - component: {fileID: 7815289451085827852}
   - component: {fileID: 1164762695078690451}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Boundary_Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
