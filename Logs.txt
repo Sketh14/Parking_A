@@ -338,8 +338,31 @@ CAR PARKING
 
 - Project
     [=] Bounary Prefab
-        {+} Fixing collider size 
+        {+} Fixing collider size
+
+- Scripts
+    [=] VehicleController
+        {+} Changing vehicle names according to their status
+        {+} Changing VehicleStatus enum values to bit check values
+        {+} Checking vehicle status of collided-vehicle to determine what to do
+        {+} Adding COLLIDED_ONBOARDING to VehicleStatus
+        {+} Logic to wait for passing vehicle
+        {+} Fixing vehicle naming according to status
+
 --------------------------------------------------------------------------------------------------------------
+                                                    05 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleController
+        {+} Doing 3 raycasts for detecting passing vehicle
+        {+} All in same direction for both alignments in same plane with offset
+        {+} Increasing raycast size for all
+        {+} Setting respective bits for raycasts for individual vehicles with +1 offset
+
+--------------------------------------------------------------------------------------------------------------
+- [Do] [IMP] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
+    [=] Sometimes the collision check does not work for vehicles just about to cross but 
+        the vehicle has crossed the On-Road threshold
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks

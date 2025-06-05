@@ -442,7 +442,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);
@@ -525,7 +525,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);

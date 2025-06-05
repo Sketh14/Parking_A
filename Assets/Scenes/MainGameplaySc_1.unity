@@ -1269,7 +1269,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1628082437
 Transform:
   m_ObjectHideFlags: 0
@@ -1625,6 +1625,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mainGameConfig: {fileID: 11400000, guid: 2c7ea7c079c8e134bb490530e88f02c5, type: 2}
+  slowTime: 0
 --- !u!1 &2146036505 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3604490752355796290, guid: 8cad6686f76c26a44b51c4516bd045af, type: 3}
@@ -2014,7 +2015,7 @@ Transform:
   m_GameObject: {fileID: 5755214984736946696}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1, y: 0.28, z: -1.53}
+  m_LocalPosition: {x: -5.94, y: 0.28, z: -9.25}
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
