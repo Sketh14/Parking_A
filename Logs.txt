@@ -391,6 +391,10 @@ CAR PARKING
     [=] VehicleController
         {+} Same length raycast for all vehicles
         {+} Same raycast spacing for all vehicles 
+
+- Scripts
+    [=] VehicleController
+        {+} Increasing raycast in one direction
 --------------------------------------------------------------------------------------------------------------
 - [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions

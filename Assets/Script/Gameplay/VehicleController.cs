@@ -531,7 +531,7 @@ namespace Parking_A.Gameplay
             RaycastHit colliderHitInfo;
 
             System.Text.StringBuilder debugOnBoarding = new System.Text.StringBuilder();
-            const int rayCount = 2;
+            const int rayCount = 3;
             int vIndex, rayIndex;
             for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
             {
@@ -547,38 +547,22 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    // rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[vIndex].InteractedDir.y * (_vehicleInfos[vIndex].VehicleType + 1);
-                    // rayDir.z = _vehicleInfos[vIndex].InteractedDir.y;
-
-                    // rayStartPos.z += _cGridHalfCellSize * 2f * _vehicleInfos[vIndex].InteractedDir.y * _vehicleInfos[vIndex].VehicleType * 2.5f
-                    //     - (_cGridHalfCellSize * (_vehicleInfos[vIndex].VehicleType - 1) * _vehicleInfos[vIndex].InteractedDir.y);
-                    rayStartPos.z += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.15f      //Vehicle Size + Offset
-                                + (_cGridHalfCellSize * 6.5f)) * _vehicleInfos[vIndex].InteractedDir.y;     //Cells offset
+                    rayStartPos.z += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
+                                + (_cGridHalfCellSize * 7f)) * _vehicleInfos[vIndex].InteractedDir.y;     //Cells offset
                     rayDir.z = _vehicleInfos[vIndex].InteractedDir.y * -1f;
-
-                    // rayStartPos.x += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1);
-                    // rayDir.x = -1.0f;
                 }
                 //Horizontal Alignment
                 else
                 {
-                    // rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
-                    // rayDir.x = _vehicleInfos[i].InteractedDir.x;
-
-                    // rayStartPos.x += _cGridHalfCellSize * 2f * _vehicleInfos[vIndex].InteractedDir.x * _vehicleInfos[vIndex].VehicleType * 2f
-                    //     - (_cGridHalfCellSize * (_vehicleInfos[vIndex].VehicleType - 1) * _vehicleInfos[vIndex].InteractedDir.x);
-                    rayStartPos.x += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.15f      //Vehicle Size + Offset
-                                + (_cGridHalfCellSize * 6.5f)) * _vehicleInfos[vIndex].InteractedDir.x;     //Cells Offset
+                    rayStartPos.x += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
+                                + (_cGridHalfCellSize * 7f)) * _vehicleInfos[vIndex].InteractedDir.x;     //Cells Offset
                     rayDir.x = _vehicleInfos[vIndex].InteractedDir.x * -1f;
-
-                    // rayStartPos.z += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1);
-                    // rayDir.z = -1.0f;
                 }
 
                 // Debug.Log($"Checking Vehicle | index: {i} | name: {_vehicleSpawner.VehiclesSpawned[i].name}"
                 // + $" | interactedDir: {_vehicleInfos[i].InteractedDir}"
                 // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
-                for (rayIndex = rayCount; rayIndex > -(rayCount + 1); rayIndex--)
+                for (rayIndex = rayCount; rayIndex > -rayCount; rayIndex--)
                 {
                     tempRayPos = rayStartPos;
                     tempRayPos.z += (_cGridHalfCellSize * 2f) * Mathf.Abs(_vehicleInfos[vIndex].InteractedDir.x) * rayIndex;
@@ -599,47 +583,29 @@ namespace Parking_A.Gameplay
                         _vehicleInfos[vIndex].ActivityCount |= 1 << (rayIndex + rayCount);
                         // Debug.Log($"Not Hit[{j}]");
 
-                        // if (_vehicleInfos[i].ActivityCount > 5)           //Arbitrary value | Wait enough for vehicle to pass
                         /*
-                        if ((_vehicleInfos[i].ActivityCount & (1 << 0)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 1)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 2)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 3)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 4)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 5)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 6)) != 0)
+                        debugOnBoarding.Clear();
+                        for (int k = 0; k < 7; k++)
                         {
-                            // Debug.Log($"All Clear");
-                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
-                            _vehicleInfos[i].ActivityCount = 0;
-
-                            RenameVehicle(i);
+                            debugOnBoarding.Append(_vehicleInfos[i].ActivityCount & (1 << k));
+                            debugOnBoarding.Append(", ");
                         }
+                        Debug.Log($"All Clear | j: {j} | ActivityCount: {_vehicleInfos[i].ActivityCount} | debugOnBoarding: {debugOnBoarding}");
                         // */
 
-                        // /*
-                        // debugOnBoarding.Clear();
-                        // for (int k = 0; k < 7; k++)
-                        // {
-                        //     debugOnBoarding.Append(_vehicleInfos[i].ActivityCount & (1 << k));
-                        //     debugOnBoarding.Append(", ");
-                        // }
-                        // Debug.Log($"All Clear | j: {j} | ActivityCount: {_vehicleInfos[i].ActivityCount} | debugOnBoarding: {debugOnBoarding}");
-
-                        if (_vehicleInfos[vIndex].ActivityCount == 31)                  //Sum of all
+                        Debug.Log($"All Clear | vIndex: {rayIndex} | ActivityCount: {_vehicleInfos[vIndex].ActivityCount}");
+                        if (_vehicleInfos[vIndex].ActivityCount == 126)                  //Sum of all
                         {
-                            // Debug.Log($"All Clear | vIndex: {vIndex} | ActivityCount: {_vehicleInfos[vIndex].ActivityCount}");
                             _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
                             _vehicleInfos[vIndex].ActivityCount = 0;
 
                             RenameVehicle(vIndex);
                         }
-                        // */
                     }
                     else
                     {
                         // _vehicleInfos[i].ActivityCount = 0;
-                        _vehicleInfos[vIndex].ActivityCount &= ~(1 << (rayIndex + 1));
+                        _vehicleInfos[vIndex].ActivityCount &= ~(1 << (rayIndex + rayCount));
                         _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.COLLIDED_ONBOARDING;
                         _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
                         // Debug.Log($"Hit[{vIndex}] | hitPoint: {colliderHitInfo.point}");
