@@ -2,6 +2,7 @@
 #define COLLISION_DEBUG_DRAW_1
 
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Parking_A.Gameplay
@@ -241,15 +242,17 @@ namespace Parking_A.Gameplay
                             vehiclePos.z = _roadBoundaries[0];
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
-                            _vehicleName.Clear();
-                            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                                , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                            RenameVehicle(i);
+                            // _vehicleName.Clear();
+                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
+                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] - 1.0f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
                             // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= _roadBoundaries[0] * -1f)
@@ -264,15 +267,17 @@ namespace Parking_A.Gameplay
                             vehiclePos.z = _roadBoundaries[0] * -1f;
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
-                            _vehicleName.Clear();
-                            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                                , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                            RenameVehicle(i);
+                            // _vehicleName.Clear();
+                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
+                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= (_roadBoundaries[0] * -1f) + 1.0f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
                             // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
                         }
                     }
@@ -292,15 +297,17 @@ namespace Parking_A.Gameplay
                             vehiclePos.x = _roadBoundaries[1];
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
-                            _vehicleName.Clear();
-                            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                                , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                            RenameVehicle(i);
+                            // _vehicleName.Clear();
+                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
+                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1] - 1.0f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
                             // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.x <= _roadBoundaries[1] * -1f)
@@ -315,15 +322,17 @@ namespace Parking_A.Gameplay
                             vehiclePos.x = _roadBoundaries[1] * -1f;
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
-                            _vehicleName.Clear();
-                            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                                , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                            RenameVehicle(i);
+                            // _vehicleName.Clear();
+                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
+                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.x <= (_roadBoundaries[1] * -1f) + 1.0f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
                         }
                     }
 
@@ -385,11 +394,12 @@ namespace Parking_A.Gameplay
                             {
                                 _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.FERRY_AROUND;
 
-                                _vehicleName.Clear();
-                                _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                                     _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                                _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                                _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                                RenameVehicle(i);
+                                // _vehicleName.Clear();
+                                // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
+                                //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                                // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                                // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                             }
                             break;
 
@@ -514,11 +524,12 @@ namespace Parking_A.Gameplay
                         else
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.COLLIDED_ONBOARDING;
 
-                        _vehicleName.Clear();
-                        _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                             _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                        _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                        _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                        RenameVehicle(i);
+                        // _vehicleName.Clear();
+                        // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
+                        //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                        // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                        // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
 
                         //Round down position to multiples of _cGridCellSize when stopping the vehicle
                         // vehiclePos = vehicleSpawner.VehiclesSpawned[i].position;
@@ -598,11 +609,12 @@ namespace Parking_A.Gameplay
                             _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
                             _vehicleInfos[i].ActivityCount = 0;
 
-                            _vehicleName.Clear();
-                            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                                 _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
+                            RenameVehicle(i);
+                            // _vehicleName.Clear();
+                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
+                            //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
+                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
+                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                     }
                     else
@@ -616,6 +628,16 @@ namespace Parking_A.Gameplay
                 }
             }
 
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void RenameVehicle(int vehicleIndex)
+        {
+            _vehicleName.Clear();
+            _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[vehicleIndex].name, 0
+                , _vehicleSpawner.VehiclesSpawned[vehicleIndex].name.Length - 2);
+            _vehicleName.Append(((int)_vehicleInfos[vehicleIndex].VehicleStatus).ToString("d2"));
+            _vehicleSpawner.VehiclesSpawned[vehicleIndex].name = _vehicleName.ToString();
         }
     }
 }

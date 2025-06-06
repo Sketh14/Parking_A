@@ -359,10 +359,27 @@ CAR PARKING
         {+} Increasing raycast size for all
         {+} Setting respective bits for raycasts for individual vehicles with +1 offset
 
+- Scripts
+    [=] VehicleController
+        {+} Increasing startPos of collision check raycast
+        {+} Changing road boundary values
+        {+} Adding ONBOARDING_ROAD to VehicleStatus
+        {+} Checking for collision using WaitForVehicle if ONBOARDING_ROAD is set
+
+--------------------------------------------------------------------------------------------------------------
+                                                    06 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleController
+        {+} Separate Renaming vehicle to a function and applying agresive inlining
+
 --------------------------------------------------------------------------------------------------------------
 - [Do] [IMP] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
     [=] Sometimes the collision check does not work for vehicles just about to cross but 
         the vehicle has crossed the On-Road threshold
+    [=] Take some offset from the road boundaries and if crossed then use WaitForVehicle collision check to check 
+        for passing vehicles
+    [=] Use different layermask and enable the check as soon as it touches the last cell
 - [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
 - [DO] [IMP] Boundary Checks
 - [DO] [IMP] Collision Checks
