@@ -373,7 +373,16 @@ CAR PARKING
     [=] VehicleController
         {+} Separate Renaming vehicle to a function and applying agresive inlining
 
+- Scripts
+    [=] VehicleController
+        {+} Taking offset while ONBOARDING_ROAD for early collision check for passing vehicles
+        {+} Increasing width of ONBOARDING_ROAD checks and increasing raycasts, decreasing spacing between them
+
 --------------------------------------------------------------------------------------------------------------
+- [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
+    [=] There is a delay between onboaridng the road and getting no collisions
+        {+} Within the delay, another passing vehicle can come and collide with the current vehicle
+        {+} But it is too late, and the vehicle is already onboarding the road
 - [Do] [IMP] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
     [=] Sometimes the collision check does not work for vehicles just about to cross but 
         the vehicle has crossed the On-Road threshold

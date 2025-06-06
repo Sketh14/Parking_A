@@ -16,6 +16,7 @@ namespace Parking_A.Gameplay
             /// <summary> Left: [-1, 0] | Right: [1, 0] | Up: [0, 1] | Down: [0, -1] </summary>
             public Vector2 InteractedDir;
             public int MarkerIndex;
+            /// <summary> 1: Small | 2: Medium | 3: Long </summary>
             public int VehicleType;
             public int ActivityCount;
 
@@ -53,7 +54,7 @@ namespace Parking_A.Gameplay
         private Func<Vector3, Vector3> _roundPosition;
 
         private const int _cCollisionCheckLayerMask = (1 << 6) | (1 << 7);
-        private const float _cGridCellSize = 0.25f;
+        private const float _cGridHalfCellSize = 0.25f;
 
         private void OnDestroy()
         {
@@ -126,7 +127,6 @@ namespace Parking_A.Gameplay
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
         }
 
-
         public bool slowTime = false;
         void Update()
         {
@@ -145,7 +145,7 @@ namespace Parking_A.Gameplay
         {
             if (!_vehiclesSpawned) return;
             CheckCollisions();
-            WaitForVehicleToPass();
+            OnBoardingRoadCollisionCheck();
         }
 
         private void VehicleSelected(int vehicleID, Vector2 slideDir)
@@ -243,13 +243,9 @@ namespace Parking_A.Gameplay
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
                             RenameVehicle(i);
-                            // _vehicleName.Clear();
-                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] - 1.0f)
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z >=
+                            _roadBoundaries[0] - (_cGridHalfCellSize * 4f) - (_cGridHalfCellSize * _vehicleInfos[i].VehicleType) - 0.1f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -268,13 +264,9 @@ namespace Parking_A.Gameplay
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
                             RenameVehicle(i);
-                            // _vehicleName.Clear();
-                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= (_roadBoundaries[0] * -1f) + 1.0f)
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z <=
+                            (_roadBoundaries[0] * -1f) + (_cGridHalfCellSize * 4f) + (_cGridHalfCellSize * _vehicleInfos[i].VehicleType) + 0.1f)
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -298,13 +290,11 @@ namespace Parking_A.Gameplay
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
                             RenameVehicle(i);
-                            // _vehicleName.Clear();
-                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1] - 1.0f)
+                        // Taking 0.1 extra in consideration of the boundary
+                        // Road Marker is 2 cells away | Last cell is occupied by boundary | Vehicle size offset
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x >=
+                            _roadBoundaries[1] - (_cGridHalfCellSize * 4f) - (_cGridHalfCellSize * _vehicleInfos[i].VehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -323,13 +313,9 @@ namespace Parking_A.Gameplay
                             _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
 
                             RenameVehicle(i);
-                            // _vehicleName.Clear();
-                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0
-                            //     , _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x <= (_roadBoundaries[1] * -1f) + 1.0f)
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x <=
+                            (_roadBoundaries[1] * -1f) + (_cGridHalfCellSize * 4f) + (_cGridHalfCellSize * _vehicleInfos[i].VehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -395,11 +381,6 @@ namespace Parking_A.Gameplay
                                 _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.FERRY_AROUND;
 
                                 RenameVehicle(i);
-                                // _vehicleName.Clear();
-                                // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                                //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                                // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                                // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                             }
                             break;
 
@@ -453,7 +434,7 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += _cGridCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
 
                     _roundPosition = (posToChange) =>
@@ -470,7 +451,7 @@ namespace Parking_A.Gameplay
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += _cGridCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
 
                     _roundPosition = (posToChange) =>
@@ -491,8 +472,8 @@ namespace Parking_A.Gameplay
                 for (int j = 1; j >= -2; j -= 3)
                 {
                     //Using Opposite, as the 2nd component is to be shifted up/down
-                    rayStartPos.x += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
-                    rayStartPos.z += _cGridCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
+                    rayStartPos.x += _cGridHalfCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
+                    rayStartPos.z += _cGridHalfCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
 #if COLLISION_DEBUG_DRAW_1
                     Debug.DrawRay(rayStartPos, rayDir * 0.1f, Color.cyan);
 #endif
@@ -525,11 +506,6 @@ namespace Parking_A.Gameplay
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.COLLIDED_ONBOARDING;
 
                         RenameVehicle(i);
-                        // _vehicleName.Clear();
-                        // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                        //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                        // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                        // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
 
                         //Round down position to multiples of _cGridCellSize when stopping the vehicle
                         // vehiclePos = vehicleSpawner.VehiclesSpawned[i].position;
@@ -542,7 +518,7 @@ namespace Parking_A.Gameplay
             }
         }
 
-        private void WaitForVehicleToPass()
+        private void OnBoardingRoadCollisionCheck()
         {
             Vector3 rayStartPos, rayDir, tempRayPos;
             RaycastHit colliderHitInfo;
@@ -560,7 +536,7 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += (_cGridCellSize + 0.1f) * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
 
                     // rayStartPos.x += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1);
@@ -569,7 +545,7 @@ namespace Parking_A.Gameplay
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += (_cGridCellSize - 0.05f) * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
 
                     // rayStartPos.z += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1);
@@ -579,20 +555,20 @@ namespace Parking_A.Gameplay
                 // Debug.Log($"Checking Vehicle | index: {i} | name: {_vehicleSpawner.VehiclesSpawned[i].name}"
                 // + $" | interactedDir: {_vehicleInfos[i].InteractedDir}"
                 // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
-                for (int j = 1; j > -2; j--)
+                for (int j = 3; j > -4; j--)
                 {
                     tempRayPos = rayStartPos;
-                    tempRayPos.z += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1) * j;
-                    tempRayPos.x += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1) * j;
+                    tempRayPos.z += (_cGridHalfCellSize - 0.15f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1) * j;
+                    tempRayPos.x += (_cGridHalfCellSize - 0.15f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1) * j;
 
 #if COLLISION_DEBUG_DRAW_2
-                    Debug.DrawRay(tempRayPos, rayDir * _cGridCellSize * 2f * _vehicleInfos[i].VehicleType, Color.cyan);
+                    Debug.DrawRay(tempRayPos, rayDir * _cGridHalfCellSize * 2f * _vehicleInfos[i].VehicleType, Color.cyan);
 #endif
                     // Debug.DrawRay(tempRayPos, rayDir * _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), Color.cyan);
 
                     // Raycast straight in front of the vehicle perpendicular to the vehicle with the length of the vehicle plus offset
                     // if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), _cCollisionCheckLayerMask))
-                    if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridCellSize * 2f * _vehicleInfos[i].VehicleType, _cCollisionCheckLayerMask))
+                    if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridHalfCellSize * 2f * _vehicleInfos[i].VehicleType, _cCollisionCheckLayerMask))
                     {
                         // {+} 2 points needed, 1 to the upper side, forward-side and 1 point with offset to the down-side, back-side
                         //     . So as to check if there is any incoming vehicle or not and if the passing vehicle is gone
@@ -610,11 +586,6 @@ namespace Parking_A.Gameplay
                             _vehicleInfos[i].ActivityCount = 0;
 
                             RenameVehicle(i);
-                            // _vehicleName.Clear();
-                            // _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[i].name, 0,
-                            //      _vehicleSpawner.VehiclesSpawned[i].name.Length - 2);
-                            // _vehicleName.Append(((int)_vehicleInfos[i].VehicleStatus).ToString("d2"));
-                            // _vehicleSpawner.VehiclesSpawned[i].name = _vehicleName.ToString();
                         }
                     }
                     else
@@ -631,7 +602,7 @@ namespace Parking_A.Gameplay
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void RenameVehicle(int vehicleIndex)
+        private void RenameVehicle(in int vehicleIndex)
         {
             _vehicleName.Clear();
             _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[vehicleIndex].name, 0
