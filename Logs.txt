@@ -395,7 +395,25 @@ CAR PARKING
 - Scripts
     [=] VehicleController
         {+} Increasing raycast in one direction
+
+- Scripts
+    [=] VehicleController
+        {+} Checking for parallel collisions on the road with oncoming vehicles at turns
+        {+} Only checking once, and if true, setting flag for ONBOARDING_ROAD collision checks
+        {+} Checking in the direction of oncoming vehicle
+- Project
+    [=] Adding Moving_Vehicle layer
+    [=] Turning off collider for road-prefab
+        
 --------------------------------------------------------------------------------------------------------------
+- [DO] [IMP] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
+    to check for the oncoming vehicles, the raycasts for collision checks do not need to move with the vehicle
+        {+} This will also somewhat fix the vehicle still moving, even when there is another oncoming vehicle at turn
+- [DO] [FIX] ONBOARDING_ROAD collisions check
+    [=] If the vehicle is at the corners ans another is approaching from the road, the current vehicle will not be 
+        able to detect it with raycast
+        {+} Might need to sphere check for edge cases
+        {+} Can also keep indexes of moving vehicles and check if any vehicle is besides the current one
 - [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions
         {+} Within the delay, another passing vehicle can come and collide with the current vehicle
