@@ -382,6 +382,10 @@ CAR PARKING
     [=] VehicleController
         {+} Checking if total sum is equal to every raycast being set 
 
+- Scripts
+    [=] VehicleController
+        {+} Fix Check Collisions raycast start position
+            <~> Medium: H|V / Long: H|V
 --------------------------------------------------------------------------------------------------------------
 - [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions
