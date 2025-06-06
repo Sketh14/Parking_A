@@ -378,6 +378,10 @@ CAR PARKING
         {+} Taking offset while ONBOARDING_ROAD for early collision check for passing vehicles
         {+} Increasing width of ONBOARDING_ROAD checks and increasing raycasts, decreasing spacing between them
 
+- Scripts
+    [=] VehicleController
+        {+} Checking if total sum is equal to every raycast being set 
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions

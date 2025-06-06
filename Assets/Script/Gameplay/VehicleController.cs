@@ -127,18 +127,22 @@ namespace Parking_A.Gameplay
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
         }
 
-        public bool slowTime = false;
+        public bool slowTime = false, slowTime2 = false;
         void Update()
         {
             if (!_vehiclesSpawned) return;
             MoveVehicle();
             FerryAroundThePark();
 
-            if (slowTime)
+            if (slowTime || slowTime2)
             {
-                Time.timeScale = 0.15f;
-                slowTime = false;
+                if (slowTime)
+                    Time.timeScale = 0.45f;
+                else
+                    Time.timeScale = 0.15f;
             }
+            else
+                Time.timeScale = 1f;
         }
 
         private void FixedUpdate()
@@ -434,7 +438,7 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.z += (_cGridHalfCellSize - 0.1f) * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
 
                     _roundPosition = (posToChange) =>
@@ -451,7 +455,7 @@ namespace Parking_A.Gameplay
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    rayStartPos.x += (_cGridHalfCellSize - 0.1f) * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
 
                     _roundPosition = (posToChange) =>
@@ -475,9 +479,9 @@ namespace Parking_A.Gameplay
                     rayStartPos.x += _cGridHalfCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
                     rayStartPos.z += _cGridHalfCellSize * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
 #if COLLISION_DEBUG_DRAW_1
-                    Debug.DrawRay(rayStartPos, rayDir * 0.1f, Color.cyan);
+                    Debug.DrawRay(rayStartPos, rayDir * 0.25f, Color.cyan);
 #endif
-                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.1f, _cCollisionCheckLayerMask))
+                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, 0.25f, _cCollisionCheckLayerMask))
                     {
                         {
                             //- Instead of fully stopping when the vehicle encounters another vehicle oncoming on the road
@@ -522,6 +526,8 @@ namespace Parking_A.Gameplay
         {
             Vector3 rayStartPos, rayDir, tempRayPos;
             RaycastHit colliderHitInfo;
+
+            System.Text.StringBuilder debugOnBoarding = new System.Text.StringBuilder();
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
@@ -536,8 +542,12 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
-                    rayDir.z = _vehicleInfos[i].InteractedDir.y;
+                    // rayStartPos.z += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1);
+                    // rayDir.z = _vehicleInfos[i].InteractedDir.y * -1f;
+
+                    rayStartPos.z += _cGridHalfCellSize * 2f * _vehicleInfos[i].InteractedDir.y * _vehicleInfos[i].VehicleType * 3f
+                        - (_cGridHalfCellSize * (_vehicleInfos[i].VehicleType - 1) * _vehicleInfos[i].InteractedDir.y);
+                    rayDir.z = _vehicleInfos[i].InteractedDir.y * -1f;
 
                     // rayStartPos.x += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1);
                     // rayDir.x = -1.0f;
@@ -545,8 +555,12 @@ namespace Parking_A.Gameplay
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
-                    rayDir.x = _vehicleInfos[i].InteractedDir.x;
+                    // rayStartPos.x += _cGridHalfCellSize * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1);
+                    // rayDir.x = _vehicleInfos[i].InteractedDir.x;
+
+                    rayStartPos.x += _cGridHalfCellSize * 2f * _vehicleInfos[i].InteractedDir.x * _vehicleInfos[i].VehicleType * 3f
+                        - (_cGridHalfCellSize * (_vehicleInfos[i].VehicleType - 1) * _vehicleInfos[i].InteractedDir.x);
+                    rayDir.x = _vehicleInfos[i].InteractedDir.x * -1f;
 
                     // rayStartPos.z += (_cGridCellSize + 0.1f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1);
                     // rayDir.z = -1.0f;
@@ -558,28 +572,33 @@ namespace Parking_A.Gameplay
                 for (int j = 3; j > -4; j--)
                 {
                     tempRayPos = rayStartPos;
-                    tempRayPos.z += (_cGridHalfCellSize - 0.15f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1) * j;
-                    tempRayPos.x += (_cGridHalfCellSize - 0.15f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1) * j;
+                    tempRayPos.z += (_cGridHalfCellSize - 0.08f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * (_vehicleInfos[i].VehicleType + 1) * j;
+                    tempRayPos.x += (_cGridHalfCellSize - 0.08f) * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * (_vehicleInfos[i].VehicleType + 1) * j;
 
 #if COLLISION_DEBUG_DRAW_2
-                    Debug.DrawRay(tempRayPos, rayDir * _cGridHalfCellSize * 2f * _vehicleInfos[i].VehicleType, Color.cyan);
+                    Debug.DrawRay(tempRayPos, rayDir * _cGridHalfCellSize * 3.5f * _vehicleInfos[i].VehicleType, Color.cyan);
 #endif
                     // Debug.DrawRay(tempRayPos, rayDir * _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), Color.cyan);
 
                     // Raycast straight in front of the vehicle perpendicular to the vehicle with the length of the vehicle plus offset
                     // if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), _cCollisionCheckLayerMask))
-                    if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridHalfCellSize * 2f * _vehicleInfos[i].VehicleType, _cCollisionCheckLayerMask))
+                    if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridHalfCellSize * 3.5f * _vehicleInfos[i].VehicleType, _cCollisionCheckLayerMask))
                     {
                         // {+} 2 points needed, 1 to the upper side, forward-side and 1 point with offset to the down-side, back-side
                         //     . So as to check if there is any incoming vehicle or not and if the passing vehicle is gone
                         // _vehicleInfos[i].ActivityCount++;
-                        _vehicleInfos[i].ActivityCount |= 1 << (j + 1);
-                        // Debug.Log($"Not Hit[{j}]");
+                        _vehicleInfos[i].ActivityCount |= 1 << (j + 3);
+                        Debug.Log($"Not Hit[{j}]");
 
                         // if (_vehicleInfos[i].ActivityCount > 5)           //Arbitrary value | Wait enough for vehicle to pass
+                        /*
                         if ((_vehicleInfos[i].ActivityCount & (1 << 0)) != 0 &&
                             (_vehicleInfos[i].ActivityCount & (1 << 1)) != 0 &&
-                            (_vehicleInfos[i].ActivityCount & (1 << 2)) != 0)
+                            (_vehicleInfos[i].ActivityCount & (1 << 2)) != 0 &&
+                            (_vehicleInfos[i].ActivityCount & (1 << 3)) != 0 &&
+                            (_vehicleInfos[i].ActivityCount & (1 << 4)) != 0 &&
+                            (_vehicleInfos[i].ActivityCount & (1 << 5)) != 0 &&
+                            (_vehicleInfos[i].ActivityCount & (1 << 6)) != 0)
                         {
                             // Debug.Log($"All Clear");
                             _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
@@ -587,6 +606,26 @@ namespace Parking_A.Gameplay
 
                             RenameVehicle(i);
                         }
+                        // */
+
+                        // /*
+                        // debugOnBoarding.Clear();
+                        // for (int k = 0; k < 7; k++)
+                        // {
+                        //     debugOnBoarding.Append(_vehicleInfos[i].ActivityCount & (1 << k));
+                        //     debugOnBoarding.Append(", ");
+                        // }
+                        // Debug.Log($"All Clear | j: {j} | ActivityCount: {_vehicleInfos[i].ActivityCount} | debugOnBoarding: {debugOnBoarding}");
+
+                        if (_vehicleInfos[i].ActivityCount == 127)                  //Sum of all
+                        {
+                            Debug.Log($"All Clear | j: {j} | ActivityCount: {_vehicleInfos[i].ActivityCount}");
+                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
+                            _vehicleInfos[i].ActivityCount = 0;
+
+                            RenameVehicle(i);
+                        }
+                        // */
                     }
                     else
                     {
@@ -594,7 +633,7 @@ namespace Parking_A.Gameplay
                         _vehicleInfos[i].ActivityCount &= ~(1 << (j + 1));
                         _vehicleInfos[i].VehicleStatus |= VehicleStatus.COLLIDED_ONBOARDING;
                         _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
-                        // Debug.Log($"Hit[{j}] | hitPoint: {colliderHitInfo.point}");
+                        Debug.Log($"Hit[{j}] | hitPoint: {colliderHitInfo.point}");
                     }
                 }
             }
