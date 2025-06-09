@@ -423,6 +423,10 @@ CAR PARKING
         {+} Increasing raycast for corner check
         {+} Persistent check if corner detected, else only once
 
+- Scripts
+    [=] VehicleController
+        {+} Only checking collisions inside the parking | Keeping OnBoarding separate
+
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle

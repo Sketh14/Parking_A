@@ -36,6 +36,7 @@ namespace Parking_A.Gameplay
             ONBOARDING_ROAD = 1 << 5,
             CORNER_COLLIDED = 1 << 6,
             CORNER_FREE = 1 << 7,
+            // COLLIDED_PARKING = 1 << 8,
             COLLIDED_ONBOARDING = 1 << 8,
         }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
@@ -435,8 +436,8 @@ namespace Parking_A.Gameplay
             {
                 //Check if the vehicle has been interacted with or have reached the road
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0
-                    || (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0
-                    || (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) != 0)
+                    || (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0)
+                    // || (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_PARKING) != 0)
                     continue;
 
                 rayStartPos = _vehicleSpawner.VehiclesSpawned[i].position;
@@ -514,10 +515,10 @@ namespace Parking_A.Gameplay
                         //     + $" | zPos: {_vehicleSpawner.VehiclesSpawned[i].position.z} | vehicleStatus: {vehicleStatus}");
 
                         //Check if the vehicle is still inside parking
-                        if (vehicleStatus == 0)
-                            _vehicleInfos[i].VehicleStatus = 0;
-                        else
-                            _vehicleInfos[i].VehicleStatus |= VehicleStatus.COLLIDED_ONBOARDING;
+                        // if (vehicleStatus == 0) 
+                        _vehicleInfos[i].VehicleStatus = 0;
+                        // else
+                        // _vehicleInfos[i].VehicleStatus |= VehicleStatus.COLLIDED_PARKING;
 
                         RenameVehicle(i);
 
