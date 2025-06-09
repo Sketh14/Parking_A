@@ -417,6 +417,12 @@ CAR PARKING
         {+} Flipping raycasts according to Interaction-Direction
         {+} Making persistent corner-collision checks
 
+- Scripts
+    [=] VehicleController
+        {+} Adding CORNER_FREE to VehicleStatus
+        {+} Increasing raycast for corner check
+        {+} Persistent check if corner detected, else only once
+
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
