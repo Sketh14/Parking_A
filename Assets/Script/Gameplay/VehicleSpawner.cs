@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using Random = UnityEngine.Random;
-using Math = System.Math;
 using Parking_A.Global;
-using System.Linq.Expressions;
 
 namespace Parking_A.Gameplay
 {
@@ -51,7 +49,6 @@ namespace Parking_A.Gameplay
             Debug.Log($"Spawning Vehicles");
 
             Random.InitState(123456);
-            _vehiclesSpawned = new List<Transform>();
             PoolManager.PoolType vehicleType;
             Vector3 spawnPos = Vector3.zero, spawnRot = Vector3.zero, halfExtents = Vector3.zero;
             // bool lotFull = false;

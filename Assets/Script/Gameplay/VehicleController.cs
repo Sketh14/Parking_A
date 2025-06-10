@@ -43,7 +43,7 @@ namespace Parking_A.Gameplay
 
         // private Transform[] _vehicleTransforms;
         private VehicleInfo[] _vehicleInfos;
-        private int _vehicleSetID;
+        // private int _vehicleSetID;
 
         private const float _cVehicleSpeedMultiplier = 5f;
         private readonly float[] _roadBoundaries = { 11.1f, 6.1f };                 //Vertical | Horizontal
@@ -91,11 +91,13 @@ namespace Parking_A.Gameplay
             _vehicleSpawner = new VehicleSpawner();
 
             byte[] boundaryData = null;
+            GameManager.Instance.OnEnvironmentSpawned += (values) => { boundaryData = values; };
 
             GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
             try
             {
-                await envSpawner.SpawnBoundary((values) => boundaryData = values);
+                // await envSpawner.SpawnBoundary((values) => boundaryData = values);
+                await envSpawner.SpawnBoundary();
             }
             //Cannot initialize boundary | Stop level generation, show some message and restart
             catch (Exception ex)
@@ -114,7 +116,11 @@ namespace Parking_A.Gameplay
                     Debug.LogError($"Boundary Data is null");
                     return;
                 }
-                _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) => InitializeVehicleData(vehicleTypes));
+                _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) =>
+                {
+                    InitializeVehicleData(vehicleTypes);
+                    GameManager.Instance.OnVehiclesSpawned?.Invoke();
+                });
             }
             //Cannot initialize vehicles | Stop level generation, show some message and restart
             catch (Exception ex)
@@ -133,10 +139,13 @@ namespace Parking_A.Gameplay
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
         }
 
+#if DEBUG_SLOW_1
         public bool slowTime = false, slowTime2 = false;
+#endif
         void Update()
         {
-            if (!_vehiclesSpawned) return;
+            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0) return;
+
             MoveVehicle();
             FerryAroundThePark();
 
@@ -155,7 +164,8 @@ namespace Parking_A.Gameplay
 
         private void FixedUpdate()
         {
-            if (!_vehiclesSpawned) return;
+            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0) return;
+
             CheckCollisions();
             OnBoardingRoadCollisionCheck();
             CornerVehicleCollisionCheck();
@@ -171,7 +181,7 @@ namespace Parking_A.Gameplay
                     && (_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0)
                 {
                     // Debug.Log($"Found Vehicle! | Vehicle ID : {vehicleID}");
-                    _vehicleSetID = i;
+                    // _vehicleSetID = i;
                     // vehicleInfos[i].hasInteracted = true;
 
                     //Validate if the slide direction is matching the vehicle's orientation

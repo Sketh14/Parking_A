@@ -434,6 +434,15 @@ CAR PARKING
     [=] VehicleController
         {+} Checking corner again if the vehicle collides with another before exiting the corner
 
+- Scripts
+    [=] NPCController
+        {+} Template for Controller
+    [=] NPCSpawner
+        {+} Separate spawner for spawning NPCs
+    [=] VehicleController
+        {+} Adding EnvironmentSpawned callback
+    [=] GameManager
+        {+} Adding action for VehicleSpawned and EnvironmentSpawned
 
 
 --------------------------------------------------------------------------------------------------------------

@@ -24,5 +24,7 @@ namespace Parking_A.Gameplay
         public string RandomSeed;
         public UniversalConstant.GameStatus GameStatus;
         public System.Action<int, Vector2> OnSelect;
+        public System.Action OnVehiclesSpawned;
+        public System.Action<byte[]> OnEnvironmentSpawned;
     }
 }
