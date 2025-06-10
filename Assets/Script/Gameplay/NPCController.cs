@@ -27,7 +27,7 @@ namespace Parking_A.Gameplay
             _npcSpawner = new NPCSpawner();
             GameManager.Instance.OnEnvironmentSpawned += (boundaryData) =>
             {
-                // _npcSpawner.SpawnNpcs(boundaryData, () => { });
+                _npcSpawner.SpawnNpcs(boundaryData, () => { });
             };
 
         }

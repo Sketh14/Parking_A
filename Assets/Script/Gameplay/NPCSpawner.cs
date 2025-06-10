@@ -1,4 +1,4 @@
-#define BOUNDARY_SWAP_DEBUG
+// #define BOUNDARY_SWAP_DEBUG
 
 using UnityEngine;
 
@@ -17,7 +17,15 @@ namespace Parking_A.Gameplay
         private const int _totalNPCsCountC = 4;
         private const int _minGapC = 3;
 
-        public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        /*
+        public NPCSpawner()
+        {
+            // TestSwapping();
+            TestSwapping2();
+        }
+        // */
+
+        public async void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         {
             // Would not need a whole gridmap as we already have the boundary data
             // Find holes in the boundary
@@ -36,23 +44,66 @@ namespace Parking_A.Gameplay
             System.Text.StringBuilder debugBoundary = new System.Text.StringBuilder();
 #endif
 
-#if BOUNDARY_SWAP_DEBUG
-            debugBoundary.Clear();
-            for (int i = boundaryData.Length - 1; i >= 0; i--)
-                debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
-            Debug.Log($"Before Swap : {debugBoundary}");
-#endif
-
             byte tempBData = 255;
-            // First swap Right | Left, then swap Right | Down
-            for (int i = UniversalConstant._GridXC * 2; i < UniversalConstant._GridYC; i--)
+            // First Flip Left
+            for (int i = UniversalConstant._GridXC * 2, j = 1;
+                i < ((UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) / 2); i++, j++)
             {
-                boundaryData[i] = boundaryData[i - UniversalConstant._GridYC];
+                tempBData = boundaryData[i];
+                boundaryData[i] = boundaryData[(UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) - j];
+                boundaryData[(UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) - j] = tempBData;
+            }
+
+            // Flip Down
+            for (int i = UniversalConstant._GridXC, j = 1; i < UniversalConstant._GridXC + (UniversalConstant._GridXC / 2); i++, j++)
+            {
+                tempBData = boundaryData[i];
+                boundaryData[i] = boundaryData[(UniversalConstant._GridXC * 2) - j];
+                boundaryData[(UniversalConstant._GridXC * 2) - j] = tempBData;
+            }
+
+            // First swap Right | Left
+            for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+            {
+                tempBData = boundaryData[i];
+                boundaryData[i] = boundaryData[i + (UniversalConstant._GridYC - 2)];
+                boundaryData[i + (UniversalConstant._GridYC - 2)] = tempBData;
             }
 
 #if BOUNDARY_SWAP_DEBUG
             debugBoundary.Clear();
-            for (int i = boundaryData.Length - 1; i >= 0; i--)
+            for (int i = UniversalConstant._GridXC; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+                debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
+            Debug.Log($"Before Swap : {debugBoundary}");
+#endif
+
+            // Then swap Right | Down
+            // Since Upper Limit is even, then this will work, else need to swap the first items also within themselves
+            /*
+            //  For odd cases
+                1 | 2 | 3           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c
+                a | b | c | d | e       1 | 2 | 3 | d | e       d | 2 | 3 | 1 | e       d | e | 3 | 1 | 2       d | e | 2 | 1 | 3       d | e | 1 | 2 | 3
+            */
+            /*for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+            {
+                tempBData = boundaryData[i];
+                boundaryData[i] = boundaryData[i - UniversalConstant._GridXC];
+                boundaryData[i - UniversalConstant._GridXC] = tempBData;
+            }*/
+
+            for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+            {
+                for (int j = i; j > i - UniversalConstant._GridXC; j--)
+                {
+                    tempBData = boundaryData[j];
+                    boundaryData[j] = boundaryData[j - 1];
+                    boundaryData[j - 1] = tempBData;
+                }
+            }
+
+#if BOUNDARY_SWAP_DEBUG
+            debugBoundary.Clear();
+            for (int i = UniversalConstant._GridXC; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) + 10; i++)
                 debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
             Debug.Log($"After Swap : {debugBoundary}");
 #endif
@@ -95,5 +146,81 @@ namespace Parking_A.Gameplay
                 // await Task.Yield();
             }
         }
+
+        private void TestSwapping()
+        {
+
+            System.Text.StringBuilder debugBoundary = new System.Text.StringBuilder();
+
+            char tempBData = ' ';
+
+            char[] testArr = new char[] { '1', '2', '3', '4', '5', '6', '7', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' };
+
+            int interval = 7;
+            debugBoundary.Clear();
+            for (int i = 0; i < testArr.Length; i++)
+                debugBoundary.Append($"{i}[{testArr[i]}] ,");
+            Debug.Log($"Before Swap : {debugBoundary}");
+
+            // Then swap Right | Down
+            // Since Upper Limit is even, then this will work, else need to swap the first items also within themselves
+            /*
+            //  For odd cases
+                1 | 2 | 3           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c
+                a | b | c | d | e       1 | 2 | 3 | d | e       d | 2 | 3 | 1 | e       d | e | 3 | 1 | 2       d | e | 2 | 1 | 3       d | e | 1 | 2 | 3
+            */
+            for (int i = interval; i < testArr.Length; i++)
+            {
+                for (int j = i; j > i - interval; j--)
+                {
+
+                    tempBData = testArr[j - 1];
+                    testArr[j - 1] = testArr[j];
+                    testArr[j] = tempBData;
+                }
+            }
+
+            debugBoundary.Clear();
+            for (int i = 0; i < testArr.Length; i++)
+                debugBoundary.Append($"{i}[{testArr[i]}] ,");
+            Debug.Log($"After Swap : {debugBoundary}");
+        }
+
+        private void TestSwapping2()
+        {
+
+            System.Text.StringBuilder debugBoundary = new System.Text.StringBuilder();
+
+            char tempBData = ' ';
+
+            char[] testArr = new char[] { '1', '2', '3', '4', '5', '6', '7', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' };
+
+            int interval = 7;
+            debugBoundary.Clear();
+            for (int i = 0; i < testArr.Length; i++)
+                debugBoundary.Append($"{i}[{testArr[i]}] ,");
+            Debug.Log($"Before Swap : {debugBoundary}");
+
+            // Then swap Right | Down
+            // Since Upper Limit is even, then this will work, else need to swap the first items also within themselves
+            /*
+            //  For odd cases
+                1 | 2 | 3           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c           ->  a | b | c
+                a | b | c | d | e       1 | 2 | 3 | d | e       d | 2 | 3 | 1 | e       d | e | 3 | 1 | 2       d | e | 2 | 1 | 3       d | e | 1 | 2 | 3
+            */
+
+            for (int i = 0, j = 1; i < testArr.Length / 2; i++, j++)
+            {
+                tempBData = testArr[i];
+                testArr[i] = testArr[testArr.Length - j];
+                testArr[testArr.Length - j] = tempBData;
+            }
+
+            debugBoundary.Clear();
+            for (int i = 0; i < testArr.Length; i++)
+                debugBoundary.Append($"{i}[{testArr[i]}] ,");
+            Debug.Log($"After Swap : {debugBoundary}");
+        }
+
     }
 }

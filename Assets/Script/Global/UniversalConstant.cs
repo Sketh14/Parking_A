@@ -8,5 +8,6 @@ namespace Parking_A.Global
         public enum GameStatus { BOUNDARY_GENERATION = 0, VEHICLE_SPAWNING = 1 << 0, LEVEL_GENERATED = 1 << 1 }
 
         public const byte _GridXC = 22, _GridYC = 42;
+        public const float _CellHalfSizeC = 0.25f;
     }
 }
