@@ -444,6 +444,9 @@ CAR PARKING
     [=] GameManager
         {+} Adding action for VehicleSpawned and EnvironmentSpawned
 
+- Scripts
+    [=] Fixing constants | naming
+
 
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
