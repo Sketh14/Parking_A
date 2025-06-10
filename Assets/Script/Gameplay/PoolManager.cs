@@ -6,7 +6,7 @@ namespace Parking_A.Gameplay
 {
     public class PoolManager : MonoBehaviour
     {
-        public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY }
+        public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY, NPC }
 
         #region Singleton
         private static PoolManager _instance;

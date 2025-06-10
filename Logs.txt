@@ -447,7 +447,15 @@ CAR PARKING
 - Scripts
     [=] Fixing constants | naming
 
-
+- Scripts
+    [=] PoolManager
+        {+} Adding NPC to PoolType
+    [=] VehicleController
+        {+} Separating VehicleSpawner with EnvironmentSpawned callback
+- Project
+    [=] NPC prefab placeholder
+- MainGameplay Scene
+    [=] Adding Npc prefab to PoolManager
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle

@@ -65,11 +65,14 @@ namespace Parking_A.Gameplay
         private void OnDestroy()
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
+            GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
         }
 
         private void Start()
         {
             GameManager.Instance.OnSelect += VehicleSelected;
+            GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
+
 
             InitializeLevel();
             _vehicleName = new System.Text.StringBuilder();
@@ -90,9 +93,6 @@ namespace Parking_A.Gameplay
             EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             _vehicleSpawner = new VehicleSpawner();
 
-            byte[] boundaryData = null;
-            GameManager.Instance.OnEnvironmentSpawned += (values) => { boundaryData = values; };
-
             GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
             try
             {
@@ -104,7 +104,10 @@ namespace Parking_A.Gameplay
             {
                 Debug.LogException(ex);
             }
+        }
 
+        private async void CallVehicleSpawner(byte[] boundaryData)
+        {
             GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNING;
             try
             {
@@ -116,7 +119,7 @@ namespace Parking_A.Gameplay
                     Debug.LogError($"Boundary Data is null");
                     return;
                 }
-                _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) =>
+                await _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) =>
                 {
                     InitializeVehicleData(vehicleTypes);
                     GameManager.Instance.OnVehiclesSpawned?.Invoke();

@@ -11,8 +11,8 @@ namespace Parking_A.Gameplay
 
         }
 
-        [SerializeField] private Transform[] _npcTransforms;
-        [SerializeField] private NPCInfo[] _npcInfos;
+        private Transform[] _npcTransforms;
+        private NPCInfo[] _npcInfos;
 
         private NPCSpawner _npcSpawner;
 
@@ -24,11 +24,12 @@ namespace Parking_A.Gameplay
 
         private void InitializeNPCs()
         {
-            byte[] boundaryData = null;
-            GameManager.Instance.OnEnvironmentSpawned += (values) => { boundaryData = values; };
-
             _npcSpawner = new NPCSpawner();
-            _npcSpawner.SpawnNpcs(boundaryData, () => { });
+            GameManager.Instance.OnEnvironmentSpawned += (boundaryData) =>
+            {
+                // _npcSpawner.SpawnNpcs(boundaryData, () => { });
+            };
+
         }
 
         private void InitializeNPCData(in byte[] npcData)

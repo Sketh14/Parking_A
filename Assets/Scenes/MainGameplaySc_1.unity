@@ -350,6 +350,7 @@ MonoBehaviour:
   - {fileID: 2146036505}
   - {fileID: 3604490752355796290, guid: cb8743b4c7856884790bdcf1ca6f4f2f, type: 3}
   - {fileID: 3604490752355796290, guid: bdba0e294f045854cb57566bd3ea5d36, type: 3}
+  - {fileID: 9166389849956346350, guid: 57315a3025701fb45a49c21959f76f9b, type: 3}
 --- !u!1 &192373847
 GameObject:
   m_ObjectHideFlags: 0
@@ -950,6 +951,7 @@ Transform:
   - {fileID: 2139412490}
   - {fileID: 1504851106}
   - {fileID: 140670668}
+  - {fileID: 2025200080}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &695690712
@@ -2697,6 +2699,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RandomSeed: 
   GameStatus: 0
+--- !u!1 &2025200079
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2025200080}
+  - component: {fileID: 2025200081}
+  m_Layer: 0
+  m_Name: NPCController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2025200080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2025200079}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 561823399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2025200081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2025200079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 475fb149010c42f40b80ab317c6cd5a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2089869162
 GameObject:
   m_ObjectHideFlags: 0
