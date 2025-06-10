@@ -428,6 +428,15 @@ CAR PARKING
         {+} Only checking collisions inside the parking | Keeping OnBoarding separate
 
 --------------------------------------------------------------------------------------------------------------
+                                                    10 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleController
+        {+} Checking corner again if the vehicle collides with another before exiting the corner
+
+
+
+--------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
 - [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,

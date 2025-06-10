@@ -614,6 +614,7 @@ namespace Parking_A.Gameplay
                 {
                     // Debug.Log($"All Clear | vIndex: {rayIndex} | hitCount: {hitCount}");
                     _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
+                    _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
 
                     RenameVehicle(vIndex);
                 }
@@ -635,6 +636,14 @@ namespace Parking_A.Gameplay
 
             for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
             {
+                // If the vehicle has collided with oncoming vehicle before escaping the corner, then unset the flag
+                // and check if the corner is free again or not
+                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) != 0
+                    && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.CORNER_FREE) != 0)
+                {
+                    _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.CORNER_FREE;
+                }
+
                 //Check if the vehicle has been interacted with or have reached the road
                 if (((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
                     && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_ROAD) == 0)
