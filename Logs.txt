@@ -404,8 +404,42 @@ CAR PARKING
 - Project
     [=] Adding Moving_Vehicle layer
     [=] Turning off collider for road-prefab
-        
+
 --------------------------------------------------------------------------------------------------------------
+                                                    09 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleController
+        {+} Fixing corner collision checks
+        {+} Inreasing raycast length multiplier
+        {+} Inreasing raycast according to vehicle-type
+        {+} Decreasing ONBOARDING_ROAD collision check length
+        {+} Flipping raycasts according to Interaction-Direction
+        {+} Making persistent corner-collision checks
+
+- Scripts
+    [=] VehicleController
+        {+} Adding CORNER_FREE to VehicleStatus
+        {+} Increasing raycast for corner check
+        {+} Persistent check if corner detected, else only once
+
+- Scripts
+    [=] VehicleController
+        {+} Only checking collisions inside the parking | Keeping OnBoarding separate
+
+--------------------------------------------------------------------------------------------------------------
+- [FIX] Increase corner raycasts
+    [=] When a vehicle is just behind, then the raycast will not detect a vehicle
+- [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,
+    then, if the 2nd vehicle is coming, it will collide with the current vehicle, as the current vehicle will not further
+    check for corner collisions
+    [=] Maybe persistent check for corner-collisions
+- [FIXED] [IMP] On letting a vehicle to pass from the front, if the second vehicle is not that far behind then the current
+    vehile wil collide with the 2nd vehicle and get stuck
+    [=] Increasing raycast to down?
+    [=] Bottom-Left needs to have raycast flipped
+- [FIXED] [IMP] On Corner checks, not all raycasts work
+    [=] Fixed, checking hitCount after the loop
 - [DO] [IMP] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
     to check for the oncoming vehicles, the raycasts for collision checks do not need to move with the vehicle
         {+} This will also somewhat fix the vehicle still moving, even when there is another oncoming vehicle at turn
