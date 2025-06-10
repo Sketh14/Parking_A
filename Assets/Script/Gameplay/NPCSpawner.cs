@@ -1,4 +1,5 @@
 // #define BOUNDARY_SWAP_DEBUG
+// #define NPC_SPAWN_TEST
 
 using UnityEngine;
 
@@ -25,7 +26,8 @@ namespace Parking_A.Gameplay
         }
         // */
 
-        public async void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        // public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         {
             // Would not need a whole gridmap as we already have the boundary data
             // Find holes in the boundary
@@ -107,40 +109,86 @@ namespace Parking_A.Gameplay
                 debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
             Debug.Log($"After Swap : {debugBoundary}");
 #endif
-            return;
 
             int npcCount = 0, emptyCell = 0;
+            GameObject npc;
+            Vector3 spawnPos;
+
+#if NPC_SPAWN_TEST
+            // int tempIndex = 52 - 22;         //Horizontal
+            int tempIndex = 85 - 84;            //Vertical
+            npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
+            npc.name = $"NPC[{tempIndex}]";
+            spawnPos = Vector3.zero;
+
+            //Horizontal
+            // spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f 
+            //      + (tempIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+            // spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+
+            //Vertical
+            spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+            spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                    - (tempIndex % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+
+            npc.transform.position = spawnPos;
+            npc.transform.rotation = Quaternion.identity;
+#endif
+
+            // return;
+
             // Top / Bottom grid cells
-            for (int bIndex = 0; bIndex < UniversalConstant._GridXC * 2; bIndex++)
+            for (int bIndex = 0; bIndex < boundaryData.Length; bIndex++)
             {
                 //Check if the cell is empty
                 if (boundaryData[bIndex] != 0)
+                {
+                    emptyCell = 0;
                     continue;
+                }
 
                 emptyCell++;
+                spawnPos = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner
                 if (emptyCell >= _minGapC)
                 {
+                    //Record current index somewhere to be used later?
+                    emptyCell = 0;
 
-                }
+                    npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
+                    npc.name = $"NPC[{bIndex}]";
 
-                // await Task.Yield();
-            }
+                    // if (bIndex >= 84)
+                    if (bIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                    {
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                            - ((bIndex - (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                            % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                    }
+                    else if (bIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
+                    {
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
+                            + ((bIndex - UniversalConstant._GridXC) % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+                    }
+                    else if (bIndex >= UniversalConstant._GridXC)
+                    {
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                            - ((bIndex - UniversalConstant._GridXC)
+                            % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                    }
+                    else
+                    {
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
+                            + (bIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
+                    }
 
-            // Left / Right grid cells
-            for (int bDataIndex = UniversalConstant._GridXC * 2;
-                bDataIndex < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
-                bDataIndex++)
-            {
-                //Check if the cell is empty
-                if (boundaryData[bDataIndex] != 0)
-                    continue;
-
-                emptyCell++;
-                if (emptyCell >= _minGapC)
-                {
-
+                    npc.transform.position = spawnPos;
+                    npc.transform.rotation = Quaternion.identity;
                 }
 
                 // await Task.Yield();

@@ -460,12 +460,18 @@ CAR PARKING
 - Scripts
     [=] EnvironmentSpawner
         {+} Local const for better readability somewhat
-    [=] NPC Spawner
+    [=] NPCSpawner
         {+} Arranging boundary in clockwise direction for finding connecting gaps
     [=] UniversalConstant
         {+} Adding half-cell size constant
     [=] VehicleController
         {+} Replacing half-cell size local ref with UniversalConstant ref
+
+- Scripts
+    [=] NPCSpawner
+        {+} Spawn position logic according to boundary index
+    [=] VehicleSpawner
+        {+} Replacing values with references 
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
