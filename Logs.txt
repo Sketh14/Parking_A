@@ -472,9 +472,8 @@ CAR PARKING
         {+} Spawn position logic according to boundary index
     [=] VehicleSpawner
         {+} Replacing values with references 
-
 --------------------------------------------------------------------------------------------------------------
-                                                    10 JUNE 2025
+                                                    11 JUNE 2025
 --------------------------------------------------------------------------------------------------------------
 - Scripts
     [=] NPCSpawner
@@ -485,8 +484,28 @@ CAR PARKING
         {+} Adding NpcStatus enum
         {+} Only spawning at 3 empty cells gap and resetting after hitting occupied one
         {+} Setting NpcStatus for every spawn direction/orientation?
+        
+- Scripts
+    [=] Pool Scriptable-Object
+        {+} Contains poolType and prefab
+    [=] UniversalConstant
+        {+} Shifting PoolType here
+    [=] EnvironmentSpawner | VehicleSpawner
+        {+} Updating PoolType references
+    [=] PoolManager
+        {+} Replacing prefabs with Pool_SO logic
+- Scene
+    [=] Creating asset for Vehicles/Boundary in SO
+
 
 --------------------------------------------------------------------------------------------------------------
+- [DO] Make scriptable for vehicles
+- [DO] In-game currency
+    [=] Powers to utilize in-game currency
+    [=] Shrink vehicle to different size vehicle
+    [=] Remove vehicle
+- [DO] Shop for skins
+- [DO] WHeel maybe if possible 
 - [DO] [MAYBE IMP] Asss weightage to boundary spawner
     [=] Consistent empty gaps or at least feel like consistent
 - [FIX] Increase corner raycasts

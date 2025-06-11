@@ -49,7 +49,7 @@ namespace Parking_A.Gameplay
             Debug.Log($"Spawning Vehicles");
 
             Random.InitState(123456);
-            PoolManager.PoolType vehicleType;
+            UniversalConstant.PoolType vehicleType;
             Vector3 spawnPos = Vector3.zero, spawnRot = Vector3.zero, halfExtents = Vector3.zero;
             // bool lotFull = false;
             float xPos = 0f, zPos = 0f, yRot = 0f;
@@ -74,7 +74,7 @@ namespace Parking_A.Gameplay
                 zPos = Random.Range(-1f, 1f) * (_borderCoordinates[1] - 1f);
                 yRot = (Random.Range(0f, 1f) > 0.7f) ? 90f : 0f;
 
-                vehicleType = (PoolManager.PoolType)Random.Range(0, (int)PoolManager.PoolType.VEHICLE_L);
+                vehicleType = (UniversalConstant.PoolType)Random.Range(0, (int)UniversalConstant.PoolType.VEHICLE_L);
 
                 //Check for vehicle collisions
                 #region OverlapCapsuleNonAlloc
@@ -441,7 +441,7 @@ namespace Parking_A.Gameplay
                                 gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * UniversalConstant._GridXC)] = (byte)vehicleType;
                         }
 
-                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);
                         _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
@@ -527,7 +527,7 @@ namespace Parking_A.Gameplay
                                 gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant._GridXC)] = (byte)vehicleType;
                         }
 
-                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                        _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);
                         _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
@@ -584,7 +584,7 @@ namespace Parking_A.Gameplay
                 spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (gridMapIndex / UniversalConstant._GridXC * 0.5f) - 0.25f;   // + (UniversalConstant._cGridY / 4) - 0.5f;
 
 
-                _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(PoolManager.PoolType)vehicleType].Get().transform);
+                _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);
                 _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]_{vehicleCount}";
                 _vehiclesSpawned[vehicleCount].position = spawnPos;
                 _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
@@ -594,7 +594,7 @@ namespace Parking_A.Gameplay
             }
         }
 
-        private void CheckIfValidPlacement(int topLeftIndex, PoolManager.PoolType vehicleType)
+        private void CheckIfValidPlacement(int topLeftIndex, UniversalConstant.PoolType vehicleType)
         {
         }
     }
