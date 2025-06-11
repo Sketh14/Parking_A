@@ -12,11 +12,22 @@ namespace Parking_A.Gameplay
 {
     public class NPCSpawner
     {
+        internal enum NPCStatus
+        {
+            SPAWNED_HORIZONTAL_UP = 0,
+            SPAWNED_VERTICAL_RIGHT = 1 << 0,
+            SPAWNED_HORIZONTAL_DOWN = 1 << 1,
+            SPAWNED_VERTICAL_LEFT = 1 << 2,
+            TOTAL_SPAWNED = 1 << 3,
+        }
+
         private List<Transform> _npcsSpawned;
         public List<Transform> NPCsSpawned { get => _npcsSpawned; }
 
+        private NPCStatus _npcSpawnStatus = 0;
+
         private const int _totalNPCsCountC = 4;
-        private const int _minGapC = 3;
+        private const int _minGapC = 4;
 
         /*
         public NPCSpawner()
@@ -142,7 +153,7 @@ namespace Parking_A.Gameplay
             // return;
 
             // Top / Bottom grid cells
-            for (int bIndex = 0; bIndex < boundaryData.Length - 1; bIndex++)
+            for (int bIndex = 0; bIndex < boundaryData.Length - 1 && (_npcSpawnStatus & NPCStatus.TOTAL_SPAWNED) == 0; bIndex++)
             {
                 //Check if the cell is empty
                 if (boundaryData[bIndex] != 0)
@@ -155,44 +166,52 @@ namespace Parking_A.Gameplay
                 spawnPos = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner
-                if (emptyCell >= _minGapC)
+                if (emptyCell == _minGapC)
                 {
-                    //Record current index somewhere to be used later?
-                    emptyCell = 0;
+                    // Record current index somewhere to be used later?
+                    // emptyCell = 0;
 
                     npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
                     npc.name = $"NPC[{bIndex}]";
 
                     // Vertical | Left [84 - 125]
-                    if (bIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                    if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_LEFT) == 0
+                        && bIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
                             + ((bIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                        _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
+                        _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
                     }
                     // Horizontal | Down [62 - 83]
-                    else if (bIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
+                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_DOWN) == 0
+                        && bIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
                             - ((bIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
                             % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+                        _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
                     }
                     // Vertical | Right [22 - 61]
-                    else if (bIndex >= UniversalConstant._GridXC)
+                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_RIGHT) == 0
+                        && bIndex >= UniversalConstant._GridXC)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
                             - ((bIndex - UniversalConstant._GridXC)
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                        _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
                     }
                     // Horizontal | Up [0 - 21]
-                    else
+                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_UP) == 0)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
                             + (bIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
+                        _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
                     }
 
                     npc.transform.position = spawnPos;

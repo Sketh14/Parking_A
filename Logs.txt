@@ -480,7 +480,15 @@ CAR PARKING
     [=] NPCSpawner
         {+} Fixing spawn position logic | Left/Down
 
+- Scripts
+    [=] NPCSpawner
+        {+} Adding NpcStatus enum
+        {+} Only spawning at 3 empty cells gap and resetting after hitting occupied one
+        {+} Setting NpcStatus for every spawn direction/orientation?
+
 --------------------------------------------------------------------------------------------------------------
+- [DO] [MAYBE IMP] Asss weightage to boundary spawner
+    [=] Consistent empty gaps or at least feel like consistent
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
 - [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,
