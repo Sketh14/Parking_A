@@ -166,7 +166,7 @@ namespace Parking_A.Gameplay
 
         public async Task SpawnVehicles2(byte[] boundaryData, Action<int[]> onVehiclesSpawned)
         {
-            Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
+            // Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
             byte[] gridMap = new byte[UniversalConstant._GridXC * UniversalConstant._GridYC];
 
@@ -552,7 +552,7 @@ namespace Parking_A.Gameplay
                 await Task.Yield();
             }
 
-            Debug.Log($"Spawning Finished");
+            Debug.Log($"Spawning Vehicles Finished");
             onVehiclesSpawned?.Invoke(addedVehicleTypes.ToArray());
         }
 

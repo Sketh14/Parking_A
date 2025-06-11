@@ -19,7 +19,7 @@ namespace Parking_A.Gameplay
         // public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
         public async Task SpawnBoundary()
         {
-            Debug.Log($"Spawning Boundary | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
+            // Debug.Log($"Spawning Boundary | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
             byte[] gridMap = new byte[(UniversalConstant._GridXC * 2) + ((UniversalConstant._GridYC - 1) * 2)];         //Additional 2 cells just in case
 

@@ -1,7 +1,7 @@
 #define COLLISION_DEBUG_DRAW_2
 #define COLLISION_DEBUG_DRAW_1
 #define CORNER_COLLISION_DEBUG_DRAW_1
-#define DEBUG_SLOW_1
+// #define DEBUG_SLOW_1
 
 using System;
 using System.Runtime.CompilerServices;
@@ -94,7 +94,6 @@ namespace Parking_A.Gameplay
             EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             _vehicleSpawner = new VehicleSpawner();
 
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
             try
             {
                 // await envSpawner.SpawnBoundary((values) => boundaryData = values);
@@ -105,11 +104,12 @@ namespace Parking_A.Gameplay
             {
                 Debug.LogException(ex);
             }
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
+            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.BOUNDARY_GENERATED);
         }
 
         private async void CallVehicleSpawner(byte[] boundaryData)
         {
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNING;
             try
             {
                 // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
@@ -132,7 +132,9 @@ namespace Parking_A.Gameplay
                 Debug.LogException(ex);
             }
 
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNED;
+            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_SPAWNED);
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
         }
 
         private void InitializeVehicleData(in int[] vehicleTypes)

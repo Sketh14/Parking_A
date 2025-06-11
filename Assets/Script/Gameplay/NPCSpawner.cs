@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Parking_A.Gameplay
 {
+    [Serializable]
     public class NPCSpawner
     {
         internal enum NPCStatus
@@ -29,16 +30,15 @@ namespace Parking_A.Gameplay
         private const int _totalNPCsCountC = 4;
         private const int _minGapC = 4;
 
-        /*
         public NPCSpawner()
         {
             // TestSwapping();
-            TestSwapping2();
+            // TestSwapping2();
+            _npcsSpawned = new List<Transform>();
         }
-        // */
 
-        public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
-        // public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        // public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         {
             // Would not need a whole gridmap as we already have the boundary data
             // Find holes in the boundary
@@ -46,7 +46,7 @@ namespace Parking_A.Gameplay
             // Make sure the hole is wide enough
             // Fill the hole with 1/2 npc
 
-            Debug.Log($"Spawning NPCs | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
+            // Debug.Log($"Spawning NPCs | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
 
             // Making the boundaryData circular
             // - Original data is in the form [Up -> Down -> Left -> Right]
@@ -125,12 +125,12 @@ namespace Parking_A.Gameplay
 
             int npcCount = 0, emptyCell = 0;
             GameObject npc;
-            Vector3 spawnPos;
+            Vector3 spawnPos, spawnRot;
 
 #if NPC_SPAWN_TEST
             int tempIndex = 66 - 62;         //Horizontal
             // int tempIndex = 85 - 84;            //Vertical
-            npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
+            npc = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC].Get();
             npc.name = $"NPC[{tempIndex}]";
             spawnPos = Vector3.zero;
 
@@ -163,7 +163,7 @@ namespace Parking_A.Gameplay
                 }
 
                 emptyCell++;
-                spawnPos = Vector3.zero;
+                spawnPos = spawnRot = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner
                 if (emptyCell == _minGapC)
@@ -171,8 +171,8 @@ namespace Parking_A.Gameplay
                     // Record current index somewhere to be used later?
                     // emptyCell = 0;
 
-                    npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
-                    npc.name = $"NPC[{bIndex}]";
+                    npc = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC].Get();
+                    _npcsSpawned.Add(npc.transform);
 
                     // Vertical | Left [84 - 125]
                     if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_LEFT) == 0
@@ -182,8 +182,12 @@ namespace Parking_A.Gameplay
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
                             + ((bIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+
+                        spawnRot.y = 0f;
+
                         _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
                         _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
+                        npc.name = $"NPC[{bIndex}]_V";
                     }
                     // Horizontal | Down [62 - 83]
                     else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_DOWN) == 0
@@ -193,7 +197,11 @@ namespace Parking_A.Gameplay
                             - ((bIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
                             % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+
+                        spawnRot.y = 270f;
+
                         _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
+                        npc.name = $"NPC[{bIndex}]_H";
                     }
                     // Vertical | Right [22 - 61]
                     else if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_RIGHT) == 0
@@ -203,7 +211,11 @@ namespace Parking_A.Gameplay
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
                             - ((bIndex - UniversalConstant._GridXC)
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+
+                        spawnRot.y = 180f;
+
                         _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
+                        npc.name = $"NPC[{bIndex}]_V";
                     }
                     // Horizontal | Up [0 - 21]
                     else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_UP) == 0)
@@ -211,15 +223,21 @@ namespace Parking_A.Gameplay
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
                             + (bIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
+
+                        spawnRot.y = 90f;
+
                         _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
+                        npc.name = $"NPC[{bIndex}]_H";
                     }
 
                     npc.transform.position = spawnPos;
-                    npc.transform.rotation = Quaternion.identity;
+                    npc.transform.localEulerAngles = spawnRot;
                 }
 
                 // await Task.Yield();
             }
+            Debug.Log($"Spawning NPCs Finished");
+            OnNpcsSpawned?.Invoke();
         }
 
         private void TestSwapping()

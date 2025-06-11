@@ -484,7 +484,7 @@ CAR PARKING
         {+} Adding NpcStatus enum
         {+} Only spawning at 3 empty cells gap and resetting after hitting occupied one
         {+} Setting NpcStatus for every spawn direction/orientation?
-        
+
 - Scripts
     [=] Pool Scriptable-Object
         {+} Contains poolType and prefab
@@ -497,9 +497,28 @@ CAR PARKING
 - Scene
     [=] Creating asset for Vehicles/Boundary in SO
 
+- Scripts
+    [=] NPCSpawner
+        {+} Adding H/V to name for identifying spawn pos
+        {+} Setting orientation to spawning also
+    [=] UniversalConstant
+        {+} Adding back NPC enum
+        {+} Adding NPC_SPAWNED enum to GameStatus
+    [=] GameManager
+        {+} Creating method to set the GameStatus for setting LEVEL_GENERATED
+    [=] NPCController
+        {+} NPCStatus enum for managing different states
+        {+} Initializing info array with spawn orientation data
+        {+} Movement logic
+            <~> Basic movement
+            <~> Turning around corners logic
+- Project
+    [=] Adding placeholder mats/ direction arrwos to NPC
+    [=] Making NPC SO for pool
+
 
 --------------------------------------------------------------------------------------------------------------
-- [DO] Make scriptable for vehicles
+- [DONE] Make scriptable for vehicles
 - [DO] In-game currency
     [=] Powers to utilize in-game currency
     [=] Shrink vehicle to different size vehicle

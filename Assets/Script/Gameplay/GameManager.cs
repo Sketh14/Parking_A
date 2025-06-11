@@ -21,8 +21,24 @@ namespace Parking_A.Gameplay
         }
         #endregion Singleton
 
+        public UniversalConstant.GameStatus SetGameStatus(UniversalConstant.GameStatus gameStatus)
+        {
+            _gameStatus |= gameStatus;
+
+            if ((_gameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) != 0
+                && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) != 0)
+                _gameStatus |= UniversalConstant.GameStatus.LEVEL_GENERATED;
+
+            return GameStatus;
+        }
+        private UniversalConstant.GameStatus _gameStatus;
+
+
         public string RandomSeed;
-        public UniversalConstant.GameStatus GameStatus;
+        public UniversalConstant.GameStatus GameStatus
+        {
+            get => _gameStatus;
+        }
         public System.Action<int, Vector2> OnSelect;
         public System.Action OnVehiclesSpawned;
         public System.Action<byte[]> OnEnvironmentSpawned;
