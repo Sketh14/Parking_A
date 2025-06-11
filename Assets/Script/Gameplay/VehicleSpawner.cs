@@ -164,7 +164,7 @@ namespace Parking_A.Gameplay
             }*/
         }
 
-        public async void SpawnVehicles2(byte[] boundaryData, Action<int[]> onVehiclesSpawned)
+        public async Task SpawnVehicles2(byte[] boundaryData, Action<int[]> onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
