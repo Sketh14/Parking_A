@@ -435,6 +435,20 @@ CAR PARKING
         {+} Checking corner again if the vehicle collides with another before exiting the corner
 
 
+--------------------------------------------------------------------------------------------------------------
+                                                    11 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] Pool Scriptable-Object
+        {+} Contains poolType and prefab
+    [=] UniversalConstant
+        {+} Shifting PoolType here
+    [=] EnvironmentSpawner | VehicleSpawner
+        {+} Updating PoolType references
+    [=] PoolManager
+        {+} Replacing prefabs with Pool_SO logic
+- Scene
+    [=] Creating asset for Vehicles/Boundary in SO
 
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts

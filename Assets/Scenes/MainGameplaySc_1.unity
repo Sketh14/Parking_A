@@ -777,13 +777,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c3ec01dd0697454487aa470e5a4a42a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _prefabToPool:
-  - {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
-  - {fileID: 5041637407529620837, guid: ccace83ab29b5dc418ae8a07d5d0d975, type: 3}
-  - {fileID: 487504617563494611, guid: 6a7a312047ff60846aed3fcb8ff054df, type: 3}
-  - {fileID: 2146036505}
-  - {fileID: 3604490752355796290, guid: cb8743b4c7856884790bdcf1ca6f4f2f, type: 3}
-  - {fileID: 3604490752355796290, guid: bdba0e294f045854cb57566bd3ea5d36, type: 3}
+  _poolSObjArr:
+  - {fileID: 11400000, guid: e407989ecdfc6d94c889d79f9bed0473, type: 2}
+  - {fileID: 11400000, guid: 2c48aeebd43e19f4c8b67a71971ce7d6, type: 2}
+  - {fileID: 11400000, guid: 9799809be5d6f174497e8409ed5fbbe8, type: 2}
+  - {fileID: 11400000, guid: bcde0a7c41e89dd4cbfe682da1976c63, type: 2}
 --- !u!1001 &153321596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6653,11 +6651,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dc9e68d23c07b7240a73eb4a08b88d58, type: 3}
   m_PrefabInstance: {fileID: 2141187623}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2146036505 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3604490752355796290, guid: 8cad6686f76c26a44b51c4516bd045af, type: 3}
-  m_PrefabInstance: {fileID: 5901245080229806512}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2146036506 stripped
 Transform:

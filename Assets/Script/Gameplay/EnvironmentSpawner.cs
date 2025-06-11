@@ -111,9 +111,9 @@ namespace Parking_A.Gameplay
 
                 //Fill the cells
                 for (neighbourX = 0; neighbourX < 2; neighbourX++)
-                    gridMap[gridMapIndex + neighbourX] = (byte)PoolManager.PoolType.BOUNDARY;
+                    gridMap[gridMapIndex + neighbourX] = (byte)UniversalConstant.PoolType.BOUNDARY;
 
-                boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
+                boundaryObject = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get();
                 boundaryObject.name = $"BoundaryH_I[{gridMapIndex}]";
                 boundaryObject.transform.position = spawnPos;
                 boundaryObject.transform.rotation = Quaternion.identity;
@@ -203,9 +203,9 @@ namespace Parking_A.Gameplay
 
                 //Fill the cells
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)
-                    gridMap[gridMapIndex + neighbourY] = (byte)PoolManager.PoolType.BOUNDARY;
+                    gridMap[gridMapIndex + neighbourY] = (byte)UniversalConstant.PoolType.BOUNDARY;
 
-                boundaryObject = PoolManager.Instance.PrefabPool[PoolManager.PoolType.BOUNDARY].Get();
+                boundaryObject = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get();
                 boundaryObject.name = $"BoundaryV_I[{gridMapIndex}]";
                 boundaryObject.transform.position = spawnPos;
                 boundaryObject.transform.localEulerAngles = spawnRot;
