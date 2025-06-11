@@ -25,7 +25,7 @@ namespace Parking_A.Gameplay
         //Single float array | Will access dimensions using offset
         private readonly float[] _vehicleDimensions;
 
-        private const int _cVehicleLayerMask = (1 << 6);
+        private const int _vehicleLayerMaskC = (1 << 6);
         private List<Transform> _vehiclesSpawned;
         public List<Transform> VehiclesSpawned { get => _vehiclesSpawned; }
 
@@ -119,7 +119,7 @@ namespace Parking_A.Gameplay
                 //BoxCast Down
                 if (!Physics.BoxCast(spawnPos, halfExtents, Vector3.down
                     // , out boxCasthitInfo
-                    , Quaternion.Euler(spawnRot), 1f, _cVehicleLayerMask))
+                    , Quaternion.Euler(spawnRot), 1f, _vehicleLayerMaskC))
                 {
                     spawnPos.y = 0.58f;
 
