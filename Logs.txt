@@ -472,6 +472,14 @@ CAR PARKING
         {+} Spawn position logic according to boundary index
     [=] VehicleSpawner
         {+} Replacing values with references 
+
+--------------------------------------------------------------------------------------------------------------
+                                                    10 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Fixing spawn position logic | Left/Down
+
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle

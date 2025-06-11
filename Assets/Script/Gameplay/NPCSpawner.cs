@@ -57,12 +57,14 @@ namespace Parking_A.Gameplay
             }
 
             // Flip Down
+            // /*
             for (int i = UniversalConstant._GridXC, j = 1; i < UniversalConstant._GridXC + (UniversalConstant._GridXC / 2); i++, j++)
             {
                 tempBData = boundaryData[i];
                 boundaryData[i] = boundaryData[(UniversalConstant._GridXC * 2) - j];
                 boundaryData[(UniversalConstant._GridXC * 2) - j] = tempBData;
             }
+            // */
 
             // First swap Right | Left
             for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
@@ -105,7 +107,7 @@ namespace Parking_A.Gameplay
 
 #if BOUNDARY_SWAP_DEBUG
             debugBoundary.Clear();
-            for (int i = UniversalConstant._GridXC; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) + 10; i++)
+            for (int i = 0; i < boundaryData.Length; i++)
                 debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
             Debug.Log($"After Swap : {debugBoundary}");
 #endif
@@ -115,8 +117,8 @@ namespace Parking_A.Gameplay
             Vector3 spawnPos;
 
 #if NPC_SPAWN_TEST
-            // int tempIndex = 52 - 22;         //Horizontal
-            int tempIndex = 85 - 84;            //Vertical
+            int tempIndex = 66 - 62;         //Horizontal
+            // int tempIndex = 85 - 84;            //Vertical
             npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
             npc.name = $"NPC[{tempIndex}]";
             spawnPos = Vector3.zero;
@@ -124,12 +126,14 @@ namespace Parking_A.Gameplay
             //Horizontal
             // spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f 
             //      + (tempIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
-            // spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+            spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
+                 - (tempIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+            spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
 
             //Vertical
-            spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
-            spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                    - (tempIndex % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+            // spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+            // spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+            //         - (tempIndex % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
 
             npc.transform.position = spawnPos;
             npc.transform.rotation = Quaternion.identity;
@@ -138,7 +142,7 @@ namespace Parking_A.Gameplay
             // return;
 
             // Top / Bottom grid cells
-            for (int bIndex = 0; bIndex < boundaryData.Length; bIndex++)
+            for (int bIndex = 0; bIndex < boundaryData.Length - 1; bIndex++)
             {
                 //Check if the cell is empty
                 if (boundaryData[bIndex] != 0)
@@ -159,20 +163,23 @@ namespace Parking_A.Gameplay
                     npc = PoolManager.Instance.PrefabPool[PoolManager.PoolType.NPC].Get();
                     npc.name = $"NPC[{bIndex}]";
 
-                    // if (bIndex >= 84)
+                    // Vertical | Left [84 - 125]
                     if (bIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                            - ((bIndex - (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                            + ((bIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
                     }
+                    // Horizontal | Down [62 - 83]
                     else if (bIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
                     {
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                            + ((bIndex - UniversalConstant._GridXC) % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
+                            - ((bIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
+                            % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
                     }
+                    // Vertical | Right [22 - 61]
                     else if (bIndex >= UniversalConstant._GridXC)
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
@@ -180,6 +187,7 @@ namespace Parking_A.Gameplay
                             - ((bIndex - UniversalConstant._GridXC)
                             % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
                     }
+                    // Horizontal | Up [0 - 21]
                     else
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
