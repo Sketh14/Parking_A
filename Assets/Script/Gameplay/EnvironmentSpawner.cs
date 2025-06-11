@@ -137,7 +137,7 @@ namespace Parking_A.Gameplay
             {
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0
-                    || gridMapIndex == UniversalConstant._GridYC - 3 + (UniversalConstant._GridXC * 2))          //Avoid Last cell
+                    || gridMapIndex == UniversalConstant._GridYC - 3 + (UniversalConstant._GridXC * 2))          //Avoid Last cell for 1st iteration
                 {
                     // Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
                     continue;
@@ -150,6 +150,7 @@ namespace Parking_A.Gameplay
                 }
 #endif
 
+                const int startOffset = UniversalConstant._GridXC * 2;
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
                 spawnRot.y = 90f;
@@ -168,16 +169,17 @@ namespace Parking_A.Gameplay
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
                 spawnRot.y = 90f;
-                spawnPos.z = (UniversalConstant._GridYC / 4.0f) - ((gridMapIndex - UniversalConstant._GridXC * 2) % (UniversalConstant._GridYC - 2) * 0.5f) - 1.0f;       //Extra 0.5f to offset above boundary
-                                                                                                                                                                          // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
+                spawnPos.z = (UniversalConstant._GridYC / 4.0f) - ((gridMapIndex - startOffset)
+                    % (UniversalConstant._GridYC - 2) * (UniversalConstant._CellHalfSizeC * 2f)) - 1.0f;       //Extra 1f to offset above boundary
+                // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
 
                 //Both will be right in X for Vertical pair
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f + ((UniversalConstant._cGridX - 1) * 0.5f);       // For objects on the left-side
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f;        // For objects on the left-side
                 // If cGridX:22 | cGridY:42, then 84 would be on the right side, as 40/40 is 1
                 spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                    + ((gridMapIndex - (UniversalConstant._GridXC * 2)) / (UniversalConstant._GridYC - 2)
-                        * (UniversalConstant._GridXC - 1) * 0.5f);        // For both-sides
+                    + ((gridMapIndex - startOffset) / (UniversalConstant._GridYC - 2)
+                    * (UniversalConstant._GridXC - 1) * 0.5f);        // For both-sides
 
                 //Check if vehicle can be placed
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)
