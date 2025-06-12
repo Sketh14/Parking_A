@@ -289,8 +289,10 @@ namespace Parking_A.Gameplay
 
                     // Remove [if-else] if possible
                     //Rotate Clockwise
-                    if (_npcSpawner.NPCsSpawned[npcIndex].forward.x > 0.5
-                        || _npcSpawner.NPCsSpawned[npcIndex].forward.z < -0.5)
+                    if ((_npcSpawner.NPCsSpawned[npcIndex].forward.x > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z > 0.5)           // HORIZONTAL_UP
+                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.z < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x > 0.5)       // VERTICAL_RIGHT
+                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.x < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z < -0.5)      // HORIZONTAL_DOWN
+                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.z > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x < -0.5))      // VERTICAL_LEFT
                     {
                         rayDir.Set(
                             rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2],

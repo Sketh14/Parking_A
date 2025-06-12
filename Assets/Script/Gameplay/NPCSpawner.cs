@@ -248,7 +248,7 @@ namespace Parking_A.Gameplay
                     npc.name = npcName.ToString();
                     npcCount++;
 
-                    Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
+                    // Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
                 }
 
                 await Task.Yield();

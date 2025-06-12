@@ -538,6 +538,10 @@ CAR PARKING
         {+} Checking vehicle collisions and extracting ID
         {+} Collision Check | Rotating rayDir clockwise by 90
             <~> Top-Left Corner
+
+- Scripts
+    [=] NPCController
+        {+} Updating collision-check raycast logic to make it suitable for all sides
 --------------------------------------------------------------------------------------------------------------
 - [FIX] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
