@@ -556,6 +556,12 @@ CAR PARKING
         {+} Adding NPC_HIT to VehicleStatus
         {+} Callback for NPCHit
             <~> Disable respective functions for vehicle when hit
+
+- Scripts
+    [=] NPCController
+        {+} Tumble logic when hit
+- Scene
+    [=] NPCprefab change
 --------------------------------------------------------------------------------------------------------------
 - [DO] Tumble NPC when hit and goes flying
 - [FIX] [IMP] NPCSpawner | Take corners continously

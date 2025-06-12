@@ -336,10 +336,24 @@ namespace Parking_A.Gameplay
         private async void GoFlying(int npcIndex, Vector3 hitDir)
         {
             float timeElapsed = 0f;
-            const float timeMultC = 3f, flySpeedMultC = 5f;
+            const float timeMultC = 1.5f, flySpeedMultC = 7f, rotSpeedMultC = 6f;
             Vector3 npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
+            // Vector3 npcRot = _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles;
 
             // int dirMult = 1;
+            Vector3 rotDir = Vector3.zero;
+            if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED) == 0)
+            {
+                rotDir.z = _npcSpawner.NPCsSpawned[npcIndex].forward.z * -1f          // Check which direction to roll
+                    * (int)(_npcSpawner.NPCsSpawned[npcIndex].position.x / _walkingBoundaries[1]);      // Check which side the NPC is
+            }
+            else
+            {
+                rotDir.x = _npcSpawner.NPCsSpawned[npcIndex].forward.x                // Check which direction to roll
+                    * (int)(_npcSpawner.NPCsSpawned[npcIndex].position.z / _walkingBoundaries[0]);      // Check which side the NPC is
+            }
+            Quaternion rotQuat = Quaternion.Euler(rotDir);
+            // Debug.Log($"rotDir: {rotDir} | rotQuat: {rotQuat} | Alignment-Status: {_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED}");
 
             // if (_npcSpawner.NPCsSpawned[npcIndex].position.)
             while (timeElapsed < 1.0f)
@@ -347,7 +361,11 @@ namespace Parking_A.Gameplay
                 timeElapsed += Time.deltaTime * timeMultC;
 
                 npcPos += hitDir * Time.deltaTime * flySpeedMultC;
+                // npcRot += rotDir * Time.deltaTime * rotSpeedMultC;
+
                 _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
+                // _npcSpawner.NPCsSpawned[npcIndex].GetChild(0).localEulerAngles = npcRot;
+                _npcSpawner.NPCsSpawned[npcIndex].GetChild(0).Rotate(rotDir * rotSpeedMultC);
 
                 await Task.Yield();
                 if (_cts.Token.IsCancellationRequested) return;
