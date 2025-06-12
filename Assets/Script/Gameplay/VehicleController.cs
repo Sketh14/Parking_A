@@ -447,7 +447,7 @@ namespace Parking_A.Gameplay
 
             Vector3 rayStartPos, rayDir, vehiclePos;
             RaycastHit colliderHitInfo;
-            int vehicleStatus;
+            // int vehicleStatus;
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
@@ -523,8 +523,8 @@ namespace Parking_A.Gameplay
                             //          . So as to check if there is any incoming vehicle or not and if the passing vehicle is gone
                         }
 
-                        int.TryParse(colliderHitInfo.transform.name[(colliderHitInfo.transform.name.Length - 2)..]
-                            , out vehicleStatus);
+                        // int.TryParse(colliderHitInfo.transform.name[(colliderHitInfo.transform.name.Length - 2)..]
+                        //     , out vehicleStatus);
                         // [colliderHitInfo.transform.name.Length - 1] - '0';
 
                         // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}"

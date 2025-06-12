@@ -516,6 +516,17 @@ CAR PARKING
     [=] Adding placeholder mats/ direction arrwos to NPC
     [=] Making NPC SO for pool
 
+--------------------------------------------------------------------------------------------------------------
+                                                    12 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Fixing NPCStatus enum values
+        {+} Fixing spawning NPC | Spawn only in each side-walks
+    [=] NPCController
+        {+} Collision Checks
+            <~> Turning around if collided with Boundary object
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Make scriptable for vehicles
