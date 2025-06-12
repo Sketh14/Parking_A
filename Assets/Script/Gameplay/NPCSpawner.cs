@@ -219,7 +219,7 @@ namespace Parking_A.Gameplay
                         spawnRot.y = 180f;
 
                         _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
-                        // _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
+                        _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
                         npcName.Clear();
                         npcName.Append($"NPC[{bIndex}]_[{npcCount}]_V");
                         // npc.name = $"NPC[{bIndex}]_V";

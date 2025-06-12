@@ -542,6 +542,14 @@ CAR PARKING
 - Scripts
     [=] NPCController
         {+} Updating collision-check raycast logic to make it suitable for all sides
+
+- Scripts
+    [=] NPCController
+        {+} Fixing raycast position
+        {+} Fixing vehicle_ID extraction
+        {+} Go flying when NPC hit | Invoking NPCHit event
+    [=] GameManager
+        {+} Event for NPCHit 
 --------------------------------------------------------------------------------------------------------------
 - [FIX] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles

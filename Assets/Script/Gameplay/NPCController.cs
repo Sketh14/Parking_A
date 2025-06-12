@@ -5,6 +5,8 @@ using System;
 using UnityEngine;
 using Parking_A.Global;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Parking_A.Gameplay
 {
@@ -29,10 +31,11 @@ namespace Parking_A.Gameplay
 
         private NPCInfo[] _npcInfos;
         private System.Text.StringBuilder _npcName;
+        private CancellationTokenSource _cts;
 
-        private const float _speedMultC = 3f;
+        private const float _speedMultC = 0.5f;
         private const int _collisionLayerMaskC = (1 << 6) | (1 << 7);
-        private const int _vehicleLayerC = 1 << 6;
+        private const int _vehicleLayerC = 6;
         private readonly float[] _walkingBoundaries = { 10.25f, 5.25f };                 //Vertical | Horizontal
         private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
 
@@ -40,8 +43,15 @@ namespace Parking_A.Gameplay
         public bool slowTime = false, slowTime2 = false;
 #endif
 
+        private void OnDestroy()
+        {
+            if (_cts != null) _cts.Cancel();
+        }
+
         private void Start()
         {
+            _cts = new CancellationTokenSource();
+
             InitializeNPCs();
             _npcName = new System.Text.StringBuilder();
         }
@@ -107,6 +117,8 @@ namespace Parking_A.Gameplay
             Vector3 npcPos, npcRot;
             for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
             {
+                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0) continue;
+
                 _npcSpawner.NPCsSpawned[npcIndex].position += _npcSpawner.NPCsSpawned[npcIndex].forward * Time.deltaTime * _speedMultC;
 
                 //Do Boundary reach check
@@ -247,7 +259,10 @@ namespace Parking_A.Gameplay
 
             for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
             {
+                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0) continue;
+
                 rayStartPos = _npcSpawner.NPCsSpawned[npcIndex].position;
+                rayStartPos.y = 0.3f;
                 // + _npcSpawner.NPCsSpawned[npcIndex].forward * (UniversalConstant._CellHalfSizeC / 2f);
                 rayDir = _npcSpawner.NPCsSpawned[npcIndex].forward;
 
@@ -259,15 +274,17 @@ namespace Parking_A.Gameplay
 #endif
                     if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
                     {
+                        Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
                         // Check if the NPC has been hit by a vehicle
-                        if ((colliderHitInfo.transform.gameObject.layer & _vehicleLayerC) != 0)
+                        if (colliderHitInfo.transform.gameObject.layer == _vehicleLayerC)
                         {
+                            _npcInfos[npcIndex].NpcStatus |= NPCStatus.NPC_HIT;
                             int vehicleID = -1;
-                            int.TryParse(colliderHitInfo.transform.name.Substring(11, 3)
+                            int.TryParse(colliderHitInfo.transform.name.Substring(12, 3)
                                 , out vehicleID);
-                            // GoFlying();
-                            Debug.Log($"Hit By Vehicle | ID: {vehicleID}");
-                            // colliderHitInfo.
+                            Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
+                            GoFlying(npcIndex, colliderHitInfo.transform.forward);
+                            GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
                             continue;
                         }
 
@@ -316,12 +333,26 @@ namespace Parking_A.Gameplay
         }
 
         // Throw NPC in the direction of being hit
-        private async void GoFlying()
+        private async void GoFlying(int npcIndex, Vector3 hitDir)
         {
-            // for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
-            // {
-            //     _npcSpawner.NPCsSpawned[npcIndex].position += Vector3.zero;
-            // }
+            float timeElapsed = 0f;
+            const float timeMultC = 3f, flySpeedMultC = 5f;
+            Vector3 npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
+
+            // int dirMult = 1;
+
+            // if (_npcSpawner.NPCsSpawned[npcIndex].position.)
+            while (timeElapsed < 1.0f)
+            {
+                timeElapsed += Time.deltaTime * timeMultC;
+
+                npcPos += hitDir * Time.deltaTime * flySpeedMultC;
+                _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
+
+                await Task.Yield();
+                if (_cts.Token.IsCancellationRequested) return;
+            }
+
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -41,6 +41,7 @@ namespace Parking_A.Gameplay
         }
         public System.Action<int, Vector2> OnSelect;
         public System.Action OnVehiclesSpawned;
+        public System.Action<int> OnNPCHit;
         public System.Action<byte[]> OnEnvironmentSpawned;
     }
 }
