@@ -550,7 +550,14 @@ CAR PARKING
         {+} Go flying when NPC hit | Invoking NPCHit event
     [=] GameManager
         {+} Event for NPCHit 
+
+- Scripts
+    [=] VehicleController
+        {+} Adding NPC_HIT to VehicleStatus
+        {+} Callback for NPCHit
+            <~> Disable respective functions for vehicle when hit
 --------------------------------------------------------------------------------------------------------------
+- [DO] Tumble NPC when hit and goes flying
 - [FIX] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
 - [DO] In-game currency

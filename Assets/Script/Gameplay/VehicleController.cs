@@ -39,6 +39,7 @@ namespace Parking_A.Gameplay
             CORNER_FREE = 1 << 7,
             // COLLIDED_PARKING = 1 << 8,
             COLLIDED_ONBOARDING = 1 << 8,
+            HIT_NPC = 1 << 9,
         }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
@@ -67,13 +68,14 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
+            GameManager.Instance.OnNPCHit -= DisableVehicle;
         }
 
         private void Start()
         {
             GameManager.Instance.OnSelect += VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
-
+            GameManager.Instance.OnNPCHit += DisableVehicle;
 
             InitializeLevel();
             _vehicleName = new System.Text.StringBuilder();
@@ -143,6 +145,11 @@ namespace Parking_A.Gameplay
             _vehicleInfos = new VehicleInfo[_vehicleSpawner.VehiclesSpawned.Count];
             for (int i = 0; i < _vehicleInfos.Length; i++)
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
+        }
+
+        private void DisableVehicle(int vehicleID)
+        {
+            _vehicleInfos[vehicleID].VehicleStatus |= VehicleStatus.HIT_NPC;
         }
 
 #if DEBUG_SLOW_1
@@ -239,7 +246,8 @@ namespace Parking_A.Gameplay
             {
                 // if (vehicleInfos[i].hasInteracted)
                 //Check if the vehicle has been interacted with and has not reached the road
-                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) != 0
+                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) == 0
+                    && (_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) != 0
                     && (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) == 0
                     && (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0)
                 {
@@ -451,7 +459,8 @@ namespace Parking_A.Gameplay
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0
+                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                    || (_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0
                     || (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0)
                     // || (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_PARKING) != 0)
                     continue;
@@ -561,7 +570,8 @@ namespace Parking_A.Gameplay
             for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if (((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
+                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                    || ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
                     && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_ROAD) == 0)
                     || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.CORNER_COLLIDED) != 0)
                     continue;

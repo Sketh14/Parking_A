@@ -274,7 +274,7 @@ namespace Parking_A.Gameplay
 #endif
                     if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
                     {
-                        Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
+                        // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
                         // Check if the NPC has been hit by a vehicle
                         if (colliderHitInfo.transform.gameObject.layer == _vehicleLayerC)
                         {
@@ -282,7 +282,7 @@ namespace Parking_A.Gameplay
                             int vehicleID = -1;
                             int.TryParse(colliderHitInfo.transform.name.Substring(12, 3)
                                 , out vehicleID);
-                            Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
+                            // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
                             GoFlying(npcIndex, colliderHitInfo.transform.forward);
                             GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
                             continue;
