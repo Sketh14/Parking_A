@@ -22,6 +22,7 @@ namespace Parking_A.Gameplay
             MOVING = 1 << 0,
             HORIZONTAL_ALIGNED = 1 << 2,
             TURNING_CORNER = 1 << 3,
+            NPC_HIT = 1 << 4,
         }
 
         private NPCSpawner _npcSpawner;
@@ -31,7 +32,9 @@ namespace Parking_A.Gameplay
 
         private const float _speedMultC = 3f;
         private const int _collisionLayerMaskC = (1 << 6) | (1 << 7);
+        private const int _vehicleLayerC = 1 << 6;
         private readonly float[] _walkingBoundaries = { 10.25f, 5.25f };                 //Vertical | Horizontal
+        private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
 
 #if SLOWTIME_DEBUG
         public bool slowTime = false, slowTime2 = false;
@@ -224,57 +227,99 @@ namespace Parking_A.Gameplay
         }
 
         //Do Collision check to turn back around
-
+        // Right: {(1.00, 0.00, 0.00)} | Down: {(0.00, 0.00, -1.00)} | Left: {(-1.00, 0.00, 0.00)} | Up: {(0.00, 0.00, 1.00)}
         private void CheckCollisions()
         {
             /*
-                |   | - |   |       |   |   |   |       |   | - |   |       |   | - |   |
+                |   |   |   |       |   |   |   |       |   | - |   |       |   | - |   |
                 -------------       -------------       -------------       -------------
-                |   | x | - |       | - | x | - |       | - | x |   |       | - | x | - |
+                |   | x | - |       | - | x |   |       | - | x |   |       |   | x | - |
                 -------------       -------------       -------------       -------------
-                |   | - |   |       |   | - |   |       |   | - |   |       |   |   |   |
+                |   | - |   |       |   | - |   |       |   |   |   |       |   |   |   |
+                HORIZONTAL_UP       VERTICAL_RIGHT      HORIZONTAL_DOWN     VERTICAL_LEFT
             */
 
             // Need to check for collision in transforms forward direction for colliding with the boundary
             // Check for collisions with the vehicles?
 
             Vector3 rayStartPos, rayDir, npcRot;
-            // RaycastHit colliderHitInfo;
+            RaycastHit colliderHitInfo;
 
             for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
             {
-                rayStartPos = _npcSpawner.NPCsSpawned[npcIndex].position
-                    + _npcSpawner.NPCsSpawned[npcIndex].forward * (UniversalConstant._CellHalfSizeC / 2f);
+                rayStartPos = _npcSpawner.NPCsSpawned[npcIndex].position;
+                // + _npcSpawner.NPCsSpawned[npcIndex].forward * (UniversalConstant._CellHalfSizeC / 2f);
                 rayDir = _npcSpawner.NPCsSpawned[npcIndex].forward;
 
-#if COLLISIONCHECK_DEBUG
-                Debug.DrawRay(rayStartPos, rayDir * (UniversalConstant._CellHalfSizeC / 2f), Color.cyan);
-#endif
-                if (Physics.Raycast(rayStartPos, rayDir, UniversalConstant._CellHalfSizeC / 2f, _collisionLayerMaskC))
+                for (int rayIndex = 0; rayIndex < 2; rayIndex++)
                 {
-                    // If collided, turn the NPC around
-                    npcRot = Vector3.zero;
 
-                    // VERTICAL
-                    if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED) == 0)
-                        npcRot.y = 90 * (1 + (int)_npcSpawner.NPCsSpawned[npcIndex].forward[2]);
-                    // HORIZONTAL
+#if COLLISIONCHECK_DEBUG
+                    Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
+#endif
+                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
+                    {
+                        // Check if the NPC has been hit by a vehicle
+                        if ((colliderHitInfo.transform.gameObject.layer & _vehicleLayerC) != 0)
+                        {
+                            int vehicleID = -1;
+                            int.TryParse(colliderHitInfo.transform.name.Substring(11, 3)
+                                , out vehicleID);
+                            // GoFlying();
+                            Debug.Log($"Hit By Vehicle | ID: {vehicleID}");
+                            // colliderHitInfo.
+                            continue;
+                        }
+
+                        // If collided, turn the NPC around
+                        npcRot = Vector3.zero;
+
+                        // VERTICAL
+                        if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED) == 0)
+                            npcRot.y = 90 * (1 + (int)_npcSpawner.NPCsSpawned[npcIndex].forward[2]);
+                        // HORIZONTAL
+                        else
+                            npcRot.y = 90 * -1 * (int)_npcSpawner.NPCsSpawned[npcIndex].forward[0];
+
+                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
+                    }
+
+                    //Rotate the rayDir according to NPC Orientation
+                    // Debug.Log($"rayDir: {rayDir} | rayIndex: {rayIndex} | x: {rayDir.x} | z: {rayDir.z}");
+
+                    // Remove [if-else] if possible
+                    //Rotate Clockwise
+                    if (_npcSpawner.NPCsSpawned[npcIndex].forward.x > 0.5
+                        || _npcSpawner.NPCsSpawned[npcIndex].forward.z < -0.5)
+                    {
+                        rayDir.Set(
+                            rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2],
+                            rayDir.y,
+                            rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3]
+                        );
+                    }
+                    //Rotate Counter-Clockwise
                     else
-                        npcRot.y = 90 * -1 * (int)_npcSpawner.NPCsSpawned[npcIndex].forward[0];
-
-                    _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
+                    {
+                        rayDir.Set(
+                            rayDir.x * _rotationMatrixBy90CW[3] + rayDir.z * _rotationMatrixBy90CW[1],
+                            rayDir.y,
+                            rayDir.x * _rotationMatrixBy90CW[2] + rayDir.z * _rotationMatrixBy90CW[0]
+                        );
+                    }
+                    // rayDir.x = rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2];
+                    // rayDir.z = rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3];
                 }
             }
-
         }
 
         // Throw NPC in the direction of being hit
         private async void GoFlying()
         {
-            for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
-            {
-                _npcSpawner.NPCsSpawned[npcIndex].position += Vector3.zero;
-            }
+            // for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
+            // {
+            //     _npcSpawner.NPCsSpawned[npcIndex].position += Vector3.zero;
+            // }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

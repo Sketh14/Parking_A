@@ -527,8 +527,19 @@ CAR PARKING
         {+} Collision Checks
             <~> Turning around if collided with Boundary object
 
-
+- Scripts
+    [=] VehicleSpawner
+        {+} Using vehicleCount instead of gridMapIndex for tracking vehicles
+            <~> 3 digit vehicleCount formatting
+    [=] NPCSpawner
+        {+} Adding npcCount to NPC name
+    [=] NPCController
+        {+} Adding NPC_Hit to NPCStatus | VehicleLayerMask | RotationMatrix array
+        {+} Checking vehicle collisions and extracting ID
+        {+} Collision Check | Rotating rayDir clockwise by 90
+            <~> Top-Left Corner
 --------------------------------------------------------------------------------------------------------------
+- [FIX] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
 - [DO] In-game currency
     [=] Powers to utilize in-game currency

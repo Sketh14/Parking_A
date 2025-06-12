@@ -37,8 +37,8 @@ namespace Parking_A.Gameplay
             _npcsSpawned = new List<Transform>();
         }
 
-        // public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
-        public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
+        // public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         {
             // Would not need a whole gridmap as we already have the boundary data
             // Find holes in the boundary
@@ -188,7 +188,7 @@ namespace Parking_A.Gameplay
                         _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
                         _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
                         npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_V");
+                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_V");
                         // npc.name = $"NPC[{bIndex}]_V";
                     }
                     // Horizontal | Down [62 - 83]
@@ -204,7 +204,7 @@ namespace Parking_A.Gameplay
 
                         _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
                         npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_H");
+                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_H");
                         // npc.name = $"NPC[{bIndex}]_H";
                     }
                     // Vertical | Right [22 - 61]
@@ -219,12 +219,14 @@ namespace Parking_A.Gameplay
                         spawnRot.y = 180f;
 
                         _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
+                        // _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
                         npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_V");
+                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_V");
                         // npc.name = $"NPC[{bIndex}]_V";
                     }
                     // Horizontal | Up [0 - 21]
-                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_UP) == 0)
+                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_UP) == 0
+                        && bIndex <= (UniversalConstant._GridXC - 1))
                     {
                         spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
                             + (bIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
@@ -234,7 +236,7 @@ namespace Parking_A.Gameplay
 
                         _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
                         npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_H");
+                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_H");
                         // npc.name = $"NPC[{bIndex}]_H";
                     }
                     else continue;
@@ -244,11 +246,12 @@ namespace Parking_A.Gameplay
                     npc.transform.position = spawnPos;
                     npc.transform.localEulerAngles = spawnRot;
                     npc.name = npcName.ToString();
+                    npcCount++;
 
-                    // Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
+                    Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
                 }
 
-                // await Task.Yield();
+                await Task.Yield();
             }
             Debug.Log($"Spawning NPCs Finished");
             OnNpcsSpawned?.Invoke();
@@ -302,7 +305,7 @@ namespace Parking_A.Gameplay
 
             char[] testArr = new char[] { '1', '2', '3', '4', '5', '6', '7', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' };
 
-            int interval = 7;
+            // int interval = 7;
             debugBoundary.Clear();
             for (int i = 0; i < testArr.Length; i++)
                 debugBoundary.Append($"{i}[{testArr[i]}] ,");
