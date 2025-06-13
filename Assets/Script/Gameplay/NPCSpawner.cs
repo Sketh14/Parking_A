@@ -208,109 +208,8 @@ namespace Parking_A.Gameplay
             Debug.Log($"Empty Cells Found: {debugGapString}");
             #endregion Record_Empty_Cell
 
-            /*
-            for (int bIndex = 0; bIndex < boundaryData.Length - 1 && (_npcSpawnStatus & NPCStatus.TOTAL_SPAWNED) == 0; bIndex++)
-            {
-                //Check if the cell is empty
-                if (boundaryData[bIndex] != 0)
-                {
-                    emptyCellCount = 0;
-                    continue;
-                }
-
-                emptyCellCount++;
-                spawnPos = spawnRot = Vector3.zero;
-                // Should be such that, the NPCs spawn at the four corners mostly
-                // No 2 NPCs at the same corner
-                if (emptyCellCount == _minGapC)
-                {
-                    // Record current index somewhere to be used later?
-                    // emptyCell = 0;
-
-
-                    // Vertical | Left [84 - 125]
-                    if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_LEFT) == 0
-                        && bIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
-                    {
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                            + ((bIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
-                            % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
-
-                        spawnRot.y = 0f;
-
-                        _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
-                        _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
-                        npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_V");
-                        // npc.name = $"NPC[{bIndex}]_V";
-                    }
-                    // Horizontal | Down [62 - 83]
-                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_DOWN) == 0
-                        && bIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
-                    {
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
-                            - ((bIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
-                            % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
-
-                        spawnRot.y = 270f;
-
-                        _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
-                        npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_H");
-                        // npc.name = $"NPC[{bIndex}]_H";
-                    }
-                    // Vertical | Right [22 - 61]
-                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_VERTICAL_RIGHT) == 0
-                        && bIndex >= UniversalConstant._GridXC)
-                    {
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                            - ((bIndex - UniversalConstant._GridXC)
-                            % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
-
-                        spawnRot.y = 180f;
-
-                        _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
-                        // _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
-                        npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_V");
-                        // npc.name = $"NPC[{bIndex}]_V";
-                    }
-                    // Horizontal | Up [0 - 21]
-                    else if ((_npcSpawnStatus & NPCStatus.SPAWNED_HORIZONTAL_UP) == 0
-                        && bIndex <= (UniversalConstant._GridXC - 1))
-                    {
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                            + (bIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
-
-                        spawnRot.y = 90f;
-
-                        _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
-                        npcName.Clear();
-                        npcName.Append($"NPC[{bIndex}]_[{npcCount}]_H");
-                        // npc.name = $"NPC[{bIndex}]_H";
-                    }
-                    else continue;
-
-                    npc = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC].Get();
-                    _npcsSpawned.Add(npc.transform);
-                    npc.transform.position = spawnPos;
-                    npc.transform.localEulerAngles = spawnRot;
-                    npc.name = npcName.ToString();
-                    npcCount++;
-
-                    // Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
-                }
-
-                await Task.Yield();
-            }
-            // */
-
             // /*
-            for (int gapIndex = 0; gapIndex < emptyGapArr.Length && npcCount <= _totalNPCsCountC; gapIndex++)
+            for (int gapIndex = 0; gapIndex < emptyGapArr.Length && npcCount < _totalNPCsCountC; gapIndex++)
             {
                 spawnPos = spawnRot = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
@@ -318,11 +217,11 @@ namespace Parking_A.Gameplay
 
 
                 // Vertical | Left [84 - 125]
-                if (gapIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                if (emptyGapArr[gapIndex] >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
                 {
                     spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
                     spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                        + ((gapIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
+                        + ((emptyGapArr[gapIndex] - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
                         % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
 
                     spawnRot.y = 0f;
@@ -330,14 +229,14 @@ namespace Parking_A.Gameplay
                     _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
                     _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
                     npcName.Clear();
-                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_V");
+                    npcName.Append($"NPC[{emptyGapArr[gapIndex]}]_[{npcCount}]_V");
                     // npc.name = $"NPC[{bIndex}]_V";
                 }
                 // Horizontal | Down [62 - 83]
-                else if (gapIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
+                else if (emptyGapArr[gapIndex] >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
                 {
                     spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
-                        - ((gapIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
+                        - ((emptyGapArr[gapIndex] - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
                         % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                     spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
 
@@ -345,15 +244,15 @@ namespace Parking_A.Gameplay
 
                     _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
                     npcName.Clear();
-                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_H");
+                    npcName.Append($"NPC[{emptyGapArr[gapIndex]}]_[{npcCount}]_H");
                     // npc.name = $"NPC[{bIndex}]_H";
                 }
                 // Vertical | Right [22 - 61]
-                else if (gapIndex >= UniversalConstant._GridXC)
+                else if (emptyGapArr[gapIndex] >= UniversalConstant._GridXC)
                 {
                     spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
                     spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                        - ((gapIndex - UniversalConstant._GridXC)
+                        - ((emptyGapArr[gapIndex] - UniversalConstant._GridXC)
                         % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
 
                     spawnRot.y = 180f;
@@ -361,21 +260,21 @@ namespace Parking_A.Gameplay
                     _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
                     // _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
                     npcName.Clear();
-                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_V");
+                    npcName.Append($"NPC[{emptyGapArr[gapIndex]}]_[{npcCount}]_V");
                     // npc.name = $"NPC[{bIndex}]_V";
                 }
                 // Horizontal | Up [0 - 21]
                 else
                 {
                     spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                        + (gapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        + (emptyGapArr[gapIndex] % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                     spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
 
                     spawnRot.y = 90f;
 
                     _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
                     npcName.Clear();
-                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_H");
+                    npcName.Append($"NPC[{emptyGapArr[gapIndex]}]_[{npcCount}]_H");
                     // npc.name = $"NPC[{bIndex}]_H";
                 }
 

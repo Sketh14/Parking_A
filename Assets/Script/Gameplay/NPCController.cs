@@ -149,35 +149,6 @@ namespace Parking_A.Gameplay
                     {
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
-
-                    /*
-                    // Turn to VERTICAL | RIGHT
-                    if (_npcSpawner.NPCsSpawned[npcIndex].position.z >= _walkingBoundaries[0])
-                    {
-                        _npcInfos[npcIndex].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
-
-                        npcRot = Vector3.zero;
-                        npcRot.y = 90f * -1f * (_npcSpawner.NPCsSpawned[npcIndex].position[0] / _walkingBoundaries[1]);
-                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
-
-                        npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
-                        npcPos.z = _walkingBoundaries[0];
-                        _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
-                    }
-                    // Turn to VERTICAL | LEFT
-                    else if (_npcSpawner.NPCsSpawned[npcIndex].position.z <= _walkingBoundaries[0] * -1f)
-                    {
-                        _npcInfos[npcIndex].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
-
-                        npcRot = Vector3.zero;
-                        npcRot.y = 90f * -1f * (_npcSpawner.NPCsSpawned[npcIndex].position[0] / _walkingBoundaries[1]);
-                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;        // new Vector3(0f, 270f, 0f);
-
-                        npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
-                        npcPos.z = _walkingBoundaries[0] * (int)(_npcSpawner.NPCsSpawned[npcIndex].position[2] / _walkingBoundaries[0]);
-                        _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
-                    }
-                    */
                 }
                 // Horizontal Alignment
                 else
@@ -205,35 +176,6 @@ namespace Parking_A.Gameplay
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
 
-                    /*
-                    if (_npcSpawner.NPCsSpawned[npcIndex].position.x >= _walkingBoundaries[1])
-                    {
-                        _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.HORIZONTAL_ALIGNED;
-                        _npcInfos[npcIndex].NpcStatus |= NPCStatus.TURNING_CORNER;
-
-                        npcRot = Vector3.zero;
-                        npcRot.y = 180f;
-                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
-
-                        npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
-                        npcPos.x = _walkingBoundaries[1];
-                        _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
-                        // Debug.Log($"Name: {_npcSpawner.NPCsSpawned[npcIndex].name} | Border Reached | npcPos: {npcPos}"
-                        //     + $" | npcRot: {npcRot} | status: {_npcInfos[npcIndex].NpcStatus}");
-                    }
-                    else if (_npcSpawner.NPCsSpawned[npcIndex].position.x <= _walkingBoundaries[1] * -1f)
-                    {
-                        _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.HORIZONTAL_ALIGNED;
-                        _npcInfos[npcIndex].NpcStatus |= NPCStatus.TURNING_CORNER;
-
-                        npcRot = Vector3.zero;
-                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
-
-                        npcPos = _npcSpawner.NPCsSpawned[npcIndex].position;
-                        npcPos.x = _walkingBoundaries[1] * -1f;
-                        _npcSpawner.NPCsSpawned[npcIndex].position = npcPos;
-                    }
-                    // */
                 }
             }
         }
@@ -276,7 +218,8 @@ namespace Parking_A.Gameplay
                     {
                         // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
                         // Check if the NPC has been hit by a vehicle
-                        if (colliderHitInfo.transform.gameObject.layer == _vehicleLayerC)
+                        if (colliderHitInfo.transform.gameObject.layer == _vehicleLayerC
+                            && rayIndex != 0)           // Only register hit from the sides
                         {
                             _npcInfos[npcIndex].NpcStatus |= NPCStatus.NPC_HIT;
                             int vehicleID = -1;
@@ -285,6 +228,7 @@ namespace Parking_A.Gameplay
                             // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
                             GoFlying(npcIndex, colliderHitInfo.transform.forward);
                             GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
+                            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
                             continue;
                         }
 

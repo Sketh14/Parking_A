@@ -570,9 +570,20 @@ CAR PARKING
     [=] NPCSpawner
         {+} Recording all the empty cells gap first
         {+} Then determining which gap to select from the list
+
+- Scripts
+    [=] NPCSpawner
+        {+} Spawning using emptyGapArr
+    [=] NPCController
+        {+} Only register rays after first for vehicle-collision checks
+            <~> To avoid collision if vehicle just passes by in-front.
+    [=] GameManager
+        {+} Setting LEVEL_FAILED to GameStatus if NPC_HIT
+    [=] UniversalConstant
+        {+} Adding NPC_HIT to GameStatus
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
-- [FIX] [IMP] NPCSpawner | Take corners continously
+- [FIXED] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
 - [DO] In-game currency
     [=] Powers to utilize in-game currency

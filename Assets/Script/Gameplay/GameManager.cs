@@ -29,6 +29,9 @@ namespace Parking_A.Gameplay
                 && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) != 0)
                 _gameStatus |= UniversalConstant.GameStatus.LEVEL_GENERATED;
 
+            if ((_gameStatus & UniversalConstant.GameStatus.NPC_HIT) != 0)
+                _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
+
             return GameStatus;
         }
         private UniversalConstant.GameStatus _gameStatus;
