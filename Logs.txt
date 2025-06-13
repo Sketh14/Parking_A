@@ -581,6 +581,26 @@ CAR PARKING
         {+} Setting LEVEL_FAILED to GameStatus if NPC_HIT
     [=] UniversalConstant
         {+} Adding NPC_HIT to GameStatus
+
+- Scripts
+    [=] GameUIManager
+        {+} Reset UI logic
+    [=] GameManager
+        {+} GameStatusChange event
+        {+} Moving InitializeLevel here from VehicleController
+    [=] UniversalConstant
+        {+} RESET_LEVEL for GameStatus enum
+    [=] NPCController
+        {+} Callback for GameStatus change
+            <~> Resetting NPC logic
+        {+} Changing EnvironmentSpawned callback logic
+        {+} Adding InitialPos | InitialRot | InitialStatus to npcInfo for storing initial spawn values 
+    [=] VehicleController
+        {+} Callback for GameStatus change
+            <~> Resetting Vehicle logic
+        {+} Adding InitialPos | InitialRot to vehicleInfo for storing initial spawn values 
+- MainGameplay Scene
+    [=] Basic reset level panel
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously

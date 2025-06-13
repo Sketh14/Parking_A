@@ -18,6 +18,10 @@ namespace Parking_A.Gameplay
             // public bool hasInteracted;
             /// <summary> Left: [-1, 0] | Right: [1, 0] | Up: [0, 1] | Down: [0, -1] </summary>
             public Vector2 InteractedDir;
+
+            public Vector2 InitialPos;
+            public float InitialRot;
+
             public int MarkerIndex;
             /// <summary> 1: Small | 2: Medium | 3: Long </summary>
             public int VehicleType;
@@ -69,6 +73,7 @@ namespace Parking_A.Gameplay
             GameManager.Instance.OnSelect -= VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
             GameManager.Instance.OnNPCHit -= DisableVehicle;
+            GameManager.Instance.OnGameStatusChange -= UpdateVehicles;
         }
 
         private void Start()
@@ -76,38 +81,10 @@ namespace Parking_A.Gameplay
             GameManager.Instance.OnSelect += VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
             GameManager.Instance.OnNPCHit += DisableVehicle;
+            GameManager.Instance.OnGameStatusChange += UpdateVehicles;
 
-            InitializeLevel();
             _vehicleName = new System.Text.StringBuilder();
-        }
-
-        private async void InitializeLevel()
-        {
-            if (_mainGameConfig.RandomizeLevel)
-            {
-                string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
-                    + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
-                GameManager.Instance.RandomSeed = tempRandomSeed;
-                Debug.Log($"Selected Random Seed: {tempRandomSeed}");
-            }
-            else
-                GameManager.Instance.RandomSeed = "SKETH";
-
-            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             _vehicleSpawner = new VehicleSpawner();
-
-            try
-            {
-                // await envSpawner.SpawnBoundary((values) => boundaryData = values);
-                await envSpawner.SpawnBoundary();
-            }
-            //Cannot initialize boundary | Stop level generation, show some message and restart
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
-            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.BOUNDARY_GENERATED);
         }
 
         private async void CallVehicleSpawner(byte[] boundaryData)
@@ -122,11 +99,7 @@ namespace Parking_A.Gameplay
                     Debug.LogError($"Boundary Data is null");
                     return;
                 }
-                await _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) =>
-                {
-                    InitializeVehicleData(vehicleTypes);
-                    GameManager.Instance.OnVehiclesSpawned?.Invoke();
-                });
+                await _vehicleSpawner.SpawnVehicles2(boundaryData, InitializeVehicleData);
             }
             //Cannot initialize vehicles | Stop level generation, show some message and restart
             catch (Exception ex)
@@ -139,17 +112,50 @@ namespace Parking_A.Gameplay
             // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
         }
 
-        private void InitializeVehicleData(in int[] vehicleTypes)
+        private void InitializeVehicleData(int[] vehicleTypes)
         {
             // _vehiclesSpawned = true;
             _vehicleInfos = new VehicleInfo[_vehicleSpawner.VehiclesSpawned.Count];
             for (int i = 0; i < _vehicleInfos.Length; i++)
+            {
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
+                _vehicleInfos[i].InitialPos.Set(_vehicleSpawner.VehiclesSpawned[i].position.x,
+                    _vehicleSpawner.VehiclesSpawned[i].position.z);
+                _vehicleInfos[i].InitialRot = _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.y;
+            }
         }
 
         private void DisableVehicle(int vehicleID)
         {
             _vehicleInfos[vehicleID].VehicleStatus |= VehicleStatus.HIT_NPC;
+        }
+
+        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus)
+        {
+            // Debug.Log($"UpdateVehicles | gameStatus: {gameStatus}");
+            switch (gameStatus)
+            {
+                case UniversalConstant.GameStatus.RESET_LEVEL:
+                    Vector3 vehiclePos, vehicleRot;
+                    for (int i = 0; i < _vehicleInfos.Length; i++)
+                    {
+                        vehiclePos = _vehicleSpawner.VehiclesSpawned[i].position;
+                        vehiclePos.x = _vehicleInfos[i].InitialPos.x;
+                        vehiclePos.z = _vehicleInfos[i].InitialPos.y;
+                        _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
+                        // _vehicleSpawner.VehiclesSpawned[i].position.Set(_vehicleInfos[i].InitialPos.x,
+                        //     _vehicleSpawner.VehiclesSpawned[i].position.y, _vehicleInfos[i].InitialPos.y);
+
+                        vehicleRot = Vector3.zero;
+                        vehicleRot.y = _vehicleInfos[i].InitialRot;
+                        _vehicleSpawner.VehiclesSpawned[i].localEulerAngles = vehicleRot;
+                        // _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.Set(0f, _vehicleInfos[i].InitialRot, 0f);
+
+                        _vehicleInfos[i].VehicleStatus = 0;
+                        _vehicleInfos[i].InteractedDir = Vector2.zero;
+                    }
+                    break;
+            }
         }
 
 #if DEBUG_SLOW_1

@@ -16,6 +16,10 @@ namespace Parking_A.Gameplay
         internal struct NPCInfo
         {
             public NPCStatus NpcStatus;
+
+            public Vector2 InitialPos;
+            public float InitialRot;
+            public byte InitialStatus;
         }
 
         internal enum NPCStatus
@@ -46,23 +50,37 @@ namespace Parking_A.Gameplay
         private void OnDestroy()
         {
             if (_cts != null) _cts.Cancel();
+            GameManager.Instance.OnGameStatusChange -= UpdateNPCs;
+            GameManager.Instance.OnEnvironmentSpawned -= CallNPCSpawner;
         }
 
         private void Start()
         {
             _cts = new CancellationTokenSource();
 
-            InitializeNPCs();
             _npcName = new System.Text.StringBuilder();
+
+            _npcSpawner = new NPCSpawner();
+
+            GameManager.Instance.OnGameStatusChange += UpdateNPCs;
+            GameManager.Instance.OnEnvironmentSpawned += CallNPCSpawner;
         }
 
-        private void InitializeNPCs()
+        private async void CallNPCSpawner(byte[] boundaryData)
         {
-            _npcSpawner = new NPCSpawner();
-            GameManager.Instance.OnEnvironmentSpawned += (boundaryData) =>
+            try
             {
-                _npcSpawner.SpawnNpcs(boundaryData, InitializeNPCData);
-            };
+                if (boundaryData == null)
+                {
+                    Debug.LogError($"Boundary Data is null");
+                    return;
+                }
+                await _npcSpawner.SpawnNpcs(boundaryData, InitializeNPCData);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         // Right: {(1.00, 0.00, 0.00)} | Down: {(0.00, 0.00, -1.00)} | Left: {(-1.00, 0.00, 0.00)} | Up: {(0.00, 0.00, 1.00)}
@@ -79,11 +97,45 @@ namespace Parking_A.Gameplay
                 else if (Mathf.Abs(_npcSpawner.NPCsSpawned[i].forward[0]) >= 0.9f)
                     _npcInfos[i].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
 
+                _npcInfos[i].InitialPos.Set(_npcSpawner.NPCsSpawned[i].position.x,
+                    _npcSpawner.NPCsSpawned[i].position.z);
+                _npcInfos[i].InitialRot = _npcSpawner.NPCsSpawned[i].localEulerAngles.y;
+                _npcInfos[i].InitialStatus = (byte)_npcInfos[i].NpcStatus;
+
                 // Debug.Log($"{_npcSpawner.NPCsSpawned[i].name} | i: {i} | forward-Z: {Mathf.Round(_npcSpawner.NPCsSpawned[i].forward[2])}"
                 //     + $" | Horizontal Status: {_npcInfos[i].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED}");
             }
 
             GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_SPAWNED);
+        }
+
+        private void UpdateNPCs(UniversalConstant.GameStatus gameStatus)
+        {
+            // Debug.Log($"UpdateNPCs | gameStatus: {gameStatus}");
+            switch (gameStatus)
+            {
+                case UniversalConstant.GameStatus.RESET_LEVEL:
+                    Vector3 npcPos, npcRot;
+                    for (int i = 0; i < _npcInfos.Length; i++)
+                    {
+                        npcPos = _npcSpawner.NPCsSpawned[i].position;
+                        npcPos.x = _npcInfos[i].InitialPos.x;
+                        npcPos.z = _npcInfos[i].InitialPos.y;
+                        _npcSpawner.NPCsSpawned[i].position = npcPos;
+                        // _npcSpawner.NPCsSpawned[i].position.Set(_npcInfos[i].InitialPos.x,
+                        //     _npcSpawner.NPCsSpawned[i].position.y, _npcInfos[i].InitialPos.y);
+
+                        npcRot = Vector3.zero;
+                        npcRot.y = _npcInfos[i].InitialRot;
+                        _npcSpawner.NPCsSpawned[i].localEulerAngles = npcRot;
+                        _npcSpawner.NPCsSpawned[i].GetChild(0).localEulerAngles = Vector3.zero;     //.Set(0f, 0f, 0f);
+                        // _npcSpawner.NPCsSpawned[i].GetChild(0).localEulerAngles.Set(0f, _npcInfos[i].InitialRot, 0f);
+
+                        _npcInfos[i].NpcStatus = 0;
+                        _npcInfos[i].NpcStatus = (NPCStatus)_npcInfos[i].InitialStatus;
+                    }
+                    break;
+            }
         }
 
         private void Update()

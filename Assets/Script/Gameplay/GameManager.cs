@@ -1,6 +1,8 @@
 using Parking_A.Global;
 using UnityEngine;
 
+using DateTime = System.DateTime;
+
 namespace Parking_A.Gameplay
 {
     public class GameManager : MonoBehaviour
@@ -21,6 +23,53 @@ namespace Parking_A.Gameplay
         }
         #endregion Singleton
 
+        [SerializeField] private GameConfigScriptableObject _mainGameConfig;
+        private UniversalConstant.GameStatus _gameStatus;
+
+
+        public string RandomSeed;
+        public UniversalConstant.GameStatus GameStatus
+        {
+            get => _gameStatus;
+        }
+        public System.Action<int, Vector2> OnSelect;
+        public System.Action<int> OnNPCHit;
+        public System.Action<UniversalConstant.GameStatus> OnGameStatusChange;
+        public System.Action<byte[]> OnEnvironmentSpawned;
+
+        private void Start()
+        {
+            InitializeLevel();
+        }
+
+        private async void InitializeLevel()
+        {
+            if (_mainGameConfig.RandomizeLevel)
+            {
+                string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
+                    + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
+                RandomSeed = tempRandomSeed;
+                Debug.Log($"Selected Random Seed: {tempRandomSeed}");
+            }
+            else
+                RandomSeed = "SKETH";
+
+            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
+
+            try
+            {
+                // await envSpawner.SpawnBoundary((values) => boundaryData = values);
+                await envSpawner.SpawnBoundary();
+            }
+            //Cannot initialize boundary | Stop level generation, show some message and restart
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
+            SetGameStatus(UniversalConstant.GameStatus.BOUNDARY_GENERATED);
+        }
+
         public UniversalConstant.GameStatus SetGameStatus(UniversalConstant.GameStatus gameStatus)
         {
             _gameStatus |= gameStatus;
@@ -34,17 +83,5 @@ namespace Parking_A.Gameplay
 
             return GameStatus;
         }
-        private UniversalConstant.GameStatus _gameStatus;
-
-
-        public string RandomSeed;
-        public UniversalConstant.GameStatus GameStatus
-        {
-            get => _gameStatus;
-        }
-        public System.Action<int, Vector2> OnSelect;
-        public System.Action OnVehiclesSpawned;
-        public System.Action<int> OnNPCHit;
-        public System.Action<byte[]> OnEnvironmentSpawned;
     }
 }
