@@ -614,6 +614,11 @@ CAR PARKING
         {+} Unsetting TURNING_CORNER in the next execution rather than waiting for condition
         {+} Separating Vehicle | Boundary collision check
             <~> Front for vehicles+boundary | side only for vehicles
+
+- Script
+    [=] NPCController
+        {+} Randomly switch to IDLE when hitting a boundary
+        {+} Fixing IDLE | MOVING NPCStatus values
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously

@@ -24,8 +24,8 @@ namespace Parking_A.Gameplay
 
         internal enum NPCStatus
         {
-            IDLE = 0,
-            MOVING = 1 << 0,
+            IDLE = 1 << 0,
+            MOVING = 1 << 1,
             HORIZONTAL_ALIGNED = 1 << 2,
             TURNING_CORNER = 1 << 3,
             NPC_HIT = 1 << 4,
@@ -40,6 +40,7 @@ namespace Parking_A.Gameplay
         private const float _speedMultC = 0.5f;
         private const int _collisionLayerMaskC = (1 << 6) | (1 << 7);
         private const int _vehicleLayerMaskC = 1 << 6;
+        private const float _idleThreshold = 0.35f;
         private readonly float[] _walkingBoundaries = { 10.25f, 5.25f };                 //Vertical | Horizontal
         private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
 
@@ -97,6 +98,7 @@ namespace Parking_A.Gameplay
                 else if (Mathf.Abs(_npcSpawner.NPCsSpawned[i].forward[0]) >= 0.9f)
                     _npcInfos[i].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
 
+                _npcInfos[i].NpcStatus |= NPCStatus.MOVING;
                 _npcInfos[i].InitialPos.Set(_npcSpawner.NPCsSpawned[i].position.x,
                     _npcSpawner.NPCsSpawned[i].position.z);
                 _npcInfos[i].InitialRot = _npcSpawner.NPCsSpawned[i].localEulerAngles.y;
@@ -169,7 +171,8 @@ namespace Parking_A.Gameplay
             Vector3 npcPos, npcRot;
             for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
             {
-                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0) continue;
+                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0
+                    || (_npcInfos[npcIndex].NpcStatus & NPCStatus.IDLE) != 0) continue;
 
                 _npcSpawner.NPCsSpawned[npcIndex].position += _npcSpawner.NPCsSpawned[npcIndex].forward * Time.deltaTime * _speedMultC;
 
@@ -197,7 +200,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Name: {_npcSpawner.NPCsSpawned[npcIndex].name} | Border Reached | npcPos: {npcPos}"
                         //     + $" | npcRot: {npcRot} | status: {_npcInfos[npcIndex].NpcStatus}");
                     }
-                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.z) <= _walkingBoundaries[0])
+                    else    // if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.z) <= _walkingBoundaries[0])
                     {
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
@@ -223,7 +226,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Name: {_npcSpawner.NPCsSpawned[npcIndex].name} | Border Reached | npcPos: {npcPos}"
                         //     + $" | npcRot: {npcRot} | status: {_npcInfos[npcIndex].NpcStatus}");
                     }
-                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.x) <= _walkingBoundaries[1])
+                    else    // if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.x) <= _walkingBoundaries[1])
                     {
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
@@ -281,6 +284,14 @@ namespace Parking_A.Gameplay
                         npcRot.y = 90 * -1 * (int)_npcSpawner.NPCsSpawned[npcIndex].forward[0];
 
                     _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
+
+                    if (UnityEngine.Random.Range(0f, 1f) < _idleThreshold)
+                    {
+                        _npcInfos[npcIndex].NpcStatus |= NPCStatus.IDLE;
+                        _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.MOVING;
+                        _ = StartMoving(npcIndex);
+                        // Debug.Log($"Idling | npcIndex: {npcIndex} | Status: {_npcInfos[npcIndex].NpcStatus}");
+                    }
                 }
 
                 //Rotate the rayDir according to NPC Orientation
@@ -331,6 +342,18 @@ namespace Parking_A.Gameplay
                 // rayDir.z = rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3];
                 // }
             }
+        }
+
+        /// <summary>
+        /// Start Moving after a delay
+        /// </summary>
+        /// <param name="npcIndex"> Index of NPC</param>
+        private async Task StartMoving(int npcIndex)
+        {
+            const int delayInSec = 2;
+            await Task.Delay(delayInSec * 1000);
+            _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.IDLE;
+            _npcInfos[npcIndex].NpcStatus |= NPCStatus.MOVING;
         }
 
         // Throw NPC in the direction of being hit
