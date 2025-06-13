@@ -17,17 +17,12 @@ namespace Parking_A.Gameplay
                 _instance = this;
             else
                 Destroy(this.gameObject);
-
-            RandomSeed = "";
-
         }
         #endregion Singleton
 
-        [SerializeField] private GameConfigScriptableObject _mainGameConfig;
+        public GameConfigScriptableObject MainGameConfig;
         private UniversalConstant.GameStatus _gameStatus;
 
-
-        public string RandomSeed;
         public UniversalConstant.GameStatus GameStatus
         {
             get => _gameStatus;
@@ -44,15 +39,13 @@ namespace Parking_A.Gameplay
 
         private async void InitializeLevel()
         {
-            if (_mainGameConfig.RandomizeLevel)
+            if (MainGameConfig.RandomizeLevel)
             {
                 string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
                     + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
-                RandomSeed = tempRandomSeed;
+                MainGameConfig.RandomString = tempRandomSeed;
                 Debug.Log($"Selected Random Seed: {tempRandomSeed}");
             }
-            else
-                RandomSeed = "SKETH";
 
             EnvironmentSpawner envSpawner = new EnvironmentSpawner();
 

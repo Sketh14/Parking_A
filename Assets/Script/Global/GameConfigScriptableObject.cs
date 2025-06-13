@@ -4,4 +4,5 @@ using UnityEngine;
 public class GameConfigScriptableObject : ScriptableObject
 {
     public bool RandomizeLevel = false;
+    public string RandomString = "";
 }

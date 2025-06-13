@@ -28,7 +28,7 @@ namespace Parking_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
-            Random.InitState(GameManager.Instance.RandomSeed.GetHashCode());
+            Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
             // Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;

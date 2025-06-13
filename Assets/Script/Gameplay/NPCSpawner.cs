@@ -198,14 +198,14 @@ namespace Parking_A.Gameplay
                 emptyCellCount++;
             }
 
-            System.Text.StringBuilder debugGapString = new System.Text.StringBuilder();
+            // System.Text.StringBuilder debugGapString = new System.Text.StringBuilder();
             for (int gapIndex = 0; gapIndex < emptyGapArr.Length; gapIndex++)
             {
                 emptyGapArr[gapIndex] /= 1000;
-                debugGapString.Append($"{emptyGapArr[gapIndex]}, ");
+                // debugGapString.Append($"{emptyGapArr[gapIndex]}, ");
             }
 
-            Debug.Log($"Empty Cells Found: {debugGapString}");
+            // Debug.Log($"Empty Cells Found: {debugGapString}");
             #endregion Record_Empty_Cell
 
             // /*

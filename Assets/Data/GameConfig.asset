@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   RandomizeLevel: 0
+  RandomString: 1316642

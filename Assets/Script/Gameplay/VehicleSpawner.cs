@@ -240,7 +240,7 @@ namespace Parking_A.Gameplay
 #endif
 
             List<int> addedVehicleTypes = new List<int>();
-            Random.InitState(GameManager.Instance.RandomSeed.GetHashCode());
+            Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
             // Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;

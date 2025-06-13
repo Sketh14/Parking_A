@@ -601,6 +601,12 @@ CAR PARKING
         {+} Adding InitialPos | InitialRot to vehicleInfo for storing initial spawn values 
 - MainGameplay Scene
     [=] Basic reset level panel
+
+- Script
+    [=] GameConfigScriptableObject
+        {+} Adding string for Random Seed
+    [=] VehicleSpawner | EnvironmentSpawner
+        {+} Replacing Random Seed ref with Game Config ref
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
@@ -704,3 +710,7 @@ REVERSE CHECK
 44[0] ,45[0] ,46[0] ,47[0] ,48[0] ,49[0] ,50[0] ,51[0] ,52[0] ,53[4] ,54[4] ,55[0] ,56[0] ,57[4] ,58[4] ,59[4] ,60[4] ,61[4] ,
 62[4] ,63[0] ,64[0] ,65[0] ,66[0] ,67[4] ,68[4] ,69[0] ,70[0] ,71[0] ,72[4] ,73[4] ,74[4] ,75[4] ,76[4] ,77[4] ,78[4] ,79[4] ,
 80[0] ,81[0] ,82[0] ,83[0] ,
+
+SPAWN_CHECK
+1316619 | 1316642 | 1316717 | 1316735 | 13161116 | 13161124 | 13161142 | 13161148 | 13161154 | 1316121
+Problem: 1316642
