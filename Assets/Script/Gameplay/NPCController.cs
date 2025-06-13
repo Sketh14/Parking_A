@@ -39,7 +39,7 @@ namespace Parking_A.Gameplay
 
         private const float _speedMultC = 0.5f;
         private const int _collisionLayerMaskC = (1 << 6) | (1 << 7);
-        private const int _vehicleLayerC = 6;
+        private const int _vehicleLayerMaskC = 1 << 6;
         private readonly float[] _walkingBoundaries = { 10.25f, 5.25f };                 //Vertical | Horizontal
         private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
 
@@ -197,7 +197,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Name: {_npcSpawner.NPCsSpawned[npcIndex].name} | Border Reached | npcPos: {npcPos}"
                         //     + $" | npcRot: {npcRot} | status: {_npcInfos[npcIndex].NpcStatus}");
                     }
-                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.z) <= _walkingBoundaries[0] - 0.5f)
+                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.z) <= _walkingBoundaries[0])
                     {
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
@@ -223,7 +223,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Name: {_npcSpawner.NPCsSpawned[npcIndex].name} | Border Reached | npcPos: {npcPos}"
                         //     + $" | npcRot: {npcRot} | status: {_npcInfos[npcIndex].NpcStatus}");
                     }
-                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.x) <= _walkingBoundaries[1] - 0.5f)
+                    else if (Mathf.Abs(_npcSpawner.NPCsSpawned[npcIndex].position.x) <= _walkingBoundaries[1])
                     {
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.TURNING_CORNER;
                     }
@@ -260,71 +260,76 @@ namespace Parking_A.Gameplay
                 // + _npcSpawner.NPCsSpawned[npcIndex].forward * (UniversalConstant._CellHalfSizeC / 2f);
                 rayDir = _npcSpawner.NPCsSpawned[npcIndex].forward;
 
-                for (int rayIndex = 0; rayIndex < 2; rayIndex++)
-                {
+                // for (int rayIndex = 0; rayIndex < 2; rayIndex++)
+                // {
 
 #if COLLISIONCHECK_DEBUG
-                    Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
+                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
 #endif
-                    if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
-                    {
-                        // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
-                        // Check if the NPC has been hit by a vehicle
-                        if (colliderHitInfo.transform.gameObject.layer == _vehicleLayerC
-                            && rayIndex != 0)           // Only register hit from the sides
-                        {
-                            _npcInfos[npcIndex].NpcStatus |= NPCStatus.NPC_HIT;
-                            int vehicleID = -1;
-                            int.TryParse(colliderHitInfo.transform.name.Substring(12, 3)
-                                , out vehicleID);
-                            // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
-                            GoFlying(npcIndex, colliderHitInfo.transform.forward);
-                            GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
-                            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
-                            continue;
-                        }
+                // If collided with anything, turn the NPC around
+                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
+                {
+                    // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
 
-                        // If collided, turn the NPC around
-                        npcRot = Vector3.zero;
+                    npcRot = Vector3.zero;
 
-                        // VERTICAL
-                        if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED) == 0)
-                            npcRot.y = 90 * (1 + (int)_npcSpawner.NPCsSpawned[npcIndex].forward[2]);
-                        // HORIZONTAL
-                        else
-                            npcRot.y = 90 * -1 * (int)_npcSpawner.NPCsSpawned[npcIndex].forward[0];
-
-                        _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
-                    }
-
-                    //Rotate the rayDir according to NPC Orientation
-                    // Debug.Log($"rayDir: {rayDir} | rayIndex: {rayIndex} | x: {rayDir.x} | z: {rayDir.z}");
-
-                    // Remove [if-else] if possible
-                    //Rotate Clockwise
-                    if ((_npcSpawner.NPCsSpawned[npcIndex].forward.x > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z > 0.5)           // HORIZONTAL_UP
-                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.z < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x > 0.5)       // VERTICAL_RIGHT
-                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.x < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z < -0.5)      // HORIZONTAL_DOWN
-                        || (_npcSpawner.NPCsSpawned[npcIndex].forward.z > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x < -0.5))      // VERTICAL_LEFT
-                    {
-                        rayDir.Set(
-                            rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2],
-                            rayDir.y,
-                            rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3]
-                        );
-                    }
-                    //Rotate Counter-Clockwise
+                    // VERTICAL
+                    if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED) == 0)
+                        npcRot.y = 90 * (1 + (int)_npcSpawner.NPCsSpawned[npcIndex].forward[2]);
+                    // HORIZONTAL
                     else
-                    {
-                        rayDir.Set(
-                            rayDir.x * _rotationMatrixBy90CW[3] + rayDir.z * _rotationMatrixBy90CW[1],
-                            rayDir.y,
-                            rayDir.x * _rotationMatrixBy90CW[2] + rayDir.z * _rotationMatrixBy90CW[0]
-                        );
-                    }
-                    // rayDir.x = rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2];
-                    // rayDir.z = rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3];
+                        npcRot.y = 90 * -1 * (int)_npcSpawner.NPCsSpawned[npcIndex].forward[0];
+
+                    _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
                 }
+
+                //Rotate the rayDir according to NPC Orientation
+                // Debug.Log($"rayDir: {rayDir} | rayIndex: {rayIndex} | x: {rayDir.x} | z: {rayDir.z}");
+
+                // Remove [if-else] if possible
+                //Rotate Clockwise
+                if ((_npcSpawner.NPCsSpawned[npcIndex].forward.x > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z > 0.5)           // HORIZONTAL_UP
+                    || (_npcSpawner.NPCsSpawned[npcIndex].forward.z < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x > 0.5)       // VERTICAL_RIGHT
+                    || (_npcSpawner.NPCsSpawned[npcIndex].forward.x < -0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.z < -0.5)      // HORIZONTAL_DOWN
+                    || (_npcSpawner.NPCsSpawned[npcIndex].forward.z > 0.5 && _npcSpawner.NPCsSpawned[npcIndex].position.x < -0.5))      // VERTICAL_LEFT
+                {
+                    rayDir.Set(
+                        rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2],
+                        rayDir.y,
+                        rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3]
+                    );
+                }
+                //Rotate Counter-Clockwise
+                else
+                {
+                    rayDir.Set(
+                        rayDir.x * _rotationMatrixBy90CW[3] + rayDir.z * _rotationMatrixBy90CW[1],
+                        rayDir.y,
+                        rayDir.x * _rotationMatrixBy90CW[2] + rayDir.z * _rotationMatrixBy90CW[0]
+                    );
+                }
+
+#if COLLISIONCHECK_DEBUG
+                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
+#endif
+                // Only register hit from the sides
+                // Check if the NPC has been hit by a vehicle
+                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _vehicleLayerMaskC))
+                {
+                    // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
+                    _npcInfos[npcIndex].NpcStatus |= NPCStatus.NPC_HIT;
+                    int vehicleID = -1;
+                    int.TryParse(colliderHitInfo.transform.name.Substring(12, 3), out vehicleID);
+                    // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
+
+                    GoFlying(npcIndex, colliderHitInfo.transform.forward);
+                    GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
+                }
+
+                // rayDir.x = rayDir.x * _rotationMatrixBy90CW[0] + rayDir.z * _rotationMatrixBy90CW[2];
+                // rayDir.z = rayDir.x * _rotationMatrixBy90CW[1] + rayDir.z * _rotationMatrixBy90CW[3];
+                // }
             }
         }
 

@@ -607,6 +607,13 @@ CAR PARKING
         {+} Adding string for Random Seed
     [=] VehicleSpawner | EnvironmentSpawner
         {+} Replacing Random Seed ref with Game Config ref
+
+- Script
+    [=] NPCController
+        {+} Fixing Corner spawn | NPC stuck rotating if boundary is at the corner
+        {+} Unsetting TURNING_CORNER in the next execution rather than waiting for condition
+        {+} Separating Vehicle | Boundary collision check
+            <~> Front for vehicles+boundary | side only for vehicles
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
