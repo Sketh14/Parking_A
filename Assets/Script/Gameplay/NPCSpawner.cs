@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using Parking_A.Global;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Parking_A.Gameplay
 {
@@ -30,8 +31,15 @@ namespace Parking_A.Gameplay
         private const int _totalNPCsCountC = 4;
         private const int _minGapC = 4;
 
+        private CancellationTokenSource _cts;
+        ~NPCSpawner()
+        {
+            _cts.Cancel();
+        }
+
         public NPCSpawner()
         {
+            _cts = new CancellationTokenSource();
             // TestSwapping();
             // TestSwapping2();
             _npcsSpawned = new List<Transform>();
@@ -53,6 +61,7 @@ namespace Parking_A.Gameplay
             // - To make it easy, we will make it [Up -> Right -> Down -> Left], in a clockwise direction
             // - After that, we can search for min-gaps even if 1 side does not contain enough empty cells
 
+            #region Boundary_Swap
 #if BOUNDARY_SWAP_DEBUG
             System.Text.StringBuilder debugBoundary = new System.Text.StringBuilder();
 #endif
@@ -122,8 +131,9 @@ namespace Parking_A.Gameplay
                 debugBoundary.Append($"{i}[{boundaryData[i]}] ,");
             Debug.Log($"After Swap : {debugBoundary}");
 #endif
+            #endregion Boundary_Swap
 
-            int npcCount = 0, emptyCell = 0;
+            int npcCount = 0, emptyCellCount = 0;
             GameObject npc;
             Vector3 spawnPos, spawnRot;
             System.Text.StringBuilder npcName = new System.Text.StringBuilder();
@@ -154,21 +164,65 @@ namespace Parking_A.Gameplay
             // return;
             // Debug.Log($"Horiontal Down Start | {UniversalConstant._GridXC + UniversalConstant._GridYC - 2}");
 
-            // Top / Bottom grid cells
+            #region Record_Empty_Cell
+
+            // Record all the empty cells above the gap threshold
+            int[] emptyGapArr = new int[10];
+            int tempSortNum = 0;
+            for (int bIndex = 0, gapIndex = 0; bIndex < boundaryData.Length - 1; bIndex++)        //Last cell is empty and out-of-index
+            {
+                //Check if the cell is empty
+                if (boundaryData[bIndex] != 0)
+                {
+                    if (emptyCellCount >= _minGapC && gapIndex < emptyGapArr.Length)
+                    {
+                        emptyGapArr[gapIndex] = (bIndex - 1) * 1000 + emptyCellCount;           //Record count also
+
+                        // Simultaneously sort the emptyGapArr in Descending Order, so that later becomes easier to select
+                        for (int i = gapIndex; i > 0; i--)
+                        {
+                            if ((emptyGapArr[i] % 1000) > (emptyGapArr[i - 1] % 1000))
+                            {
+                                tempSortNum = emptyGapArr[i];
+                                emptyGapArr[i] = emptyGapArr[i - 1];
+                                emptyGapArr[i - 1] = tempSortNum;
+                            }
+                        }
+
+                        gapIndex++;
+                    }
+                    emptyCellCount = 0;
+                    continue;
+                }
+
+                emptyCellCount++;
+            }
+
+            System.Text.StringBuilder debugGapString = new System.Text.StringBuilder();
+            for (int gapIndex = 0; gapIndex < emptyGapArr.Length; gapIndex++)
+            {
+                emptyGapArr[gapIndex] /= 1000;
+                debugGapString.Append($"{emptyGapArr[gapIndex]}, ");
+            }
+
+            Debug.Log($"Empty Cells Found: {debugGapString}");
+            #endregion Record_Empty_Cell
+
+            /*
             for (int bIndex = 0; bIndex < boundaryData.Length - 1 && (_npcSpawnStatus & NPCStatus.TOTAL_SPAWNED) == 0; bIndex++)
             {
                 //Check if the cell is empty
                 if (boundaryData[bIndex] != 0)
                 {
-                    emptyCell = 0;
+                    emptyCellCount = 0;
                     continue;
                 }
 
-                emptyCell++;
+                emptyCellCount++;
                 spawnPos = spawnRot = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner
-                if (emptyCell == _minGapC)
+                if (emptyCellCount == _minGapC)
                 {
                     // Record current index somewhere to be used later?
                     // emptyCell = 0;
@@ -253,6 +307,90 @@ namespace Parking_A.Gameplay
 
                 await Task.Yield();
             }
+            // */
+
+            // /*
+            for (int gapIndex = 0; gapIndex < emptyGapArr.Length && npcCount <= _totalNPCsCountC; gapIndex++)
+            {
+                spawnPos = spawnRot = Vector3.zero;
+                // Should be such that, the NPCs spawn at the four corners mostly
+                // No 2 NPCs at the same corner
+
+
+                // Vertical | Left [84 - 125]
+                if (gapIndex >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                {
+                    spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+                    spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                        + ((gapIndex - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
+                        % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+
+                    spawnRot.y = 0f;
+
+                    _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_LEFT;
+                    _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;
+                    npcName.Clear();
+                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_V");
+                    // npc.name = $"NPC[{bIndex}]_V";
+                }
+                // Horizontal | Down [62 - 83]
+                else if (gapIndex >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
+                {
+                    spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
+                        - ((gapIndex - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
+                        % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                    spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+
+                    spawnRot.y = 270f;
+
+                    _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_DOWN;
+                    npcName.Clear();
+                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_H");
+                    // npc.name = $"NPC[{bIndex}]_H";
+                }
+                // Vertical | Right [22 - 61]
+                else if (gapIndex >= UniversalConstant._GridXC)
+                {
+                    spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
+                    spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
+                        - ((gapIndex - UniversalConstant._GridXC)
+                        % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+
+                    spawnRot.y = 180f;
+
+                    _npcSpawnStatus |= NPCStatus.SPAWNED_VERTICAL_RIGHT;
+                    // _npcSpawnStatus |= NPCStatus.TOTAL_SPAWNED;                 //TESTING
+                    npcName.Clear();
+                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_V");
+                    // npc.name = $"NPC[{bIndex}]_V";
+                }
+                // Horizontal | Up [0 - 21]
+                else
+                {
+                    spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
+                        + (gapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                    spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
+
+                    spawnRot.y = 90f;
+
+                    _npcSpawnStatus |= NPCStatus.SPAWNED_HORIZONTAL_UP;
+                    npcName.Clear();
+                    npcName.Append($"NPC[{gapIndex}]_[{npcCount}]_H");
+                    // npc.name = $"NPC[{bIndex}]_H";
+                }
+
+                npc = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC].Get();
+                _npcsSpawned.Add(npc.transform);
+                npc.transform.position = spawnPos;
+                npc.transform.localEulerAngles = spawnRot;
+                npc.name = npcName.ToString();
+                npcCount++;
+
+                // Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
+                await Task.Yield();
+            }
+            // */
+
             Debug.Log($"Spawning NPCs Finished");
             OnNpcsSpawned?.Invoke();
         }

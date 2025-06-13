@@ -562,8 +562,16 @@ CAR PARKING
         {+} Tumble logic when hit
 - Scene
     [=] NPCprefab change
+    
 --------------------------------------------------------------------------------------------------------------
-- [DO] Tumble NPC when hit and goes flying
+                                                    13 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Recording all the empty cells gap first
+        {+} Then determining which gap to select from the list
+--------------------------------------------------------------------------------------------------------------
+- [DONE] Tumble NPC when hit and goes flying
 - [FIX] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
 - [DO] In-game currency
