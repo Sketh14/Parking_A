@@ -166,7 +166,7 @@ namespace Parking_A.Gameplay
 
         public async Task SpawnVehicles2(byte[] boundaryData, Action<int[]> onVehiclesSpawned)
         {
-            Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
+            // Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
             byte[] gridMap = new byte[UniversalConstant._GridXC * UniversalConstant._GridYC];
 
@@ -240,7 +240,7 @@ namespace Parking_A.Gameplay
 #endif
 
             List<int> addedVehicleTypes = new List<int>();
-            Random.InitState(GameManager.Instance.RandomSeed.GetHashCode());
+            Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
             // Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
@@ -360,7 +360,8 @@ namespace Parking_A.Gameplay
                         spawnRot.y = -90f;
 
                         //By default, the car will be placed in the left-orientation
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % UniversalConstant._GridXC * 0.5f);
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
+                            + (gridMapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         goto case 4;
 
                     //Check Right
@@ -368,14 +369,16 @@ namespace Parking_A.Gameplay
                         xDir = 1;
                         spawnRot.y = 90f;
 
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (0.25f * (vehicleType - 1)) + (gridMapIndex % UniversalConstant._GridXC * 0.5f) + (0.5f * vehicleType);
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
+                            + (gridMapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2)) + (UniversalConstant._CellHalfSizeC * 2 * vehicleType);
                         // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
                         goto case 4;
 
                     //Check Horizontal Pairs
                     case 4:
                         //Both will be down in Y for horizontal pair
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (gridMapIndex / UniversalConstant._GridXC * 0.5f) - 0.5f;
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (gridMapIndex / UniversalConstant._GridXC
+                            * (UniversalConstant._CellHalfSizeC * 2)) - (UniversalConstant._CellHalfSizeC * 2);
                         // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
 
                         // /*
@@ -439,7 +442,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{vehicleCount:D3}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);
@@ -452,7 +455,8 @@ namespace Parking_A.Gameplay
                         yDir = -1;
                         spawnRot.y = 0f;
 
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / UniversalConstant._GridXC * 0.5f);
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
+                            - (gridMapIndex / UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
                         goto case 5;
 
                     // Check down
@@ -460,13 +464,15 @@ namespace Parking_A.Gameplay
                         yDir = 1;
                         spawnRot.y = 180f;
 
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (0.25f * (vehicleType - 1)) - (gridMapIndex / UniversalConstant._GridXC * 0.5f) - (0.5f * vehicleType);
+                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
+                            - (gridMapIndex / UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2)) - (UniversalConstant._CellHalfSizeC * 2 * vehicleType);
                         goto case 5;
 
                     //Check vertical pairs
                     case 5:
                         //Both will be right in X for Vertical pair
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._GridXC * 0.5f) + 0.5f;
+                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._GridXC
+                            * (UniversalConstant._CellHalfSizeC * 2)) + (UniversalConstant._CellHalfSizeC * 2);
                         xDir = 1;
 
                         //Check if vehicle can exit the parking lot
@@ -522,7 +528,7 @@ namespace Parking_A.Gameplay
                         }
 
                         _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);
-                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{gridMapIndex}]O[{vehicleOrientation}]_00";
+                        _vehiclesSpawned[vehicleCount].name = $"Vehicle[{vehicleType}]I[{vehicleCount:D3}]O[{vehicleOrientation}]_00";
                         _vehiclesSpawned[vehicleCount].position = spawnPos;
                         _vehiclesSpawned[vehicleCount].localEulerAngles = spawnRot;
                         addedVehicleTypes.Add(vehicleType);
@@ -546,7 +552,7 @@ namespace Parking_A.Gameplay
                 await Task.Yield();
             }
 
-            Debug.Log($"Spawning Finished");
+            Debug.Log($"Spawning Vehicles Finished");
             onVehiclesSpawned?.Invoke(addedVehicleTypes.ToArray());
         }
 

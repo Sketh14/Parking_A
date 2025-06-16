@@ -1,7 +1,7 @@
 #define COLLISION_DEBUG_DRAW_2
 #define COLLISION_DEBUG_DRAW_1
 #define CORNER_COLLISION_DEBUG_DRAW_1
-#define DEBUG_SLOW_1
+// #define DEBUG_SLOW_1
 
 using System;
 using System.Runtime.CompilerServices;
@@ -18,6 +18,10 @@ namespace Parking_A.Gameplay
             // public bool hasInteracted;
             /// <summary> Left: [-1, 0] | Right: [1, 0] | Up: [0, 1] | Down: [0, -1] </summary>
             public Vector2 InteractedDir;
+
+            public Vector2 InitialPos;
+            public float InitialRot;
+
             public int MarkerIndex;
             /// <summary> 1: Small | 2: Medium | 3: Long </summary>
             public int VehicleType;
@@ -39,6 +43,7 @@ namespace Parking_A.Gameplay
             CORNER_FREE = 1 << 7,
             // COLLIDED_PARKING = 1 << 8,
             COLLIDED_ONBOARDING = 1 << 8,
+            HIT_NPC = 1 << 9,
         }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
@@ -67,49 +72,23 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
+            GameManager.Instance.OnNPCHit -= DisableVehicle;
+            GameManager.Instance.OnGameStatusChange -= UpdateVehicles;
         }
 
         private void Start()
         {
             GameManager.Instance.OnSelect += VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
+            GameManager.Instance.OnNPCHit += DisableVehicle;
+            GameManager.Instance.OnGameStatusChange += UpdateVehicles;
 
-
-            InitializeLevel();
             _vehicleName = new System.Text.StringBuilder();
-        }
-
-        private async void InitializeLevel()
-        {
-            if (_mainGameConfig.RandomizeLevel)
-            {
-                string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
-                    + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
-                GameManager.Instance.RandomSeed = tempRandomSeed;
-                Debug.Log($"Selected Random Seed: {tempRandomSeed}");
-            }
-            else
-                GameManager.Instance.RandomSeed = "SKETH";
-
-            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
             _vehicleSpawner = new VehicleSpawner();
-
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.BOUNDARY_GENERATION;
-            try
-            {
-                // await envSpawner.SpawnBoundary((values) => boundaryData = values);
-                await envSpawner.SpawnBoundary();
-            }
-            //Cannot initialize boundary | Stop level generation, show some message and restart
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
         }
 
         private async void CallVehicleSpawner(byte[] boundaryData)
         {
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNING;
             try
             {
                 // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
@@ -120,11 +99,7 @@ namespace Parking_A.Gameplay
                     Debug.LogError($"Boundary Data is null");
                     return;
                 }
-                await _vehicleSpawner.SpawnVehicles2(boundaryData, (vehicleTypes) =>
-                {
-                    InitializeVehicleData(vehicleTypes);
-                    GameManager.Instance.OnVehiclesSpawned?.Invoke();
-                });
+                await _vehicleSpawner.SpawnVehicles2(boundaryData, InitializeVehicleData);
             }
             //Cannot initialize vehicles | Stop level generation, show some message and restart
             catch (Exception ex)
@@ -132,15 +107,55 @@ namespace Parking_A.Gameplay
                 Debug.LogException(ex);
             }
 
-            GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.VEHICLE_SPAWNED;
+            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_SPAWNED);
+            // GameManager.Instance.GameStatus |= Global.UniversalConstant.GameStatus.LEVEL_GENERATED;
         }
 
-        private void InitializeVehicleData(in int[] vehicleTypes)
+        private void InitializeVehicleData(int[] vehicleTypes)
         {
             // _vehiclesSpawned = true;
             _vehicleInfos = new VehicleInfo[_vehicleSpawner.VehiclesSpawned.Count];
             for (int i = 0; i < _vehicleInfos.Length; i++)
+            {
                 _vehicleInfos[i].VehicleType = vehicleTypes[i];
+                _vehicleInfos[i].InitialPos.Set(_vehicleSpawner.VehiclesSpawned[i].position.x,
+                    _vehicleSpawner.VehiclesSpawned[i].position.z);
+                _vehicleInfos[i].InitialRot = _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.y;
+            }
+        }
+
+        private void DisableVehicle(int vehicleID)
+        {
+            _vehicleInfos[vehicleID].VehicleStatus |= VehicleStatus.HIT_NPC;
+        }
+
+        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus)
+        {
+            // Debug.Log($"UpdateVehicles | gameStatus: {gameStatus}");
+            switch (gameStatus)
+            {
+                case UniversalConstant.GameStatus.RESET_LEVEL:
+                    Vector3 vehiclePos, vehicleRot;
+                    for (int i = 0; i < _vehicleInfos.Length; i++)
+                    {
+                        vehiclePos = _vehicleSpawner.VehiclesSpawned[i].position;
+                        vehiclePos.x = _vehicleInfos[i].InitialPos.x;
+                        vehiclePos.z = _vehicleInfos[i].InitialPos.y;
+                        _vehicleSpawner.VehiclesSpawned[i].position = vehiclePos;
+                        // _vehicleSpawner.VehiclesSpawned[i].position.Set(_vehicleInfos[i].InitialPos.x,
+                        //     _vehicleSpawner.VehiclesSpawned[i].position.y, _vehicleInfos[i].InitialPos.y);
+
+                        vehicleRot = Vector3.zero;
+                        vehicleRot.y = _vehicleInfos[i].InitialRot;
+                        _vehicleSpawner.VehiclesSpawned[i].localEulerAngles = vehicleRot;
+                        // _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.Set(0f, _vehicleInfos[i].InitialRot, 0f);
+
+                        _vehicleInfos[i].VehicleStatus = 0;
+                        _vehicleInfos[i].InteractedDir = Vector2.zero;
+                    }
+                    break;
+            }
         }
 
 #if DEBUG_SLOW_1
@@ -237,7 +252,8 @@ namespace Parking_A.Gameplay
             {
                 // if (vehicleInfos[i].hasInteracted)
                 //Check if the vehicle has been interacted with and has not reached the road
-                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) != 0
+                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) == 0
+                    && (_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) != 0
                     && (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) == 0
                     && (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0)
                 {
@@ -445,11 +461,12 @@ namespace Parking_A.Gameplay
 
             Vector3 rayStartPos, rayDir, vehiclePos;
             RaycastHit colliderHitInfo;
-            int vehicleStatus;
+            // int vehicleStatus;
             for (int i = 0; i < _vehicleInfos.Length; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0
+                if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                    || (_vehicleInfos[i].VehicleStatus & VehicleStatus.INTERACTED) == 0
                     || (_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0)
                     // || (_vehicleInfos[i].VehicleStatus & VehicleStatus.COLLIDED_PARKING) != 0)
                     continue;
@@ -521,8 +538,8 @@ namespace Parking_A.Gameplay
                             //          . So as to check if there is any incoming vehicle or not and if the passing vehicle is gone
                         }
 
-                        int.TryParse(colliderHitInfo.transform.name[(colliderHitInfo.transform.name.Length - 2)..]
-                            , out vehicleStatus);
+                        // int.TryParse(colliderHitInfo.transform.name[(colliderHitInfo.transform.name.Length - 2)..]
+                        //     , out vehicleStatus);
                         // [colliderHitInfo.transform.name.Length - 1] - '0';
 
                         // Debug.Log($"Hit | Point: {colliderHitInfo.point} | name: {colliderHitInfo.transform.name}"
@@ -559,7 +576,8 @@ namespace Parking_A.Gameplay
             for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if (((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
+                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                    || ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
                     && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_ROAD) == 0)
                     || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.CORNER_COLLIDED) != 0)
                     continue;

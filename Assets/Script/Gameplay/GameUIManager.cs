@@ -1,16 +1,30 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-public class GameUIManager : MonoBehaviour
+namespace Parking_A.Gameplay
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class GameUIManager : MonoBehaviour
     {
-        
-    }
+        [SerializeField] private Button _resetLevelBt;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [SerializeField] private GameObject _levelFailedPanel;
+
+        private void OnDestroy()
+        {
+
+        }
+
+        private void Start()
+        {
+            GameManager.Instance.OnNPCHit += (dummyVal) => { _levelFailedPanel.gameObject.SetActive(true); };
+            _resetLevelBt.onClick.AddListener(ResetUI);
+        }
+
+        private void ResetUI()
+        {
+            GameManager.Instance.OnGameStatusChange?.Invoke(Global.UniversalConstant.GameStatus.RESET_LEVEL);
+
+            _levelFailedPanel.SetActive(false);
+        }
     }
 }

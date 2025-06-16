@@ -434,10 +434,57 @@ CAR PARKING
     [=] VehicleController
         {+} Checking corner again if the vehicle collides with another before exiting the corner
 
+- Scripts
+    [=] NPCController
+        {+} Template for Controller
+    [=] NPCSpawner
+        {+} Separate spawner for spawning NPCs
+    [=] VehicleController
+        {+} Adding EnvironmentSpawned callback
+    [=] GameManager
+        {+} Adding action for VehicleSpawned and EnvironmentSpawned
 
+- Scripts
+    [=] Fixing constants | naming
+
+- Scripts
+    [=] PoolManager
+        {+} Adding NPC to PoolType
+    [=] VehicleController
+        {+} Separating VehicleSpawner with EnvironmentSpawned callback
+- Project
+    [=] NPC prefab placeholder
+- MainGameplay Scene
+    [=] Adding Npc prefab to PoolManager
+
+- Scripts
+    [=] EnvironmentSpawner
+        {+} Local const for better readability somewhat
+    [=] NPCSpawner
+        {+} Arranging boundary in clockwise direction for finding connecting gaps
+    [=] UniversalConstant
+        {+} Adding half-cell size constant
+    [=] VehicleController
+        {+} Replacing half-cell size local ref with UniversalConstant ref
+
+- Scripts
+    [=] NPCSpawner
+        {+} Spawn position logic according to boundary index
+    [=] VehicleSpawner
+        {+} Replacing values with references 
 --------------------------------------------------------------------------------------------------------------
                                                     11 JUNE 2025
 --------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Fixing spawn position logic | Left/Down
+
+- Scripts
+    [=] NPCSpawner
+        {+} Adding NpcStatus enum
+        {+} Only spawning at 3 empty cells gap and resetting after hitting occupied one
+        {+} Setting NpcStatus for every spawn direction/orientation?
+
 - Scripts
     [=] Pool Scriptable-Object
         {+} Contains poolType and prefab
@@ -450,7 +497,140 @@ CAR PARKING
 - Scene
     [=] Creating asset for Vehicles/Boundary in SO
 
+- Scripts
+    [=] NPCSpawner
+        {+} Adding H/V to name for identifying spawn pos
+        {+} Setting orientation to spawning also
+    [=] UniversalConstant
+        {+} Adding back NPC enum
+        {+} Adding NPC_SPAWNED enum to GameStatus
+    [=] GameManager
+        {+} Creating method to set the GameStatus for setting LEVEL_GENERATED
+    [=] NPCController
+        {+} NPCStatus enum for managing different states
+        {+} Initializing info array with spawn orientation data
+        {+} Movement logic
+            <~> Basic movement
+            <~> Turning around corners logic
+- Project
+    [=] Adding placeholder mats/ direction arrwos to NPC
+    [=] Making NPC SO for pool
+
 --------------------------------------------------------------------------------------------------------------
+                                                    12 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Fixing NPCStatus enum values
+        {+} Fixing spawning NPC | Spawn only in each side-walks
+    [=] NPCController
+        {+} Collision Checks
+            <~> Turning around if collided with Boundary object
+
+- Scripts
+    [=] VehicleSpawner
+        {+} Using vehicleCount instead of gridMapIndex for tracking vehicles
+            <~> 3 digit vehicleCount formatting
+    [=] NPCSpawner
+        {+} Adding npcCount to NPC name
+    [=] NPCController
+        {+} Adding NPC_Hit to NPCStatus | VehicleLayerMask | RotationMatrix array
+        {+} Checking vehicle collisions and extracting ID
+        {+} Collision Check | Rotating rayDir clockwise by 90
+            <~> Top-Left Corner
+
+- Scripts
+    [=] NPCController
+        {+} Updating collision-check raycast logic to make it suitable for all sides
+
+- Scripts
+    [=] NPCController
+        {+} Fixing raycast position
+        {+} Fixing vehicle_ID extraction
+        {+} Go flying when NPC hit | Invoking NPCHit event
+    [=] GameManager
+        {+} Event for NPCHit 
+
+- Scripts
+    [=] VehicleController
+        {+} Adding NPC_HIT to VehicleStatus
+        {+} Callback for NPCHit
+            <~> Disable respective functions for vehicle when hit
+
+- Scripts
+    [=] NPCController
+        {+} Tumble logic when hit
+- Scene
+    [=] NPCprefab change
+    
+--------------------------------------------------------------------------------------------------------------
+                                                    13 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] NPCSpawner
+        {+} Recording all the empty cells gap first
+        {+} Then determining which gap to select from the list
+
+- Scripts
+    [=] NPCSpawner
+        {+} Spawning using emptyGapArr
+    [=] NPCController
+        {+} Only register rays after first for vehicle-collision checks
+            <~> To avoid collision if vehicle just passes by in-front.
+    [=] GameManager
+        {+} Setting LEVEL_FAILED to GameStatus if NPC_HIT
+    [=] UniversalConstant
+        {+} Adding NPC_HIT to GameStatus
+
+- Scripts
+    [=] GameUIManager
+        {+} Reset UI logic
+    [=] GameManager
+        {+} GameStatusChange event
+        {+} Moving InitializeLevel here from VehicleController
+    [=] UniversalConstant
+        {+} RESET_LEVEL for GameStatus enum
+    [=] NPCController
+        {+} Callback for GameStatus change
+            <~> Resetting NPC logic
+        {+} Changing EnvironmentSpawned callback logic
+        {+} Adding InitialPos | InitialRot | InitialStatus to npcInfo for storing initial spawn values 
+    [=] VehicleController
+        {+} Callback for GameStatus change
+            <~> Resetting Vehicle logic
+        {+} Adding InitialPos | InitialRot to vehicleInfo for storing initial spawn values 
+- MainGameplay Scene
+    [=] Basic reset level panel
+
+- Script
+    [=] GameConfigScriptableObject
+        {+} Adding string for Random Seed
+    [=] VehicleSpawner | EnvironmentSpawner
+        {+} Replacing Random Seed ref with Game Config ref
+
+- Script
+    [=] NPCController
+        {+} Fixing Corner spawn | NPC stuck rotating if boundary is at the corner
+        {+} Unsetting TURNING_CORNER in the next execution rather than waiting for condition
+        {+} Separating Vehicle | Boundary collision check
+            <~> Front for vehicles+boundary | side only for vehicles
+
+- Script
+    [=] NPCController
+        {+} Randomly switch to IDLE when hitting a boundary
+        {+} Fixing IDLE | MOVING NPCStatus values
+--------------------------------------------------------------------------------------------------------------
+- [DONE] Tumble NPC when hit and goes flying
+- [FIXED] [IMP] NPCSpawner | Take corners continously
+- [DONE] Make scriptable for vehicles
+- [DO] In-game currency
+    [=] Powers to utilize in-game currency
+    [=] Shrink vehicle to different size vehicle
+    [=] Remove vehicle
+- [DO] Shop for skins
+- [DO] WHeel maybe if possible 
+- [DO] [MAYBE IMP] Asss weightage to boundary spawner
+    [=] Consistent empty gaps or at least feel like consistent
 - [FIX] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
 - [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,
@@ -524,3 +704,25 @@ CAR PARKING
     [=] Taking Absolute values as the direction would not matter
         {+} The vehicle can go forward/backward
     [=] Threshold : 0.75 for both
+
+
+INVERSE CHECK
+22[4] ,23[4] ,24[0] ,25[0] ,26[0] ,27[4] ,28[4] ,29[0] ,30[0] ,31[0] ,32[0] ,33[4] ,34[4] ,35[0] ,36[0] ,37[0] ,38[0] ,39[0] ,40[0] ,41[0] ,42[0] ,43[0] ,
+44[0] ,45[0] ,46[0] ,47[0] ,48[4] ,49[4] ,50[0] ,51[0] ,52[4] ,53[4] ,54[4] ,55[4] ,56[4] ,57[4] ,58[0] ,59[0] ,60[4] ,61[4] ,62[0] ,63[0] ,64[0] ,65[0] ,66[0] ,67[0] ,68[4] ,69[4] ,70[0] ,71[0] ,72[0] ,73[4] ,74[4] ,75[0] ,76[0] ,77[0] ,78[4] ,79[4] ,80[0] ,81[0] ,82[0] ,83[0] 
+
+22[0] ,23[0] ,24[0] ,25[0] ,26[4] ,27[4] ,28[0] ,29[0] ,30[4] ,31[4] ,32[4] ,33[4] ,34[4] ,35[4] ,36[0] ,37[0] ,38[4] ,39[4] ,40[0] ,41[0] ,42[0] ,43[0] ,44[0] ,45[0] ,46[4] ,47[4] ,48[0] ,49[0] ,50[0] ,51[4] ,52[4] ,53[0] ,54[0] ,55[0] ,56[4] ,57[4] ,58[0] ,59[0] ,60[0] ,61[0] ,
+62[4] ,63[4] ,64[0] ,65[0] ,66[0] ,67[4] ,68[4] ,69[0] ,70[0] ,71[0] ,72[0] ,73[4] ,74[4] ,75[0] ,76[0] ,77[0] ,78[0] ,79[0] ,80[0] ,81[0] ,82[0] ,83[0] ,
+
+
+REVERSE CHECK
+44[0] ,45[0] ,46[0] ,47[0] ,48[4] ,49[4] ,50[4] ,51[4] ,52[4] ,53[4] ,54[4] ,55[4] ,56[0] ,57[0] ,58[0] ,59[4] ,60[4] ,61[0] ,
+62[0] ,63[0] ,64[0] ,65[4] ,66[4] ,67[4] ,68[4] ,69[4] ,70[4] ,71[0] ,72[0] ,73[4] ,74[4] ,75[0] ,76[0] ,77[0] ,78[0] ,79[0] ,
+80[0] ,81[0] ,82[0] ,83[0] ,
+
+44[0] ,45[0] ,46[0] ,47[0] ,48[0] ,49[0] ,50[0] ,51[0] ,52[0] ,53[4] ,54[4] ,55[0] ,56[0] ,57[4] ,58[4] ,59[4] ,60[4] ,61[4] ,
+62[4] ,63[0] ,64[0] ,65[0] ,66[0] ,67[4] ,68[4] ,69[0] ,70[0] ,71[0] ,72[4] ,73[4] ,74[4] ,75[4] ,76[4] ,77[4] ,78[4] ,79[4] ,
+80[0] ,81[0] ,82[0] ,83[0] ,
+
+SPAWN_CHECK
+1316619 | 1316642 | 1316717 | 1316735 | 13161116 | 13161124 | 13161142 | 13161148 | 13161154 | 1316121
+Problem: 1316642
