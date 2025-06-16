@@ -619,6 +619,16 @@ CAR PARKING
     [=] NPCController
         {+} Randomly switch to IDLE when hitting a boundary
         {+} Fixing IDLE | MOVING NPCStatus values
+        
+--------------------------------------------------------------------------------------------------------------
+                                                    16 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] SaveSystem
+        {+} Save/Load logic
+    [=] PlayerStats
+        {+} Simple class to store player stats
+
 --------------------------------------------------------------------------------------------------------------
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
