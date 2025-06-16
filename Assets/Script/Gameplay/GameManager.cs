@@ -21,6 +21,7 @@ namespace Parking_A.Gameplay
         #endregion Singleton
 
         public GameConfigScriptableObject MainGameConfig;
+        public PlayerStats CurrentPlayerStats;
         private UniversalConstant.GameStatus _gameStatus;
 
         public UniversalConstant.GameStatus GameStatus
@@ -35,6 +36,14 @@ namespace Parking_A.Gameplay
         private void Start()
         {
             InitializeLevel();
+
+            SaveSystem.LoadProgress((saveStatus, saveStr, playerStats) =>
+            {
+                if ((saveStatus & SaveSystem.SaveStatus.LOADED_PROGRESS) != 0)
+                    CurrentPlayerStats = playerStats;
+                else
+                    CurrentPlayerStats = new PlayerStats();
+            });
         }
 
         private async void InitializeLevel()

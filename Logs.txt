@@ -629,7 +629,32 @@ CAR PARKING
     [=] PlayerStats
         {+} Simple class to store player stats
 
+- Scripts
+    [=] GameManager
+        {+} PlayerStats field to store current stats
+    [=] ShopController
+        {+} Controller for shop
+        {+} Internal struct to keep track of Vehicle type | Skin Mats | Skin Index
+        {+} Initializing vehicles from Vehicle-SO
+        {+} ShopUIController UI callbacks
+        {+} Skin toggle logic | Vehicle selection logic
+    [=] ShopUIController
+        {+} Adding next | previous bt for switching vehicles
+        {+} Vehicle Selection bts
+- Scene
+    [=] MainMenu_Shop
+        {+} Separate temmporary scene for Shop template
+        {+} Rotating platform to showcase vehicle
+        {+} Bts to select vehicle | Toggle vehicle skins
+    [=] Prefab
+        {+} Vehicle_S | Adding a parent to the mesh
+- Project
+    [=] Test mats for testing vehicle skin switch
+
+
 --------------------------------------------------------------------------------------------------------------
+- [DO] [IMP] Link Vehicle info to player stats
+    [=] Keep track of the skin of vehicles
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
