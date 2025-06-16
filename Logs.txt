@@ -651,6 +651,26 @@ CAR PARKING
 - Project
     [=] Test mats for testing vehicle skin switch
 
+- Scripts
+    [=] MainMenuManager
+        {+} Singleton to handle MainMenu
+        {+} Loading player stats
+    [=] ShopController
+        {+} Adding skin price to VehicleInfo
+        {+} Buy/Equip Skin logic | Saving to PlayerStats
+        {+} Callbacks for updating vehicle-skin prices and buy/equip text 
+    [=] PlayerStats
+        {+} Adding fields to store the vehicle stats | Skins Bought | Skin equipped
+        {+} Default Constructor | Initializing skin flags to 1 as default skin is equipped for all
+    [=] ShopUIController
+        {+} Adding Equip/Buy bt
+            <~> Only keeping 1 as the index is tracked by ShopController
+        {+} Adding BUY_EQUIP_VEHICLE | VEHICLE_SKIN_BOUGHT | UPDATE_VEHICLE_INFO to InteractionStatus
+        {+} Callbacks for updating UI | prices/texts
+- Scene
+    [=] MainMenu_Shop
+        {+} Adding skin-price texts for each vehicle 
+
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Link Vehicle info to player stats
