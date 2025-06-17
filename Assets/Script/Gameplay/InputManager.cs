@@ -91,10 +91,20 @@ namespace Parking_A.Gameplay
 
                     // Check if user has not selected the small vehicle for Shrink power
                     if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
+                    {
                         _selectionStatus = SelectionStatus.NOT_SELECTED;
+
+                        // Remove this if any other way found
+                        if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
+                        {
+                            GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
+                            GameManager.Instance.SavePlayerStats();
+                        }
+                    }
                     else
                         _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
-                    Debug.Log($"Resetting SelectionStatus | {_selectionStatus}");
+
+                    // Debug.Log($"Resetting SelectionStatus | {_selectionStatus}");
 #if DEBUGGING_TOUCH
                     drawRay = true;
 #endif
@@ -166,7 +176,7 @@ namespace Parking_A.Gameplay
 
                     _selectionStatus |= SelectionStatus.POWER1_ACTIVE;
 
-                    Debug.Log($"Changing SelectionStatus: {_selectionStatus}");
+                    // Debug.Log($"Changing SelectionStatus: {_selectionStatus}");
                     break;
 
                 case GameUIManager.UISelected.POWER_2:

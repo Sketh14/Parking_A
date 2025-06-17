@@ -1,3 +1,5 @@
+#define TESTING
+
 using Parking_A.Global;
 using UnityEngine;
 
@@ -17,12 +19,28 @@ namespace Parking_A.Gameplay
                 _instance = this;
             else
                 Destroy(this.gameObject);
+
+            SaveSystem.LoadProgress((saveStatus, saveStr, playerStats) =>
+            {
+                if ((saveStatus & SaveSystem.SaveStatus.LOADED_PROGRESS) != 0)
+                    CurrentPlayerStats = playerStats;
+                else
+                {
+                    CurrentPlayerStats = new PlayerStats();
+                }
+#if TESTING
+                CurrentPlayerStats.Gold = 10000;
+                CurrentPlayerStats.Coins = 10000;
+#endif
+            });
         }
         #endregion Singleton
 
         public GameConfigScriptableObject MainGameConfig;
         public PlayerStats CurrentPlayerStats;
         private UniversalConstant.GameStatus _gameStatus;
+        [SerializeField] private int[] _powerPrices;
+        public int[] PowerPrices { get => _powerPrices; }
 
         public UniversalConstant.GameStatus GameStatus
         {
@@ -38,13 +56,6 @@ namespace Parking_A.Gameplay
         {
             InitializeLevel();
 
-            SaveSystem.LoadProgress((saveStatus, saveStr, playerStats) =>
-            {
-                if ((saveStatus & SaveSystem.SaveStatus.LOADED_PROGRESS) != 0)
-                    CurrentPlayerStats = playerStats;
-                else
-                    CurrentPlayerStats = new PlayerStats();
-            });
         }
 
         public void SavePlayerStats()

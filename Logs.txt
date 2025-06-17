@@ -719,12 +719,29 @@ CAR PARKING
     [=] InputManager
         {+} Reset selection if small vehicle selected for shrink power
 
+- Scripts
+    [=] GameUIManager
+        {+} Adding enums to UISelected
+        {+} Adding PowerPanel buttons | Connecting callbacks to these
+        {+} Toggle Panels logic
+        {+} Adding disclaimer text | power prices | delay clear disclaimer
+        {+} Price check for powers 
+        {+} Disable Power-Panel opening if power selected | Enable after use
+        {+} Only Saveprogress if power is used
+    [=] GameManager
+        {+} Adding Power-Prices
+    [=] InputManager
+        {+} Invoking callback for power-used
+        {+} Saving player stats only when power is used
+- Scene
+    [=] MainGameplaySc_1
+        {+} Adding Power Panel UI
 --------------------------------------------------------------------------------------------------------------
-- [DO] Shrink Power should not work for Small Vehicles
-- [DO] Update RESET logic according to powers
+- [DONE] Shrink Power should not work for Small Vehicles
+- [DONE] Update RESET logic according to powers
 - [FIX] [IMP] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
-- [DO] [IMP] Link Vehicle info to player stats
+- [DONE FOR NOW] [IMP] Link Vehicle info to player stats
     [=] Keep track of the skin of vehicles
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
