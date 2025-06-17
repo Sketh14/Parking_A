@@ -28,8 +28,9 @@ namespace Parking_A.Gameplay
         {
             get => _gameStatus;
         }
-        public System.Action<int, Vector2> OnSelect;
+        public System.Action<InputManager.SelectionStatus, int, Vector2> OnSelect;
         public System.Action<int> OnNPCHit;
+        public System.Action<GameUIManager.UISelected, int> OnUISelected;
         public System.Action<UniversalConstant.GameStatus> OnGameStatusChange;
         public System.Action<byte[]> OnEnvironmentSpawned;
 
@@ -44,6 +45,24 @@ namespace Parking_A.Gameplay
                 else
                     CurrentPlayerStats = new PlayerStats();
             });
+        }
+
+        public void SavePlayerStats()
+        {
+            SaveSystem.SaveProgress(CurrentPlayerStats, SavePlayerStats);
+        }
+
+        private void SavePlayerStats(SaveSystem.SaveStatus saveStatus, string resultStr)
+        {
+            if ((saveStatus & SaveSystem.SaveStatus.SAVED_PROGRESS) != 0)
+            {
+                Debug.Log($"Progress Saved");
+            }
+            else
+            {
+                //Show something for save failed
+                Debug.LogError($"Saving progress failed | Error: {resultStr}");
+            }
         }
 
         private async void InitializeLevel()

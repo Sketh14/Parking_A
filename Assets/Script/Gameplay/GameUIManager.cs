@@ -5,9 +5,13 @@ namespace Parking_A.Gameplay
 {
     public class GameUIManager : MonoBehaviour
     {
+        public enum UISelected { POWER_1, POWER_2 }
+
         [SerializeField] private Button _resetLevelBt;
 
         [SerializeField] private GameObject _levelFailedPanel;
+
+        [SerializeField] private Button[] _powerBts;
 
         private void OnDestroy()
         {
@@ -18,6 +22,12 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnNPCHit += (dummyVal) => { _levelFailedPanel.gameObject.SetActive(true); };
             _resetLevelBt.onClick.AddListener(ResetUI);
+
+            for (int i = 0; i < _powerBts.Length; i++)
+            {
+                int tempIndex = i;
+                _powerBts[i].onClick.AddListener(() => GameManager.Instance.OnUISelected?.Invoke((UISelected)tempIndex, -1));
+            }
         }
 
         private void ResetUI()

@@ -687,6 +687,24 @@ CAR PARKING
     [=] ShopUIController
         {+} Fixing default buy/equip text
 - MainMenu_Shop Scene update for earlier commit
+
+- Scripts
+    [=] GameManager
+        {+} Save progress logic
+        {+} Adding Action for UISelected event
+        {+} Updating OnSelect to include SelectionStatus of InputManager
+    [=] GameUIManager
+        {+} Powers bt logic | Invoking Action for UISelected
+    [=] InputManager
+        {+} UISelected callback logic
+            <~> Setting _selectionStatus accordingly with powers
+        {+} SelectionStatus enum | Replacing _selectionStatus
+    [=] VehicleController
+        {+} Updating OnSelect callback logic
+            <~> Powers logic
+- Scene
+    [=] MainGameplaySc_1
+        {+} Adding power buttons
 --------------------------------------------------------------------------------------------------------------
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
 - [DO] [IMP] Link Vehicle info to player stats
@@ -698,7 +716,10 @@ CAR PARKING
     [=] Powers to utilize in-game currency
     [=] Shrink vehicle to different size vehicle
     [=] Remove vehicle
-- [DO] Shop for skins
+- [DO] [DONE FOR NOW] Shop for skins
+    [=] Made rotating platform
+    [=] Buy/Equip mechanics
+    [=] Sacing progress to PlayerStats
 - [DO] WHeel maybe if possible 
 - [DO] [MAYBE IMP] Asss weightage to boundary spawner
     [=] Consistent empty gaps or at least feel like consistent

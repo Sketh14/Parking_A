@@ -13,8 +13,14 @@ namespace Parking_A.Gameplay
 {
     public class InputManager : MonoBehaviour
     {
+        /// <summary> POWER1: Shrink Vehicle | POWER2: Remove Vehicle </summary>
+        public enum SelectionStatus
+        {
+            NOT_SELECTED = 0, SELECTED = 1 << 0, POWER1_ACTIVE = 1 << 1, POWER2_ACTIVE = 1 << 2
+        }
+
         //Keeping track of mouse/touch status
-        private byte _selectionStatus;
+        private SelectionStatus _selectionStatus;
 
         private int _hitTransformID = 0;
 
@@ -24,8 +30,15 @@ namespace Parking_A.Gameplay
         // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
 
         private const int _vehicleLayerMaskC = (1 << 6);
+
+        private void ODestroy()
+        {
+            GameManager.Instance.OnUISelected -= HandleUIAction;
+        }
+
         private void Start()
         {
+            GameManager.Instance.OnUISelected += HandleUIAction;
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
         }
 
@@ -58,24 +71,31 @@ namespace Parking_A.Gameplay
             Vector2 slideDir = Vector2.zero;
 #endif
 
+
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
                  || !userInteracting)
             {
-                if (_selectionStatus == 1)
+                if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
                 {
                     slideDir = (Mouse.current.position.value - interactPos).normalized;
                     slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
                     slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
 
-                    GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
+                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
+                        || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
+                        _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
 
+                    GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
+                    _selectionStatus = SelectionStatus.NOT_SELECTED;
 #if DEBUGGING_TOUCH
                     drawRay = true;
 #endif
                 }
-                _selectionStatus = 0;
+
+                _selectionStatus |= SelectionStatus.NOT_SELECTED;
+                _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
 #else
@@ -83,16 +103,28 @@ namespace Parking_A.Gameplay
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
                 || !userInteracting)
             {
-                if(_selectionStatus == 1){
-                slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;
-                GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
+                if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
+                {
+                    _selectionStatus &= ~SelectionStatus.POWER_ACTIVE;
+                    slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;
+                    slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
+                    slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
+
+                    if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
+                    {
+                        _selectionStatus &= ~SelectionStatus.POWER_ACTIVE;
+                    }
+                    else
+                        GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
                 }
-                _selectionStatus = 0;
+
+                _selectionStatus |= SelectionStatus.NOT_SELECTED;
+                _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
 #endif
 
-            if (_selectionStatus == 0)
+            if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
             {
 #if !MOBILE_CONTROLS
                 interactPos = Mouse.current.position.value;
@@ -105,17 +137,30 @@ namespace Parking_A.Gameplay
 
                 if (Physics.Raycast(cameraRay, out rayHit, 500f, _vehicleLayerMaskC))
                 {
-                    _selectionStatus = 1;
+                    _selectionStatus |= SelectionStatus.SELECTED;
                     _hitTransformID = rayHit.transform.GetInstanceID();
 #if DEBUGGING_TOUCH
                     hitPos = rayHit.point;
 #endif
-                    // Debug.Log($"_hitTransformID: {_hitTransformID}");
+                    Debug.Log($"_hitTransformID: {_hitTransformID}");
                     // GameManager.Instance.OnSelect?.Invoke(rayHit.transform.GetInstanceID(), slideDir);
                 }
             }
         }
 
+        private void HandleUIAction(GameUIManager.UISelected uISelected, int value)
+        {
+            switch (uISelected)
+            {
+                case GameUIManager.UISelected.POWER_1:
+                    _selectionStatus |= SelectionStatus.POWER1_ACTIVE;
+                    break;
+
+                case GameUIManager.UISelected.POWER_2:
+                    _selectionStatus |= SelectionStatus.POWER2_ACTIVE;
+                    break;
+            }
+        }
 
         private void CheckForTouch()
         {

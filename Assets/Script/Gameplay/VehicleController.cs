@@ -190,9 +190,10 @@ namespace Parking_A.Gameplay
             CornerVehicleCollisionCheck();
         }
 
-        private void VehicleSelected(int vehicleID, Vector2 slideDir)
+        private void VehicleSelected(InputManager.SelectionStatus selectionStatus, int vehicleID, Vector2 slideDir)
         {
-            // Debug.Log($"vehicleID: {vehicleID} | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
+            Debug.Log($"selectionStatus: {selectionStatus} | vehicleID: {vehicleID}"
+            + $" | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
             for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 if (vehicleID == _vehicleSpawner.VehiclesSpawned[i].GetInstanceID()
@@ -209,6 +210,37 @@ namespace Parking_A.Gameplay
                     // + $" | slideDir: {slideDir.y} | slidedir Rounded: {Mathf.RoundToInt(slideDir.y)}");
                     // + $" | VehicleOrientation: {vehicleOrientationVertical}");
 
+                    switch (selectionStatus)
+                    {
+                        //Do Nothing | Normal Selection
+                        case InputManager.SelectionStatus.SELECTED:
+                            break;
+
+                        //Replace vehicle with a smaller vehicle
+                        case InputManager.SelectionStatus.POWER1_ACTIVE:
+                            PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+
+                            _vehicleSpawner.VehiclesSpawned[i] = PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
+                                                                    .Get().transform;
+
+                            _vehicleInfos[i].VehicleType = 1;
+                            _vehicleSpawner.VehiclesSpawned[i].position = _vehicleInfos[i].InitialPos;
+
+                            Vector3 vehicleRot = Vector3.zero;
+                            vehicleRot.y = _vehicleInfos[i].InitialRot;
+                            _vehicleSpawner.VehiclesSpawned[i].position = vehicleRot;
+                            return;
+
+                        //Remove vehicle
+                        case InputManager.SelectionStatus.POWER2_ACTIVE:
+                            _vehicleInfos[i].VehicleStatus |= VehicleStatus.INTERACTED;
+                            _vehicleInfos[i].VehicleStatus |= VehicleStatus.LEFT_PARKING;
+                            _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(false);
+                            PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                            return;
+                    }
 
                     // UP | DOWN
                     if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[i].forward[2]) >= 0.9f
