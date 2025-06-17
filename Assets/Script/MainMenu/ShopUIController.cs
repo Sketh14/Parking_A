@@ -50,7 +50,7 @@ namespace Parking_A.MainMenu
             //NOTE: Only checking the 1st skin for small vehicle as it is default. The rest can be updated 
             //      when the player goes to the next skin.
             if ((MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[0] & (1 << 0)) != 0)
-                _buyOrEquipSkinBt.GetComponentInChildren<TMPro.TMP_Text>().text = "EQUIP";
+                _buyOrEquipSkinBt.GetComponentInChildren<TMPro.TMP_Text>().text = "EQUIPPED";
             #endregion Buttons
         }
 

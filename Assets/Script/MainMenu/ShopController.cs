@@ -1,5 +1,9 @@
+#define MOBILE_CONTROLS
+
 using Parking_A.Global;
 using UnityEngine;
+
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Parking_A.MainMenu
 {
@@ -12,12 +16,13 @@ namespace Parking_A.MainMenu
             public byte SkinIndex;
             public int[] SkinPrice;
             public Material[] SkinsMat;
+            public GameObject VehiclePrefab;
         }
 
         [SerializeField] private Transform _rotatingPlatform;
         [SerializeField] private float _turnSpeed = 1f;
 
-        [SerializeField] private PoolScriptableObject[] _vehicleSOs;
+        // [SerializeField] private PoolScriptableObject[] _vehicleSOs;
         [SerializeField] private VehicleInfos[] _vehicleInfos;
         private GameObject[] _vehiclePrefabs;
 
@@ -38,14 +43,14 @@ namespace Parking_A.MainMenu
 
         private void InitializeVehicles()
         {
-            _vehiclePrefabs = new GameObject[_vehicleSOs.Length];
+            _vehiclePrefabs = new GameObject[_vehicleInfos.Length];
 
             Transform vehicleHolder = _rotatingPlatform.GetChild(0);
             GameObject tempVehicle;
             Vector3 spawnPos = new Vector3(0f, 0.3f, 0f);
-            for (int i = 0; i < _vehicleSOs.Length; i++)
+            for (int i = 0; i < _vehicleInfos.Length; i++)
             {
-                tempVehicle = Instantiate(_vehicleSOs[i].poolPrefab, vehicleHolder);
+                tempVehicle = Instantiate(_vehicleInfos[i].VehiclePrefab, vehicleHolder);
                 tempVehicle.transform.localPosition = spawnPos;
                 tempVehicle.SetActive(false);
 
@@ -77,6 +82,8 @@ namespace Parking_A.MainMenu
 
         void Update()
         {
+#if MOBILE_CONTROLS
+#endif
             _rotatingPlatform.Rotate(Vector3.up, _turnSpeed * Time.deltaTime);
         }
 
@@ -91,7 +98,7 @@ namespace Parking_A.MainMenu
                     _vehiclePrefabs[2].SetActive(false);
 
                     _currVehicleIndex = 0;
-                    break;
+                    goto case (ShopUIController.InteractionStatus)101;
 
                 case ShopUIController.InteractionStatus.SELECT_VEHICLE_M:
                     _vehiclePrefabs[0].SetActive(false);
@@ -99,7 +106,7 @@ namespace Parking_A.MainMenu
                     _vehiclePrefabs[2].SetActive(false);
 
                     _currVehicleIndex = 1;
-                    break;
+                    goto case (ShopUIController.InteractionStatus)101;
 
                 case ShopUIController.InteractionStatus.SELECT_VEHICLE_L:
                     _vehiclePrefabs[0].SetActive(false);
@@ -107,7 +114,7 @@ namespace Parking_A.MainMenu
                     _vehiclePrefabs[2].SetActive(true);
 
                     _currVehicleIndex = 2;
-                    break;
+                    goto case (ShopUIController.InteractionStatus)101;
 
                 case ShopUIController.InteractionStatus.NEXT_VEHICLE_SKIN:
                     skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
@@ -125,12 +132,16 @@ namespace Parking_A.MainMenu
                     // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
                     goto case (ShopUIController.InteractionStatus)100;
 
-                // Set skins | UI callbacks
+                // Set skins
                 case (ShopUIController.InteractionStatus)100:
                     _vehiclePrefabs[_currVehicleIndex].transform.GetChild(4).GetChild(0)
                         .GetComponent<MeshRenderer>().material =
                         _vehicleInfos[_currVehicleIndex].SkinsMat[_vehicleInfos[_currVehicleIndex].SkinIndex];
 
+                    goto case (ShopUIController.InteractionStatus)101;
+
+                // UI callbacks
+                case (ShopUIController.InteractionStatus)101:
                     // Check if the skin currently selected is equipped or not
                     if ((MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex]
                         & (1 << _vehicleInfos[_currVehicleIndex].SkinIndex)) != 0)

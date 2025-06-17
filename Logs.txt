@@ -671,8 +671,16 @@ CAR PARKING
     [=] MainMenu_Shop
         {+} Adding skin-price texts for each vehicle 
 
+--------------------------------------------------------------------------------------------------------------
+                                                    17 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] ShopController
+        {+} Replacing Pool-SOs with VehicleInfo
+        {+} Updating buy/equip text when changing vehicles
 
 --------------------------------------------------------------------------------------------------------------
+- [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
 - [DO] [IMP] Link Vehicle info to player stats
     [=] Keep track of the skin of vehicles
 - [DONE] Tumble NPC when hit and goes flying
