@@ -705,7 +705,24 @@ CAR PARKING
 - Scene
     [=] MainGameplaySc_1
         {+} Adding power buttons
+
+- Scripts
+    [=] VehicleController
+        {+} Reset logic for vehicles when powers are used
+            <~> Changing vehicle to previous type if power is used to change the vehicle type
+        {+} Adding VehicleType for containing changed VehicleType to VehicleInfo
+        {+} Name change for spawned vehicle with power
+        {+} Rename logic fix | Working with 4 digits now
+        {+} Disallow small vehicle selection for Shrink power
+    [=] VehicleSpawner
+        {+} Name update
+    [=] InputManager
+        {+} Reset selection if small vehicle selected for shrink power
+
 --------------------------------------------------------------------------------------------------------------
+- [DO] Shrink Power should not work for Small Vehicles
+- [DO] Update RESET logic according to powers
+- [FIX] [IMP] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
 - [DO] [IMP] Link Vehicle info to player stats
     [=] Keep track of the skin of vehicles

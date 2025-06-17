@@ -16,7 +16,7 @@ namespace Parking_A.Gameplay
         /// <summary> POWER1: Shrink Vehicle | POWER2: Remove Vehicle </summary>
         public enum SelectionStatus
         {
-            NOT_SELECTED = 0, SELECTED = 1 << 0, POWER1_ACTIVE = 1 << 1, POWER2_ACTIVE = 1 << 2
+            NOT_SELECTED = 0, SELECTED = 1 << 0, CHECK_AGAIN = 1 << 1, POWER1_ACTIVE = 1 << 2, POWER2_ACTIVE = 1 << 3
         }
 
         //Keeping track of mouse/touch status
@@ -88,7 +88,13 @@ namespace Parking_A.Gameplay
                         _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
 
                     GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
-                    _selectionStatus = SelectionStatus.NOT_SELECTED;
+
+                    // Check if user has not selected the small vehicle for Shrink power
+                    if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
+                        _selectionStatus = SelectionStatus.NOT_SELECTED;
+                    else
+                        _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
+                    Debug.Log($"Resetting SelectionStatus | {_selectionStatus}");
 #if DEBUGGING_TOUCH
                     drawRay = true;
 #endif
@@ -142,7 +148,7 @@ namespace Parking_A.Gameplay
 #if DEBUGGING_TOUCH
                     hitPos = rayHit.point;
 #endif
-                    Debug.Log($"_hitTransformID: {_hitTransformID}");
+                    // Debug.Log($"_hitTransformID: {_hitTransformID}");
                     // GameManager.Instance.OnSelect?.Invoke(rayHit.transform.GetInstanceID(), slideDir);
                 }
             }
@@ -153,7 +159,14 @@ namespace Parking_A.Gameplay
             switch (uISelected)
             {
                 case GameUIManager.UISelected.POWER_1:
+                    // In case the player has selected a small vehicle | Event is fired again to show that small vehicle is selected
+                    // Set the CHECK_AGAIN flag, so that the Update does not modify anything
+                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0)
+                        _selectionStatus |= SelectionStatus.CHECK_AGAIN;
+
                     _selectionStatus |= SelectionStatus.POWER1_ACTIVE;
+
+                    Debug.Log($"Changing SelectionStatus: {_selectionStatus}");
                     break;
 
                 case GameUIManager.UISelected.POWER_2:
