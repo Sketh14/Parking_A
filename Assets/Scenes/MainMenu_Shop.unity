@@ -1221,7 +1221,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: EQUIPPED
+  m_text: EQUIP
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2331,10 +2331,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rotatingPlatform: {fileID: 2022061985}
   _turnSpeed: 15
-  _vehicleSOs:
-  - {fileID: 11400000, guid: e407989ecdfc6d94c889d79f9bed0473, type: 2}
-  - {fileID: 11400000, guid: 2c48aeebd43e19f4c8b67a71971ce7d6, type: 2}
-  - {fileID: 11400000, guid: 9799809be5d6f174497e8409ed5fbbe8, type: 2}
   _vehicleInfos:
   - VehicleType: 1
     SkinIndex: 0
@@ -2345,6 +2341,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
     - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
     - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+    VehiclePrefab: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
   - VehicleType: 2
     SkinIndex: 0
     SkinPrice: c80000002c01000090010000f4010000e8030000
@@ -2354,6 +2351,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
     - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
     - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+    VehiclePrefab: {fileID: 5041637407529620837, guid: ccace83ab29b5dc418ae8a07d5d0d975, type: 3}
   - VehicleType: 3
     SkinIndex: 0
     SkinPrice: c80000002c01000090010000f4010000e8030000
@@ -2363,6 +2361,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
     - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
     - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+    VehiclePrefab: {fileID: 487504617563494611, guid: 6a7a312047ff60846aed3fcb8ff054df, type: 3}
   _shopUIController: {fileID: 1537556201}
 --- !u!4 &1715241339
 Transform:

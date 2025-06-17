@@ -89,7 +89,6 @@ namespace Parking_A.MainMenu
 
         public void UpdateVehicle(ShopUIController.InteractionStatus interactionStatus, int value)
         {
-            int skinsCount;
             switch (interactionStatus)
             {
                 case ShopUIController.InteractionStatus.SELECT_VEHICLE_S:
@@ -117,19 +116,23 @@ namespace Parking_A.MainMenu
                     goto case (ShopUIController.InteractionStatus)101;
 
                 case ShopUIController.InteractionStatus.NEXT_VEHICLE_SKIN:
-                    skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
-                    _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex + 1) >= skinsCount
-                        ? (byte)0 : ++_vehicleInfos[_currVehicleIndex].SkinIndex;
+                    {
+                        int skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
+                        _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex + 1) >= skinsCount
+                            ? (byte)0 : ++_vehicleInfos[_currVehicleIndex].SkinIndex;
 
-                    // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
+                        // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
+                    }
                     goto case (ShopUIController.InteractionStatus)100;
 
                 case ShopUIController.InteractionStatus.PREV_VEHICLE_SKIN:
-                    skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
-                    _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex - 1) < 0
-                        ? (byte)(skinsCount - 1) : --_vehicleInfos[_currVehicleIndex].SkinIndex;
+                    {
+                        int skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
+                        _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex - 1) < 0
+                            ? (byte)(skinsCount - 1) : --_vehicleInfos[_currVehicleIndex].SkinIndex;
 
-                    // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
+                        // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
+                    }
                     goto case (ShopUIController.InteractionStatus)100;
 
                 // Set skins
@@ -163,31 +166,36 @@ namespace Parking_A.MainMenu
                     break;
 
                 case ShopUIController.InteractionStatus.BUY_EQUIP_VEHICLE:
-                    //Maybe display something earlier to show that stats are not loaded
-                    if (MainMenuManager.Instance.LoadStatsFailCount > MainMenuManager._maxLoadFailCount)
-                        return;
-
-                    //Check if the player has bought the skin or not
-                    if ((MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[value]
-                        & (1 << _vehicleInfos[value].SkinIndex)) != 0)
                     {
-                        MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[value] = 0;             //Reset first
-                        MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[value] |= 1 << _vehicleInfos[value].SkinIndex;
+                        //Maybe display something earlier to show that stats are not loaded
+                        if (MainMenuManager.Instance.LoadStatsFailCount > MainMenuManager._maxLoadFailCount)
+                            return;
 
+                        //Check if the player has bought the skin or not
+                        if ((MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex]
+                            & (1 << _vehicleInfos[_currVehicleIndex].SkinIndex)) != 0)
+                        {
+                            MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] = 0;             //Reset first
+                            MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] |= 1 << _vehicleInfos[_currVehicleIndex].SkinIndex;
+
+                            _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 1);
+                            MainMenuManager.Instance.SavePlayerStats();
+                            return;
+                        }
+
+                        //Check if the player has enough coins
+                        int skinPrice = _vehicleInfos[_currVehicleIndex].SkinPrice[_vehicleInfos[_currVehicleIndex].SkinIndex];
+                        if (MainMenuManager.Instance.PlayerStats.Coins < skinPrice)
+                        {
+                            //Show message for not enough money
+                            return;
+                        }
+
+                        MainMenuManager.Instance.PlayerStats.Coins -= skinPrice;
+                        MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex] |= 1 << _vehicleInfos[_currVehicleIndex].SkinIndex;
+                        _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 0);
                         MainMenuManager.Instance.SavePlayerStats();
-                        return;
                     }
-
-                    //Check if the player has enough coins
-                    if (MainMenuManager.Instance.PlayerStats.Coins < _vehicleInfos[value].SkinPrice[_vehicleInfos[value].SkinIndex])
-                    {
-                        //Show message for not enough money
-                        return;
-                    }
-
-                    MainMenuManager.Instance.PlayerStats.Coins -= value;
-                    MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[value] |= 1 << _vehicleInfos[value].SkinIndex;
-                    MainMenuManager.Instance.SavePlayerStats();
 
                     break;
             }

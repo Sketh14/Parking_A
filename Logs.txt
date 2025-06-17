@@ -679,6 +679,14 @@ CAR PARKING
         {+} Replacing Pool-SOs with VehicleInfo
         {+} Updating buy/equip text when changing vehicles
 
+- Scripts
+    [=] MainMenuManager
+        {+} SaveSystem logic
+    [=] ShopController
+        {+} Fixing Buy/Equip Logic
+    [=] ShopUIController
+        {+} Fixing default buy/equip text
+- MainMenu_Shop Scene update for earlier commit
 --------------------------------------------------------------------------------------------------------------
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
 - [DO] [IMP] Link Vehicle info to player stats

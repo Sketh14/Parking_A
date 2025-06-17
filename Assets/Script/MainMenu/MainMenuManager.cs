@@ -30,14 +30,19 @@ namespace Parking_A.MainMenu
 
         public void SavePlayerStats()
         {
-            // SaveSystem.SaveProgress(_playerStats, SavePlayerStats);
+            SaveSystem.SaveProgress(PlayerStats, SavePlayerStats);
         }
 
         private void SavePlayerStats(SaveSystem.SaveStatus saveStatus, string resultStr)
         {
-            if ((saveStatus & SaveSystem.SaveStatus.SAVED_PROGRESS) == 0)
+            if ((saveStatus & SaveSystem.SaveStatus.SAVED_PROGRESS) != 0)
+            {
+                Debug.Log($"Progress Saved");
+            }
+            else
             {
                 //Show something for save failed
+                Debug.LogError($"Saving progress failed | Error: {resultStr}");
             }
         }
 
