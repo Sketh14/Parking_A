@@ -8562,6 +8562,10 @@ MonoBehaviour:
     BoughtVehicleSkinIndexes: 
     EquippedVehicleSkinIndexes: 
   _powerPrices: 0500000005000000
+  VehicleInfoSOs:
+  - {fileID: 11400000, guid: 092ae3914cb9da64197b3b3d68cef848, type: 2}
+  - {fileID: 11400000, guid: 3767f6d1d5bf37a489ec0b736497cbb7, type: 2}
+  - {fileID: 11400000, guid: 41b36c6ec3d7d014b82b5ac04761a6c4, type: 2}
 --- !u!1 &2018582763
 GameObject:
   m_ObjectHideFlags: 0

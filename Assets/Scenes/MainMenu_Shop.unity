@@ -2332,36 +2332,15 @@ MonoBehaviour:
   _rotatingPlatform: {fileID: 2022061985}
   _turnSpeed: 15
   _vehicleInfos:
-  - VehicleType: 1
-    SkinIndex: 0
-    SkinPrice: c80000002c01000090010000f4010000e8030000
-    SkinsMat:
-    - {fileID: -347936904605023872, guid: 0f0aed4c82cbd6340a763987e3f2a8c6, type: 3}
-    - {fileID: 2100000, guid: 6c4c1fc60ea19af4aaf575dce7bd5611, type: 2}
-    - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
-    - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
-    - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+  - SkinIndex: 0
     VehiclePrefab: {fileID: 1861517304491143972, guid: 868cd470b7b54464e921ae8e0f4f6000, type: 3}
-  - VehicleType: 2
-    SkinIndex: 0
-    SkinPrice: c80000002c01000090010000f4010000e8030000
-    SkinsMat:
-    - {fileID: -6538903991835684241, guid: 7fca410b991bc6a4abb438343b68d56b, type: 3}
-    - {fileID: 2100000, guid: 6c4c1fc60ea19af4aaf575dce7bd5611, type: 2}
-    - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
-    - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
-    - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+    VehicleInfoSO: {fileID: 11400000, guid: 092ae3914cb9da64197b3b3d68cef848, type: 2}
+  - SkinIndex: 0
     VehiclePrefab: {fileID: 5041637407529620837, guid: ccace83ab29b5dc418ae8a07d5d0d975, type: 3}
-  - VehicleType: 3
-    SkinIndex: 0
-    SkinPrice: c80000002c01000090010000f4010000e8030000
-    SkinsMat:
-    - {fileID: -6538903991835684241, guid: 298babd934a1afe4996e4e33413dabf3, type: 3}
-    - {fileID: 2100000, guid: 6c4c1fc60ea19af4aaf575dce7bd5611, type: 2}
-    - {fileID: 2100000, guid: 96c22a2106ebfcf4daa14b5f2eb46456, type: 2}
-    - {fileID: 2100000, guid: e481f5310f9d0aa428fcff8f4ad0355b, type: 2}
-    - {fileID: 2100000, guid: 864752e9935ce454e8732133e2c1c6f1, type: 2}
+    VehicleInfoSO: {fileID: 11400000, guid: 3767f6d1d5bf37a489ec0b736497cbb7, type: 2}
+  - SkinIndex: 0
     VehiclePrefab: {fileID: 487504617563494611, guid: 6a7a312047ff60846aed3fcb8ff054df, type: 3}
+    VehicleInfoSO: {fileID: 11400000, guid: 41b36c6ec3d7d014b82b5ac04761a6c4, type: 2}
   _shopUIController: {fileID: 1537556201}
 --- !u!4 &1715241339
 Transform:

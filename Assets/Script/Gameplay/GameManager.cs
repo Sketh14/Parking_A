@@ -46,6 +46,9 @@ namespace Parking_A.Gameplay
         {
             get => _gameStatus;
         }
+
+        public VehicleInfoScriptableObject[] VehicleInfoSOs;
+
         public System.Action<InputManager.SelectionStatus, int, Vector2> OnSelect;
         public System.Action<int> OnNPCHit;
         public System.Action<GameUIManager.UISelected, int> OnUISelected;
@@ -54,8 +57,8 @@ namespace Parking_A.Gameplay
 
         private void Start()
         {
+            PoolManager.Instance.InitializePool();
             InitializeLevel();
-
         }
 
         public void SavePlayerStats()

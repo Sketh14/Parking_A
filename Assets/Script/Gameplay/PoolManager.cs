@@ -8,6 +8,7 @@ namespace Parking_A.Gameplay
     public class PoolManager : MonoBehaviour
     {
         // public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY }
+        internal enum PoolStatus { NOT_INTIALIZED = 0, INITIALIZED = 1 << 0 }
 
         #region Singleton
         private static PoolManager _instance;
@@ -25,12 +26,26 @@ namespace Parking_A.Gameplay
         #endregion Singleton
 
         [SerializeField] private PoolScriptableObject[] _poolSObjArr;
+        private PoolStatus _poolStatus;
 
         public Dictionary<UniversalConstant.PoolType, UnityEngine.Pool.ObjectPool<GameObject>> PrefabPool;
 
         private void Start()
         {
             PrefabPool = new Dictionary<UniversalConstant.PoolType, UnityEngine.Pool.ObjectPool<GameObject>>();
+        }
+
+        public void InitializePool()
+        {
+            if ((_poolStatus & PoolStatus.INITIALIZED) != 0)
+                return;
+
+            //Updating skins of Vehicles | maybe this should be in GameManager
+            for (int i = 0; i < 3; i++)
+            {
+
+            }
+
             //Initialize pool to contain 5 of every item
             for (int i = 0; i < _poolSObjArr.Length; i++)
             {
@@ -49,6 +64,8 @@ namespace Parking_A.Gameplay
                 PrefabPool.Add((UniversalConstant.PoolType)(i + 1), objectPool);
                 // Debug.Log($"Creating Prefab Pool | Name : {poolHolder.name} | i: {0} | PoolType: {(PoolType)i} | Count: {PrefabPool[PoolType.VEHICLE_1].CountAll}");
             }
+
+            _poolStatus |= PoolStatus.INITIALIZED;
         }
 
         private GameObject CreatePool(int poolIndex, in Transform poolParent)

@@ -49,7 +49,7 @@ namespace Parking_A.MainMenu
             _buyOrEquipSkinBt.onClick.AddListener(() => OnVehicleInteraction?.Invoke(InteractionStatus.BUY_EQUIP_VEHICLE, -1));
             //NOTE: Only checking the 1st skin for small vehicle as it is default. The rest can be updated 
             //      when the player goes to the next skin.
-            if ((MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[0] & (1 << 0)) != 0)
+            if (MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[0] == 0)
                 _buyOrEquipSkinBt.GetComponentInChildren<TMPro.TMP_Text>().text = "EQUIPPED";
             #endregion Buttons
         }

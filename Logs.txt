@@ -743,7 +743,27 @@ CAR PARKING
 - Scripts
     [=] InputManager
         {+} FIx POWER_USED flag set logic
+
+- Scripts
+    [=] PoolManager
+        {+} Adding flag to check Pool-status
+        {+} Separating Pool Initialization
+    [=] GameManager
+        {+} Calling for Pool Initialization 
+        {+} Adding VehicleInfo SOs
+    [=] VehicleInfoScriptableObject
+        {+} Separate SO for vehicles
+        {+} To use for both shop and gameplay
+    [=] ShopController
+        {+} Adding VehicleInfoSO here
+    [=] PlayerStats
+        {+} Changing EquippedVehicleSkinIndexes to byte and not using as flags
+- Project
+    [=] Restructure Data Folder
+    [=] Add VehicleInfo-SO's
 --------------------------------------------------------------------------------------------------------------
+- [FIX] Show correct mat for vehicle for skin equipped
+- [DO] Assign skins to vehicles in main gameplay when equipped
 - [CHANGE] Change Boundary Prefab Colliders
     [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh
 - [DONE] Shrink Power should not work for Small Vehicles

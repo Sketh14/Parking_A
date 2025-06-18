@@ -12,11 +12,12 @@ namespace Parking_A.MainMenu
         [System.Serializable]
         internal class VehicleInfos
         {
-            public UniversalConstant.PoolType VehicleType;
-            public byte SkinIndex;
-            public int[] SkinPrice;
-            public Material[] SkinsMat;
+            // public UniversalConstant.PoolType VehicleType;
+            // public int[] SkinPrice;
+            // public Material[] SkinsMat;
+            public byte EquippedSkinIndex;
             public GameObject VehiclePrefab;
+            public VehicleInfoScriptableObject VehicleInfoSO;
         }
 
         [SerializeField] private Transform _rotatingPlatform;
@@ -55,17 +56,22 @@ namespace Parking_A.MainMenu
                 tempVehicle.SetActive(false);
 
                 _vehiclePrefabs[i] = tempVehicle;
-                _vehicleInfos[i].SkinIndex = 0;             //TODO: Link this to player save stats
+
+                //TODO: Link Equipped Skin to player save stats
+                //TODO: Update UI according to Equipped Skin | Price/Buy/Equip
+
+                _vehicleInfos[i].EquippedSkinIndex = 0;
+                // _vehicleInfos[i].EquippedSkinIndex = MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[i];             //TODO: Link this to player save stats
                 _vehiclePrefabs[i].transform.GetChild(4).GetChild(0)
                     .GetComponent<MeshRenderer>().material =
-                    _vehicleInfos[i].SkinsMat[_vehicleInfos[i].SkinIndex];
+                    _vehicleInfos[i].VehicleInfoSO.SkinsMat[_vehicleInfos[i].EquippedSkinIndex];
             }
             _vehiclePrefabs[0].SetActive(true);             //By default small vehicle will be active
             _currVehicleIndex = 0;
 
             // Update initial price text to default small vehicle's 1st skin
             _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.UPDATE_VEHICLE_INFO,
-                _vehicleInfos[0].SkinPrice[0]);
+                _vehicleInfos[0].VehicleInfoSO.SkinPrice[0]);
 
             // As the first skin is the default one, so no need to do below
             // Check if player has the dafault skin or not
@@ -117,9 +123,9 @@ namespace Parking_A.MainMenu
 
                 case ShopUIController.InteractionStatus.NEXT_VEHICLE_SKIN:
                     {
-                        int skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
-                        _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex + 1) >= skinsCount
-                            ? (byte)0 : ++_vehicleInfos[_currVehicleIndex].SkinIndex;
+                        int skinsCount = _vehicleInfos[_currVehicleIndex].VehicleInfoSO.SkinsMat.Length;
+                        _vehicleInfos[_currVehicleIndex].EquippedSkinIndex = (_vehicleInfos[_currVehicleIndex].EquippedSkinIndex + 1) >= skinsCount
+                            ? (byte)0 : ++_vehicleInfos[_currVehicleIndex].EquippedSkinIndex;
 
                         // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
                     }
@@ -127,9 +133,9 @@ namespace Parking_A.MainMenu
 
                 case ShopUIController.InteractionStatus.PREV_VEHICLE_SKIN:
                     {
-                        int skinsCount = _vehicleInfos[_currVehicleIndex].SkinsMat.Length;
-                        _vehicleInfos[_currVehicleIndex].SkinIndex = (_vehicleInfos[_currVehicleIndex].SkinIndex - 1) < 0
-                            ? (byte)(skinsCount - 1) : --_vehicleInfos[_currVehicleIndex].SkinIndex;
+                        int skinsCount = _vehicleInfos[_currVehicleIndex].VehicleInfoSO.SkinsMat.Length;
+                        _vehicleInfos[_currVehicleIndex].EquippedSkinIndex = (_vehicleInfos[_currVehicleIndex].EquippedSkinIndex - 1) < 0
+                            ? (byte)(skinsCount - 1) : --_vehicleInfos[_currVehicleIndex].EquippedSkinIndex;
 
                         // _vehiclePrefabs[_currVehicleSkinIndex].SetActive(true);
                     }
@@ -139,21 +145,21 @@ namespace Parking_A.MainMenu
                 case (ShopUIController.InteractionStatus)100:
                     _vehiclePrefabs[_currVehicleIndex].transform.GetChild(4).GetChild(0)
                         .GetComponent<MeshRenderer>().material =
-                        _vehicleInfos[_currVehicleIndex].SkinsMat[_vehicleInfos[_currVehicleIndex].SkinIndex];
+                        _vehicleInfos[_currVehicleIndex].VehicleInfoSO.SkinsMat[_vehicleInfos[_currVehicleIndex].EquippedSkinIndex];
 
                     goto case (ShopUIController.InteractionStatus)101;
 
                 // UI callbacks
                 case (ShopUIController.InteractionStatus)101:
                     // Check if the skin currently selected is equipped or not
-                    if ((MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex]
-                        & (1 << _vehicleInfos[_currVehicleIndex].SkinIndex)) != 0)
+                    if (MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] ==
+                        _vehicleInfos[_currVehicleIndex].EquippedSkinIndex)
                     {
                         _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 1);
                     }
                     // Check if the skin currently selected is bought or not
                     else if ((MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex]
-                        & (1 << _vehicleInfos[_currVehicleIndex].SkinIndex)) != 0)
+                        & (1 << _vehicleInfos[_currVehicleIndex].EquippedSkinIndex)) != 0)
                     {
                         _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 0);
                     }
@@ -161,7 +167,7 @@ namespace Parking_A.MainMenu
                         _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, -1);
 
                     _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.UPDATE_VEHICLE_INFO,
-                        _vehicleInfos[_currVehicleIndex].SkinPrice[_vehicleInfos[_currVehicleIndex].SkinIndex]);
+                        _vehicleInfos[_currVehicleIndex].VehicleInfoSO.SkinPrice[_vehicleInfos[_currVehicleIndex].EquippedSkinIndex]);
 
                     break;
 
@@ -173,10 +179,10 @@ namespace Parking_A.MainMenu
 
                         //Check if the player has bought the skin or not
                         if ((MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex]
-                            & (1 << _vehicleInfos[_currVehicleIndex].SkinIndex)) != 0)
+                            & (1 << _vehicleInfos[_currVehicleIndex].EquippedSkinIndex)) != 0)
                         {
-                            MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] = 0;             //Reset first
-                            MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] |= 1 << _vehicleInfos[_currVehicleIndex].SkinIndex;
+                            // MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] = 0;             //Reset first
+                            MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[_currVehicleIndex] = _vehicleInfos[_currVehicleIndex].EquippedSkinIndex;
 
                             _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 1);
                             MainMenuManager.Instance.SavePlayerStats();
@@ -184,7 +190,7 @@ namespace Parking_A.MainMenu
                         }
 
                         //Check if the player has enough coins
-                        int skinPrice = _vehicleInfos[_currVehicleIndex].SkinPrice[_vehicleInfos[_currVehicleIndex].SkinIndex];
+                        int skinPrice = _vehicleInfos[_currVehicleIndex].VehicleInfoSO.SkinPrice[_vehicleInfos[_currVehicleIndex].EquippedSkinIndex];
                         if (MainMenuManager.Instance.PlayerStats.Coins < skinPrice)
                         {
                             //Show message for not enough money
@@ -192,7 +198,7 @@ namespace Parking_A.MainMenu
                         }
 
                         MainMenuManager.Instance.PlayerStats.Coins -= skinPrice;
-                        MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex] |= 1 << _vehicleInfos[_currVehicleIndex].SkinIndex;
+                        MainMenuManager.Instance.PlayerStats.BoughtVehicleSkinIndexes[_currVehicleIndex] |= 1 << _vehicleInfos[_currVehicleIndex].EquippedSkinIndex;
                         _shopUIController.OnVehicleInteraction?.Invoke(ShopUIController.InteractionStatus.VEHICLE_SKIN_BOUGHT, 0);
                         MainMenuManager.Instance.SavePlayerStats();
                     }
