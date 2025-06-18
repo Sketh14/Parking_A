@@ -736,7 +736,16 @@ CAR PARKING
 - Scene
     [=] MainGameplaySc_1
         {+} Adding Power Panel UI
+        
 --------------------------------------------------------------------------------------------------------------
+                                                    18 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] InputManager
+        {+} FIx POWER_USED flag set logic
+--------------------------------------------------------------------------------------------------------------
+- [CHANGE] Change Boundary Prefab Colliders
+    [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh
 - [DONE] Shrink Power should not work for Small Vehicles
 - [DONE] Update RESET logic according to powers
 - [FIX] [IMP] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
@@ -746,10 +755,11 @@ CAR PARKING
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
-- [DO] In-game currency
-    [=] Powers to utilize in-game currency
-    [=] Shrink vehicle to different size vehicle
-    [=] Remove vehicle
+- [DONE] In-game currency
+    [=] [DONE] Powers to utilize in-game currency
+    [=] [DONE] Shrink vehicle to different size vehicle
+        <~> Replacing Vehicle with a small vehicle
+    [=] [DONE] Remove vehicle
 - [DO] [DONE FOR NOW] Shop for skins
     [=] Made rotating platform
     [=] Buy/Equip mechanics

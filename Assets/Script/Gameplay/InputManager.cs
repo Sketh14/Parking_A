@@ -92,14 +92,14 @@ namespace Parking_A.Gameplay
                     // Check if user has not selected the small vehicle for Shrink power
                     if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
                     {
-                        _selectionStatus = SelectionStatus.NOT_SELECTED;
-
                         // Remove this if any other way found
                         if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
                         {
                             GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
                             GameManager.Instance.SavePlayerStats();
                         }
+
+                        _selectionStatus = SelectionStatus.NOT_SELECTED;
                     }
                     else
                         _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
