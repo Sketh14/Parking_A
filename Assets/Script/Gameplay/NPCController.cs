@@ -392,6 +392,7 @@ namespace Parking_A.Gameplay
 
                     GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
                     GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
+                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_FAILED);
                     GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
                 }
 

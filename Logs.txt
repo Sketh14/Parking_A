@@ -774,6 +774,14 @@ CAR PARKING
         {+} Fixing NPC getting thrown in the wrong direction if the vehicle's orientation is flipped and forward is opposite
         {+} Checking vehicle forward+position to determine hit-direction
 
+- Scene
+    [=] Level Win UI
+-  Scripts
+    [=] GameUIManager
+        {+} Level result logic
+            <~> Passed or Failed level
+    [=] UniversalConstant
+        {+} Adding LEVEL_PASSED to GameStatus
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Show correct mat for vehicle for skin equipped
 - [DONE] Assign skins to vehicles in main gameplay when equipped

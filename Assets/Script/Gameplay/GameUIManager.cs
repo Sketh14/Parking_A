@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Parking_A.Global;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,10 +7,12 @@ namespace Parking_A.Gameplay
 {
     public class GameUIManager : MonoBehaviour
     {
-        public enum UISelected { POWER_PANEL = 0, LEVEL_FAILED_PANEL = 1, POWER_1 = 2, POWER_2 = 3, POWER_USED, RESET_UI }
+        public enum UISelected { POWER_PANEL = 0, LEVEL_RESULT_PANEL = 1, POWER_1 = 2, POWER_2 = 3, POWER_USED, RESET_UI, GO_HOME }
 
-        [SerializeField] private Button _resetLevelBt;
-        [SerializeField] private GameObject _levelFailedPanel, _powerPanel;
+        [SerializeField] private Button _tryAgainBt, _nextLevelBt, _homeBt;
+        [SerializeField] private GameObject _levelResultPanel, _powerPanel;
+        [SerializeField] private TMPro.TMP_Text _levelResultTxt;
+        private const string _levelPassedC = "LEVEL PASSED!", _levelFailedC = "LEVEL FAILED";
 
         [SerializeField] private Button _openPowerPanelBt, _closePowerPanelBt;
         [SerializeField] private Button[] _usePowerBts;
@@ -26,16 +29,21 @@ namespace Parking_A.Gameplay
         private void OnDestroy()
         {
             GameManager.Instance.OnUISelected -= UpdateUIFromResult;
+            GameManager.Instance.OnGameStatusChange -= UpdateUIFromGameStatus;
         }
 
         private void Start()
         {
-            GameManager.Instance.OnNPCHit += (dummyVal) => { UpdateUI(UISelected.LEVEL_FAILED_PANEL, true); };
+            // GameManager.Instance.OnNPCHit += (dummyVal) => { UpdateUI(UISelected.LEVEL_RESULT_PANEL, true); };
             GameManager.Instance.OnUISelected += UpdateUIFromResult;
+            GameManager.Instance.OnGameStatusChange += UpdateUIFromGameStatus;
 
-            _resetLevelBt.onClick.AddListener(() => UpdateUI(UISelected.RESET_UI, true));
+            _tryAgainBt.onClick.AddListener(() => UpdateUI(UISelected.RESET_UI, true));
             _openPowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, true));
             _closePowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, false));
+
+            _nextLevelBt.onClick.AddListener(() => GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL));
+            _homeBt.onClick.AddListener(() => UpdateUI(UISelected.GO_HOME, false));
 
             for (int i = 0; i < _usePowerBts.Length; i++)
             {
@@ -59,6 +67,33 @@ namespace Parking_A.Gameplay
             }
         }
 
+        private void UpdateUIFromGameStatus(UniversalConstant.GameStatus gameStatus)
+        {
+            switch (gameStatus)
+            {
+                case UniversalConstant.GameStatus.LEVEL_FAILED:
+                    _levelResultPanel.gameObject.SetActive(true);
+                    _levelResultTxt.text = _levelFailedC;
+                    _tryAgainBt.gameObject.SetActive(true);
+                    _nextLevelBt.gameObject.SetActive(false);
+
+                    break;
+
+                case UniversalConstant.GameStatus.LEVEL_PASSED:
+                    _levelResultPanel.gameObject.SetActive(true);
+                    _levelResultTxt.text = _levelPassedC;
+                    _nextLevelBt.gameObject.SetActive(true);
+                    _tryAgainBt.gameObject.SetActive(false);
+
+                    break;
+
+                case UniversalConstant.GameStatus.NEXT_LEVEL:
+                    _levelResultPanel.gameObject.SetActive(false);
+
+                    break;
+            }
+        }
+
         private void UpdateUI(UISelected uISelected, bool value)
         {
             switch (uISelected)
@@ -67,14 +102,14 @@ namespace Parking_A.Gameplay
                     _powerPanel.SetActive(value);
                     break;
 
-                case UISelected.LEVEL_FAILED_PANEL:
-                    _levelFailedPanel.gameObject.SetActive(value);
+                case UISelected.LEVEL_RESULT_PANEL:
+                    _levelResultPanel.gameObject.SetActive(value);
                     break;
 
                 case UISelected.RESET_UI:
-                    GameManager.Instance.OnGameStatusChange?.Invoke(Global.UniversalConstant.GameStatus.RESET_LEVEL);
+                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.RESET_LEVEL);
 
-                    _levelFailedPanel.SetActive(false);
+                    _levelResultPanel.SetActive(false);
                     break;
 
 
@@ -98,6 +133,10 @@ namespace Parking_A.Gameplay
                         ClearDisclaimerAsync(0);
                     }
 
+                    break;
+
+                case UISelected.GO_HOME:
+                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(0);
                     break;
             }
         }
