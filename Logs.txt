@@ -761,9 +761,18 @@ CAR PARKING
 - Project
     [=] Restructure Data Folder
     [=] Add VehicleInfo-SO's
+
+--------------------------------------------------------------------------------------------------------------
+                                                    19 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Script
+    [=] PoolManager
+        {+} Completing skins assigning
+
+
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Show correct mat for vehicle for skin equipped
-- [DO] Assign skins to vehicles in main gameplay when equipped
+- [DONE] Assign skins to vehicles in main gameplay when equipped
 - [CHANGE] Change Boundary Prefab Colliders
     [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh
 - [DONE] Shrink Power should not work for Small Vehicles

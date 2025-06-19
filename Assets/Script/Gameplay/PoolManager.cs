@@ -1,3 +1,5 @@
+#define RESET_SKINS_AT_END
+
 using System;
 using System.Collections.Generic;
 using Parking_A.Global;
@@ -30,6 +32,18 @@ namespace Parking_A.Gameplay
 
         public Dictionary<UniversalConstant.PoolType, UnityEngine.Pool.ObjectPool<GameObject>> PrefabPool;
 
+        private void OnDestroy()
+        {
+#if RESET_SKINS_AT_END
+            //Reset Skins
+            for (int i = 0; i < 3; i++)
+            {
+                _poolSObjArr[i].poolPrefab.transform.GetChild(4).GetChild(0).GetComponent<MeshRenderer>().material =
+                    GameManager.Instance.VehicleInfoSOs[i].SkinsMat[0];
+            }
+#endif
+        }
+
         private void Start()
         {
             PrefabPool = new Dictionary<UniversalConstant.PoolType, UnityEngine.Pool.ObjectPool<GameObject>>();
@@ -43,7 +57,9 @@ namespace Parking_A.Gameplay
             //Updating skins of Vehicles | maybe this should be in GameManager
             for (int i = 0; i < 3; i++)
             {
-
+                _poolSObjArr[i].poolPrefab.transform.GetChild(4).GetChild(0).GetComponent<MeshRenderer>().material =
+                    GameManager.Instance.VehicleInfoSOs[i]
+                        .SkinsMat[GameManager.Instance.CurrentPlayerStats.EquippedVehicleSkinIndexes[i]];
             }
 
             //Initialize pool to contain 5 of every item
