@@ -42,7 +42,8 @@ namespace Parking_A.Gameplay
             _openPowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, true));
             _closePowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, false));
 
-            _nextLevelBt.onClick.AddListener(() => GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL));
+            _nextLevelBt.onClick.AddListener(() =>
+                GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1));
             _homeBt.onClick.AddListener(() => UpdateUI(UISelected.GO_HOME, false));
 
             for (int i = 0; i < _usePowerBts.Length; i++)
@@ -67,7 +68,7 @@ namespace Parking_A.Gameplay
             }
         }
 
-        private void UpdateUIFromGameStatus(UniversalConstant.GameStatus gameStatus)
+        private void UpdateUIFromGameStatus(UniversalConstant.GameStatus gameStatus, int value)
         {
             switch (gameStatus)
             {
@@ -87,7 +88,7 @@ namespace Parking_A.Gameplay
 
                     break;
 
-                case UniversalConstant.GameStatus.NEXT_LEVEL:
+                case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
                     _levelResultPanel.gameObject.SetActive(false);
 
                     break;
@@ -107,8 +108,8 @@ namespace Parking_A.Gameplay
                     break;
 
                 case UISelected.RESET_UI:
-                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.RESET_LEVEL);
-
+                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.RESET_LEVEL, -1);
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.RESET_LEVEL);
                     _levelResultPanel.SetActive(false);
                     break;
 

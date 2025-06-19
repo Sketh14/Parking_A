@@ -48,11 +48,12 @@ namespace Parking_A.Gameplay
         }
 
         public VehicleInfoScriptableObject[] VehicleInfoSOs;
+        private EnvironmentSpawner _envSpawner;
 
         public System.Action<InputManager.SelectionStatus, int, Vector2> OnSelect;
-        public System.Action<int> OnNPCHit;
+        // public System.Action<int> OnNPCHit;
         public System.Action<GameUIManager.UISelected, int> OnUISelected;
-        public System.Action<UniversalConstant.GameStatus> OnGameStatusChange;
+        public System.Action<UniversalConstant.GameStatus, int> OnGameStatusChange;
         public System.Action<byte[]> OnEnvironmentSpawned;
 
         private void Start()
@@ -89,12 +90,12 @@ namespace Parking_A.Gameplay
                 Debug.Log($"Selected Random Seed: {tempRandomSeed}");
             }
 
-            EnvironmentSpawner envSpawner = new EnvironmentSpawner();
+            _envSpawner = new EnvironmentSpawner();
 
             try
             {
                 // await envSpawner.SpawnBoundary((values) => boundaryData = values);
-                await envSpawner.SpawnBoundary();
+                await _envSpawner.SpawnBoundary();
             }
             //Cannot initialize boundary | Stop level generation, show some message and restart
             catch (System.Exception ex)
@@ -107,16 +108,50 @@ namespace Parking_A.Gameplay
 
         public UniversalConstant.GameStatus SetGameStatus(UniversalConstant.GameStatus gameStatus)
         {
+            // if ((gameStatus & UniversalConstant.GameStatus.RESET_LEVEL) != 0)
+            // {
+            //     _gameStatus &= ~UniversalConstant.GameStatus.NPC_HIT;
+            //     _gameStatus &= ~UniversalConstant.GameStatus.LEVEL_FAILED;
+            //     return GameStatus;
+            // }
+
+            switch (gameStatus)
+            {
+                case UniversalConstant.GameStatus.RESET_LEVEL:
+                    _gameStatus &= ~UniversalConstant.GameStatus.NPC_HIT;
+                    _gameStatus &= ~UniversalConstant.GameStatus.LEVEL_FAILED;
+                    return GameStatus;
+
+                case UniversalConstant.GameStatus.NPC_HIT:
+                    _gameStatus |= UniversalConstant.GameStatus.NPC_HIT;
+                    _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
+                    return GameStatus;
+
+                case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
+                    DeSpawnBoundary();
+                    return GameStatus;
+            }
+
             _gameStatus |= gameStatus;
 
             if ((_gameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) != 0
                 && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) != 0)
                 _gameStatus |= UniversalConstant.GameStatus.LEVEL_GENERATED;
 
-            if ((_gameStatus & UniversalConstant.GameStatus.NPC_HIT) != 0)
-                _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
+            // if ((_gameStatus & UniversalConstant.GameStatus.NPC_HIT) != 0)
+            //     _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
 
             return GameStatus;
+        }
+
+        private void DeSpawnBoundary()
+        {
+            for (int i = 0; i < _envSpawner.BoundariesSpawned.Count; i++)
+            {
+                PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY]
+                    .Release(_envSpawner.BoundariesSpawned[i]);
+            }
+            _envSpawner.ClearBoundaries();
         }
     }
 }

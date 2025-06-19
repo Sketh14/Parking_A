@@ -782,8 +782,22 @@ CAR PARKING
             <~> Passed or Failed level
     [=] UniversalConstant
         {+} Adding LEVEL_PASSED to GameStatus
+
+- Scripts
+    [=] UniversalConstant
+        {+} Adding enums for Next-Level generation
+    [=] VehicleController
+        {+} Next level generation
+            <~> Despawning vehicles
+    [=] GameManager
+        {+} Replacing OnHit action with OnGameStatusChange | Adding int to value passed
+        {+} Despawning Environment
+    [=] EnvironmentSpawner
+        {+} Using a list to store boundaryObjects | For despawning also
 --------------------------------------------------------------------------------------------------------------
-- [FIX] Show correct mat for vehicle for skin equipped
+- [DO] Maybe follow the routine of setting flag for resetting level
+    [=] Request Made, Values Changed, Continue With Gameplay
+- [FIX] [FIXED] Show correct mat for vehicle for skin equipped
 - [DONE] Assign skins to vehicles in main gameplay when equipped
 - [CHANGE] Change Boundary Prefab Colliders
     [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh

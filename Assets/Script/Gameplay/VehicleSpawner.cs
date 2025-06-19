@@ -44,6 +44,11 @@ namespace Parking_A.Gameplay
             // SpawnVehicles2();
         }
 
+        public void ClearVehicles()
+        {
+            _vehiclesSpawned.Clear();
+        }
+
         public async void SpawnVehicles(Action onVehiclesSpawned)
         {
             Debug.Log($"Spawning Vehicles");
@@ -175,6 +180,7 @@ namespace Parking_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
+            #region BoundaryData
             //Initialize Boundary Data
 #if !DEBUG_GRID_BOUNDARY
             System.Text.StringBuilder debugGrid = new System.Text.StringBuilder();
@@ -238,6 +244,7 @@ namespace Parking_A.Gameplay
 
             Debug.Log("gridMap: \n" + debugGrid.ToString());
 #endif
+            #endregion BoundaryData
 
             List<int> addedVehicleTypes = new List<int>();
             Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
@@ -251,6 +258,7 @@ namespace Parking_A.Gameplay
             int emergencyExit = 0;
 #endif
 
+            #region SpawnVehicles
             // 1 cell gap for boundary
 #if !SPAWN_LOOP_TEST
             for (gridMapIndex = 0; gridMapIndex < UniversalConstant._GridXC * UniversalConstant._GridYC; gridMapIndex++)
@@ -554,6 +562,8 @@ namespace Parking_A.Gameplay
 
             Debug.Log($"Spawning Vehicles Finished");
             onVehiclesSpawned?.Invoke(addedVehicleTypes.ToArray());
+            #endregion SpawnVehicles
+
         }
 
         //Test if vehicles spawn within bounds

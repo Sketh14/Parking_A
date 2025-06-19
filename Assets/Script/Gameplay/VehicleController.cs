@@ -73,7 +73,7 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
-            GameManager.Instance.OnNPCHit -= DisableVehicle;
+            // GameManager.Instance.OnNPCHit -= DisableVehicle;
             GameManager.Instance.OnGameStatusChange -= UpdateVehicles;
         }
 
@@ -81,7 +81,7 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect += VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
-            GameManager.Instance.OnNPCHit += DisableVehicle;
+            // GameManager.Instance.OnNPCHit += DisableVehicle;
             GameManager.Instance.OnGameStatusChange += UpdateVehicles;
 
             _vehicleName = new System.Text.StringBuilder();
@@ -132,11 +132,15 @@ namespace Parking_A.Gameplay
             _vehicleInfos[vehicleID].VehicleStatus |= VehicleStatus.HIT_NPC;
         }
 
-        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus)
+        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus, int value)
         {
             // Debug.Log($"UpdateVehicles | gameStatus: {gameStatus}");
             switch (gameStatus)
             {
+                case UniversalConstant.GameStatus.NPC_HIT:
+                    _vehicleInfos[value].VehicleStatus |= VehicleStatus.HIT_NPC;
+                    break;
+
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 vehiclePos, vehicleRot;
                     for (int i = 0; i < _vehicleInfos.Length; i++)
@@ -169,6 +173,20 @@ namespace Parking_A.Gameplay
                         _vehicleInfos[i].InteractedDir = Vector2.zero;
                         _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(true);
                     }
+                    break;
+
+                case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
+                    for (int i = 0; i < _vehicleInfos.Length; i++)
+                    {
+                        PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
+                            .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+
+                        _vehicleInfos[i].VehicleStatus = 0;
+                        _vehicleInfos[i].VehicleType = 255;
+                        _vehicleInfos[i].InteractedDir = Vector2.zero;
+                    }
+
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_UNLOADED);
                     break;
             }
         }

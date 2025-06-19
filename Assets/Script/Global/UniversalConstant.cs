@@ -15,7 +15,9 @@ namespace Parking_A.Global
             LEVEL_FAILED = 1 << 4,
             RESET_LEVEL = 1 << 5,
             LEVEL_PASSED = 1 << 6,
-            NEXT_LEVEL = 1 << 7,
+            NEXT_LEVEL_REQUESTED = 1 << 7,
+            VEHICLE_UNLOADED = 1 << 8,
+            LOAD_NEXT_LEVEL = 1 << 9,
         }
         public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY, NPC }
 

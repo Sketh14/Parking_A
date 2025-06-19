@@ -2,21 +2,30 @@
 // #define SPAWN_HORIZONTAL_TEST
 // #define SPAWN_VERTICAL_TEST
 
-using System;
-
 using UnityEngine;
 
 using Parking_A.Global;
 using Random = UnityEngine.Random;
+
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Parking_A.Gameplay
 {
     public class EnvironmentSpawner
     {
+        private List<GameObject> _boundariesSpawned;
+        public List<GameObject> BoundariesSpawned { get => _boundariesSpawned; }
+
         // private const string _randomSeed = "SKETH";
 
         // public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
+
+        public void ClearBoundaries()
+        {
+            _boundariesSpawned.Clear();
+        }
+
         public async Task SpawnBoundary()
         {
             // Debug.Log($"Spawning Boundary | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
@@ -32,9 +41,10 @@ namespace Parking_A.Gameplay
             // Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;
+            int boundaryCount = 0;
             Vector3 spawnPos, spawnRot;
 
-            GameObject boundaryObject;
+            // GameObject boundaryObject;
 
 #if EMERGENCY_LOOP_EXIT
             int emergencyExit = 0;
@@ -49,6 +59,7 @@ namespace Parking_A.Gameplay
                 |   | x |   |      |   |   |   |  
             */
 
+            #region HORIZONTAL_SPAWN
             // 1 cell gap for last-boundary
 #if !SPAWN_HORIZONTAL_TEST
             for (gridMapIndex = 0; gridMapIndex < (UniversalConstant._GridXC * 2) - 1; gridMapIndex++)
@@ -113,10 +124,12 @@ namespace Parking_A.Gameplay
                 for (neighbourX = 0; neighbourX < 2; neighbourX++)
                     gridMap[gridMapIndex + neighbourX] = (byte)UniversalConstant.PoolType.BOUNDARY;
 
-                boundaryObject = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get();
-                boundaryObject.name = $"BoundaryH_I[{gridMapIndex}]";
-                boundaryObject.transform.position = spawnPos;
-                boundaryObject.transform.rotation = Quaternion.identity;
+                _boundariesSpawned.Add(PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get());
+                _boundariesSpawned[boundaryCount].name = $"BoundaryH_I[{gridMapIndex}]";
+                _boundariesSpawned[boundaryCount].transform.position = spawnPos;
+                _boundariesSpawned[boundaryCount].transform.rotation = Quaternion.identity;
+
+                boundaryCount++;
 
                 //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
 
@@ -125,7 +138,9 @@ namespace Parking_A.Gameplay
 
                 await Task.Yield();
             }
+            #endregion HORIZONTAL_SPAWN
 
+            #region VERTICAL_SPAWN
             // /*
 #if !SPAWN_VERTICAL_TEST
             for (gridMapIndex = UniversalConstant._GridXC * 2;
@@ -205,20 +220,18 @@ namespace Parking_A.Gameplay
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)
                     gridMap[gridMapIndex + neighbourY] = (byte)UniversalConstant.PoolType.BOUNDARY;
 
-                boundaryObject = PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get();
-                boundaryObject.name = $"BoundaryV_I[{gridMapIndex}]";
-                boundaryObject.transform.position = spawnPos;
-                boundaryObject.transform.localEulerAngles = spawnRot;
+                _boundariesSpawned.Add(PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.BOUNDARY].Get());
+                _boundariesSpawned[boundaryCount].name = $"BoundaryV_I[{gridMapIndex}]";
+                _boundariesSpawned[boundaryCount].transform.position = spawnPos;
+                _boundariesSpawned[boundaryCount].transform.localEulerAngles = spawnRot;
 
-                //Check the validity of the random vehicle | If the vehicle can escape from the parking lot or not
-
-                // If true, then place the vehicle
-                // If false, then choose another vehicle | leave the spot empty
+                boundaryCount++;
 
                 await Task.Yield();
             }
             Debug.Log($"Spawning Boundary Finished");
             // */
+            #endregion VERTICAL_SPAWN
 
             // onBoundarySpawned?.Invoke(gridMap);
             GameManager.Instance.OnEnvironmentSpawned?.Invoke(gridMap);

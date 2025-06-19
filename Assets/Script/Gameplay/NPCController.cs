@@ -112,7 +112,7 @@ namespace Parking_A.Gameplay
             GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_SPAWNED);
         }
 
-        private void UpdateNPCs(UniversalConstant.GameStatus gameStatus)
+        private void UpdateNPCs(UniversalConstant.GameStatus gameStatus, int value)
         {
             // Debug.Log($"UpdateNPCs | gameStatus: {gameStatus}");
             switch (gameStatus)
@@ -391,8 +391,8 @@ namespace Parking_A.Gameplay
                     // + $"|xPos: {colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x)} ");
 
                     GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
-                    GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
-                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_FAILED);
+                    // GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
+                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_FAILED, vehicleID);
                     GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
                 }
 
