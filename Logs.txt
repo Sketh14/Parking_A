@@ -769,6 +769,10 @@ CAR PARKING
     [=] PoolManager
         {+} Completing skins assigning
 
+- Scripts
+    [=] NPCController
+        {+} Fixing NPC getting thrown in the wrong direction if the vehicle's orientation is flipped and forward is opposite
+        {+} Checking vehicle forward+position to determine hit-direction
 
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Show correct mat for vehicle for skin equipped
@@ -777,7 +781,7 @@ CAR PARKING
     [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh
 - [DONE] Shrink Power should not work for Small Vehicles
 - [DONE] Update RESET logic according to powers
-- [FIX] [IMP] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
+- [FIX] [IMP] [FIXED] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
 - [DONE FOR NOW] [IMP] Link Vehicle info to player stats
     [=] Keep track of the skin of vehicles
@@ -796,7 +800,7 @@ CAR PARKING
 - [DO] WHeel maybe if possible 
 - [DO] [MAYBE IMP] Asss weightage to boundary spawner
     [=] Consistent empty gaps or at least feel like consistent
-- [FIX] Increase corner raycasts
+- [FIX [DONE]] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
 - [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,
     then, if the 2nd vehicle is coming, it will collide with the current vehicle, as the current vehicle will not further
@@ -806,29 +810,29 @@ CAR PARKING
     vehile wil collide with the 2nd vehicle and get stuck
     [=] Increasing raycast to down?
     [=] Bottom-Left needs to have raycast flipped
-- [FIXED] [IMP] On Corner checks, not all raycasts work
+- [FIXED] [IMP] [DONE] On Corner checks, not all raycasts work
     [=] Fixed, checking hitCount after the loop
-- [DO] [IMP] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
+- [DO] [IMP] [DONE] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
     to check for the oncoming vehicles, the raycasts for collision checks do not need to move with the vehicle
         {+} This will also somewhat fix the vehicle still moving, even when there is another oncoming vehicle at turn
-- [DO] [FIX] ONBOARDING_ROAD collisions check
+- [DO] [FIX] [DONE] ONBOARDING_ROAD collisions check
     [=] If the vehicle is at the corners ans another is approaching from the road, the current vehicle will not be 
         able to detect it with raycast
         {+} Might need to sphere check for edge cases
         {+} Can also keep indexes of moving vehicles and check if any vehicle is besides the current one
-- [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
+- [DO] [FIX] [DONE] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions
         {+} Within the delay, another passing vehicle can come and collide with the current vehicle
         {+} But it is too late, and the vehicle is already onboarding the road
-- [Do] [IMP] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
+- [Do] [IMP] [DONE] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
     [=] Sometimes the collision check does not work for vehicles just about to cross but 
         the vehicle has crossed the On-Road threshold
     [=] Take some offset from the road boundaries and if crossed then use WaitForVehicle collision check to check 
         for passing vehicles
     [=] Use different layermask and enable the check as soon as it touches the last cell
-- [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
-- [DO] [IMP] Boundary Checks
-- [DO] [IMP] Collision Checks
+- [Do] [IMP] [DONE] Fill the vehicle grid with bounary values and check collisions while placement
+- [DO] [IMP] [DONE] Boundary Checks
+- [DO] [IMP] [DONE] Collision Checks
     [=] When vehicle is moving
         {+} Check if collided wth another vehicle  [DONE FOR NOW]
         {+} Check if there is another vehicle on the road, before entering the road
@@ -847,7 +851,7 @@ CAR PARKING
     [=] For Large Vehicle | Center will always in interval of 0.5 starting from the (-1 | 1)
     [=] Since every Vehicle has the same width and only the length differs
         {+} Need to only change the length value, breadth value can remain the same
-- [DO] Vehicle Collision Detection
+- [DO] [DONE] Vehicle Collision Detection
     [=] Make sectors and add vehicles, for less load [DONE FOR NOW]
     [=] [IMP] Detect collisions while getting on road
 - [DO] [DONE FOR NOW] Pooling System 

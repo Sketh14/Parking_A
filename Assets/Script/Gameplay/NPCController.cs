@@ -36,6 +36,7 @@ namespace Parking_A.Gameplay
         private NPCInfo[] _npcInfos;
         private System.Text.StringBuilder _npcName;
         private CancellationTokenSource _cts;
+        private int _hitNPCINdex;
 
         private const float _speedMultC = 0.5f;
         private const int _collisionLayerMaskC = (1 << 6) | (1 << 7);
@@ -328,12 +329,68 @@ namespace Parking_A.Gameplay
                 if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _vehicleLayerMaskC))
                 {
                     // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
+                    // _hitNPCINdex = npcIndex;
                     _npcInfos[npcIndex].NpcStatus |= NPCStatus.NPC_HIT;
                     int vehicleID = -1;
                     int.TryParse(colliderHitInfo.transform.name.Substring(12, 3), out vehicleID);
-                    // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {colliderHitInfo.transform.forward}");
+                    // Debug.Log($"Hit By Vehicle | ID: {vehicleID}");
 
-                    GoFlying(npcIndex, colliderHitInfo.transform.forward);
+
+                    // int vehicleDir = 0;
+                    // int.TryParse(colliderHitInfo.transform.name.Substring(22, 2), out vehicleDir);
+                    // Debug.Log($"Hit By Vehicle | ID: {vehicleID} | Hit Dir: {vehicleDir}");
+
+                    // Determining Hit-Direction
+                    //  - Since forward will be on the same orienatation as the vehicle, would just need to determine 
+                    //    if its going forward or backward
+                    //  - Just need to check the quadrant in which the vehicle is present
+
+                    /*
+                    int dirMult = 1;
+                    // HORIZONTAL | Right Side
+                    if (colliderHitInfo.transform.position.x > 0.05)
+                    {
+                        if (colliderHitInfo.transform.forward.x > 0)
+                            dirMult = 1;
+                        else
+                            dirMult = -1;
+                    }
+                    // HORIZONTAL | Left Side
+                    else if (colliderHitInfo.transform.position.x < -0.05)
+                    {
+                        if (colliderHitInfo.transform.forward.x < 0)
+                            dirMult = 1;
+                        else
+                            dirMult = -1;
+                    }
+
+                    // VERTICAL | Up Side
+                    else if (colliderHitInfo.transform.position.z > 0)
+                    {
+                        if (colliderHitInfo.transform.forward.z > 0)
+                            dirMult = 1;
+                        else
+                            dirMult = -1;
+                    }
+                    // VERTICAL | Down Side
+                    else
+                    {
+                        if (colliderHitInfo.transform.forward.z < 0)
+                            dirMult = 1;
+                        else
+                            dirMult = -1;
+                    }*/
+
+                    int dirMult2 = 1 * (int)colliderHitInfo.transform.forward.x
+                        * (int)(colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x))  //Check if the vehicle is "Right" or "Left" from the center
+                        + 1 * (int)colliderHitInfo.transform.forward.z
+                        * (int)(colliderHitInfo.transform.position.z / Math.Abs(colliderHitInfo.transform.position.z));  //Check if the vehicle is "Up" or "Down" from the center
+                    // Debug.Log($"dirMult |z: {1 * (int)colliderHitInfo.transform.forward.z} "
+                    // + $"|zPos: {colliderHitInfo.transform.position.z / Math.Abs(colliderHitInfo.transform.position.z)} "
+                    // + $"|x: {1 * (int)colliderHitInfo.transform.forward.x} "
+                    // + $"|xPos: {colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x)} ");
+
+                    GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
                     GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
                     GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
                 }
