@@ -1,4 +1,4 @@
-#define SLOWTIME_DEBUG
+// #define SLOWTIME_DEBUG
 #define COLLISIONCHECK_DEBUG
 
 using System;
@@ -400,7 +400,7 @@ namespace Parking_A.Gameplay
 
                     GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
                     // GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
-                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_FAILED, vehicleID);
+                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NPC_HIT, vehicleID);
                     GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_HIT);
                 }
 
@@ -459,7 +459,8 @@ namespace Parking_A.Gameplay
                 _npcSpawner.NPCsSpawned[npcIndex].GetChild(0).Rotate(rotDir * rotSpeedMultC);
 
                 await Task.Yield();
-                if (_cts.Token.IsCancellationRequested) return;
+                if (_cts.Token.IsCancellationRequested
+                    || (GameManager.Instance.GameStatus & UniversalConstant.GameStatus.RESET_LEVEL) != 0) return;
             }
 
         }

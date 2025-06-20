@@ -101,7 +101,7 @@ namespace Parking_A.Gameplay
                 MainGameConfig.RandomString = tempRandomSeed;
             }
             Random.InitState(MainGameConfig.RandomString.GetHashCode());
-            Debug.Log($"Selected Random Seed: {MainGameConfig.RandomString}");
+            Debug.Log($"Selected Random Seed: {MainGameConfig.RandomString}");          // OG: 1316642
 
             try
             {
@@ -138,6 +138,7 @@ namespace Parking_A.Gameplay
                 case UniversalConstant.GameStatus.NPC_HIT:
                     _gameStatus |= UniversalConstant.GameStatus.NPC_HIT;
                     _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
+                    OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_FAILED, -1);
 
                     return GameStatus;
 
