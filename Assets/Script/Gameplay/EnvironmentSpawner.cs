@@ -9,6 +9,7 @@ using Random = UnityEngine.Random;
 
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Parking_A.Gameplay
 {
@@ -20,8 +21,15 @@ namespace Parking_A.Gameplay
         // private const string _randomSeed = "SKETH";
 
         // public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
+        private CancellationTokenSource _cts;
+        ~EnvironmentSpawner()
+        {
+            _cts.Cancel();
+        }
+
         public EnvironmentSpawner()
         {
+            _cts = new CancellationTokenSource();
             _boundariesSpawned = new List<GameObject>();
         }
 
@@ -41,7 +49,7 @@ namespace Parking_A.Gameplay
             for (; gridMapIndex < gridMap.Length; gridMapIndex++)
                 gridMap[gridMapIndex] = 0;
 
-            Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
+            // Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
             // Random.InitState(123456);
 
             int boundaryOrientation, neighbourX, neighbourY;
@@ -141,6 +149,7 @@ namespace Parking_A.Gameplay
                 // If false, then choose another vehicle | leave the spot empty
 
                 await Task.Yield();
+                if (_cts.IsCancellationRequested) return;
             }
             #endregion HORIZONTAL_SPAWN
 
@@ -232,6 +241,7 @@ namespace Parking_A.Gameplay
                 boundaryCount++;
 
                 await Task.Yield();
+                if (_cts.IsCancellationRequested) return;
             }
             Debug.Log($"Spawning Boundary Finished");
             // */

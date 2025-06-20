@@ -292,6 +292,7 @@ namespace Parking_A.Gameplay
 
                 // Debug.Log($"{npc.name} | Pos: {npc.transform.position} | bIndex: {bIndex}");
                 await Task.Yield();
+                if (_cts.IsCancellationRequested) return;
             }
             // */
 

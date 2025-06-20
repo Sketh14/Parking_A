@@ -1,5 +1,6 @@
 // #define EMERGENCY_LOOP_EXIT
 // #define SPAWN_LOOP_TEST
+#define VEHICLE_TYPE_ORIENTATION_DEBUG
 
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace Parking_A.Gameplay
         {
             Debug.Log($"Spawning Vehicles");
 
-            Random.InitState(123456);
+            // Random.InitState(123456);
             UniversalConstant.PoolType vehicleType;
             Vector3 spawnPos = Vector3.zero, spawnRot = Vector3.zero, halfExtents = Vector3.zero;
             // bool lotFull = false;
@@ -247,7 +248,7 @@ namespace Parking_A.Gameplay
             #endregion BoundaryData
 
             List<int> addedVehicleTypes = new List<int>();
-            Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
+            // Random.InitState(GameManager.Instance.MainGameConfig.RandomString.GetHashCode());
             // Random.InitState(123456);
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX, neighbourY;
@@ -256,6 +257,10 @@ namespace Parking_A.Gameplay
 
 #if EMERGENCY_LOOP_EXIT
             int emergencyExit = 0;
+#endif
+
+#if VEHICLE_TYPE_ORIENTATION_DEBUG
+            System.Text.StringBuilder vehicleTyOrDebug = new System.Text.StringBuilder();
 #endif
 
             #region SpawnVehicles
@@ -295,6 +300,11 @@ namespace Parking_A.Gameplay
                 //Random Orientation
                 //0: Left | 1: Right | 2: Up | 3: Down
                 vehicleOrientation = Random.Range(0, 4);         //Original
+
+#if VEHICLE_TYPE_ORIENTATION_DEBUG
+                vehicleTyOrDebug.Append($"[{gridMapIndex}]Ty[{vehicleType}]Or[{vehicleOrientation}], ");
+#endif
+
 #else
                 // vehicleOrientation = Random.Range(0, 2);         //Original
                 vehicleOrientation = 1;                             //Test
@@ -559,6 +569,10 @@ namespace Parking_A.Gameplay
 
                 await Task.Yield();
             }
+
+#if VEHICLE_TYPE_ORIENTATION_DEBUG
+            Debug.Log($"Vehicle Type Orienattion Debug : {vehicleTyOrDebug.ToString()}");
+#endif
 
             Debug.Log($"Spawning Vehicles Finished");
             onVehiclesSpawned?.Invoke(addedVehicleTypes.ToArray());

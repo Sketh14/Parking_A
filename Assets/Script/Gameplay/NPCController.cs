@@ -24,6 +24,7 @@ namespace Parking_A.Gameplay
 
         internal enum NPCStatus
         {
+            UNINITIALIZED = 0,
             IDLE = 1 << 0,
             MOVING = 1 << 1,
             HORIZONTAL_ALIGNED = 1 << 2,
@@ -63,6 +64,7 @@ namespace Parking_A.Gameplay
             _npcName = new System.Text.StringBuilder();
 
             _npcSpawner = new NPCSpawner();
+            _npcInfos = new NPCInfo[8];             //Max should never be lesser than set  in Spawner
 
             GameManager.Instance.OnGameStatusChange += UpdateNPCs;
             GameManager.Instance.OnEnvironmentSpawned += CallNPCSpawner;
@@ -78,6 +80,7 @@ namespace Parking_A.Gameplay
                     return;
                 }
                 await _npcSpawner.SpawnNpcs(boundaryData, InitializeNPCData);
+                if (_cts.IsCancellationRequested) return;
             }
             catch (Exception ex)
             {
@@ -88,9 +91,9 @@ namespace Parking_A.Gameplay
         // Right: {(1.00, 0.00, 0.00)} | Down: {(0.00, 0.00, -1.00)} | Left: {(-1.00, 0.00, 0.00)} | Up: {(0.00, 0.00, 1.00)}
         private void InitializeNPCData()
         {
-            _npcInfos = new NPCInfo[_npcSpawner.NPCsSpawned.Count];
+            // _npcInfos = new NPCInfo[_npcSpawner.NPCsSpawned.Count];
 
-            for (int i = 0; i < _npcInfos.Length; i++)
+            for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
             {
                 // UP | DOWN
                 if (Mathf.Abs(_npcSpawner.NPCsSpawned[i].forward[2]) >= 0.9f)
@@ -99,6 +102,7 @@ namespace Parking_A.Gameplay
                 else if (Mathf.Abs(_npcSpawner.NPCsSpawned[i].forward[0]) >= 0.9f)
                     _npcInfos[i].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
 
+                _npcInfos[i].NpcStatus = 0;         //REset
                 _npcInfos[i].NpcStatus |= NPCStatus.MOVING;
                 _npcInfos[i].InitialPos.Set(_npcSpawner.NPCsSpawned[i].position.x,
                     _npcSpawner.NPCsSpawned[i].position.z);
@@ -119,7 +123,7 @@ namespace Parking_A.Gameplay
             {
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 npcPos, npcRot;
-                    for (int i = 0; i < _npcInfos.Length; i++)
+                    for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
                     {
                         npcPos = _npcSpawner.NPCsSpawned[i].position;
                         npcPos.x = _npcInfos[i].InitialPos.x;
@@ -142,12 +146,14 @@ namespace Parking_A.Gameplay
 
                 case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
 
-                    for (int i = 0; i < _npcInfos.Length; i++)
+                    for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
                     {
                         PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC]
                             .Release(_npcSpawner.NPCsSpawned[i].gameObject);
 
-                        _npcInfos[i].NpcStatus = 0;
+                        _npcInfos[i].NpcStatus = NPCStatus.UNINITIALIZED;
+                        // _npcInfos[i].NpcStatus |= NPCStatus.IDLE;       //Avoid Update
+                        // _npcInfos[i].NpcStatus |= NPCStatus.NPC_HIT;       //Avoid CollisionCheck
                     }
 
                     _npcSpawner.ClearNPCs();
@@ -185,10 +191,11 @@ namespace Parking_A.Gameplay
         private void MoveNPCs()
         {
             Vector3 npcPos, npcRot;
-            for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
+            for (int npcIndex = 0; npcIndex < _npcSpawner.NPCsSpawned.Count; npcIndex++)
             {
                 if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0
-                    || (_npcInfos[npcIndex].NpcStatus & NPCStatus.IDLE) != 0) continue;
+                    || (_npcInfos[npcIndex].NpcStatus & NPCStatus.IDLE) != 0
+                    || _npcInfos[npcIndex].NpcStatus == NPCStatus.UNINITIALIZED) continue;
 
                 _npcSpawner.NPCsSpawned[npcIndex].position += _npcSpawner.NPCsSpawned[npcIndex].forward * Time.deltaTime * _speedMultC;
 
@@ -270,9 +277,10 @@ namespace Parking_A.Gameplay
             Vector3 rayStartPos, rayDir, npcRot;
             RaycastHit colliderHitInfo;
 
-            for (int npcIndex = 0; npcIndex < _npcInfos.Length; npcIndex++)
+            for (int npcIndex = 0; npcIndex < _npcSpawner.NPCsSpawned.Count; npcIndex++)
             {
-                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0) continue;
+                if ((_npcInfos[npcIndex].NpcStatus & NPCStatus.NPC_HIT) != 0
+                || _npcInfos[npcIndex].NpcStatus == NPCStatus.UNINITIALIZED) continue;
 
                 rayStartPos = _npcSpawner.NPCsSpawned[npcIndex].position;
                 rayStartPos.y = 0.3f;
@@ -389,6 +397,7 @@ namespace Parking_A.Gameplay
         {
             const int delayInSec = 2;
             await Task.Delay(delayInSec * 1000);
+            if (_cts.IsCancellationRequested) return;
             _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.IDLE;
             _npcInfos[npcIndex].NpcStatus |= NPCStatus.MOVING;
         }

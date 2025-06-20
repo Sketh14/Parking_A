@@ -43,7 +43,8 @@ namespace Parking_A.Gameplay
             _closePowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, false));
 
             _nextLevelBt.onClick.AddListener(() =>
-                GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1));
+            GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, true));
+            // GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1));
             _homeBt.onClick.AddListener(() => UpdateUI(UISelected.GO_HOME, false));
 
             for (int i = 0; i < _usePowerBts.Length; i++)

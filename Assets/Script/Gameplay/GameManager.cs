@@ -60,7 +60,7 @@ namespace Parking_A.Gameplay
 
         private CancellationTokenSource _cts;
 
-        private void Oestroy()
+        private void OnDestroy()
         {
             if (_cts != null) _cts.Cancel();
         }
@@ -70,8 +70,8 @@ namespace Parking_A.Gameplay
             _cts = new CancellationTokenSource();
 
             PoolManager.Instance.InitializePool();
-            InitializeLevel();
             _envSpawner = new EnvironmentSpawner();
+            InitializeLevel();
         }
 
         public void SavePlayerStats()
@@ -99,8 +99,9 @@ namespace Parking_A.Gameplay
                 string tempRandomSeed = DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString()
                     + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString();
                 MainGameConfig.RandomString = tempRandomSeed;
-                Debug.Log($"Selected Random Seed: {tempRandomSeed}");
             }
+            Random.InitState(MainGameConfig.RandomString.GetHashCode());
+            Debug.Log($"Selected Random Seed: {MainGameConfig.RandomString}");
 
             try
             {
@@ -131,17 +132,26 @@ namespace Parking_A.Gameplay
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     _gameStatus &= ~UniversalConstant.GameStatus.NPC_HIT;
                     _gameStatus &= ~UniversalConstant.GameStatus.LEVEL_FAILED;
+
                     return GameStatus;
 
                 case UniversalConstant.GameStatus.NPC_HIT:
                     _gameStatus |= UniversalConstant.GameStatus.NPC_HIT;
                     _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;
+
                     return GameStatus;
 
                 case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
-                    DeSpawnBoundary();
                     _gameStatus &= ~UniversalConstant.GameStatus.LEVEL_GENERATED;
+                    DeSpawnBoundary();
+                    OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1);
                     RequestLevelGeneration();
+
+                    return GameStatus;
+
+                case UniversalConstant.GameStatus.LEVEL_PASSED:
+                    _gameStatus |= UniversalConstant.GameStatus.LEVEL_PASSED;
+
                     return GameStatus;
             }
 
@@ -170,6 +180,7 @@ namespace Parking_A.Gameplay
                 && (_gameStatus & UniversalConstant.GameStatus.BOUNDARY_GENERATED) == 0)
             {
                 _gameStatus = UniversalConstant.GameStatus.UNINITIALIZED;
+                Debug.Log($"All Systems uninitialized | Calling for initialization again");
                 InitializeLevel();
             }
             else
