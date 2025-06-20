@@ -162,7 +162,10 @@ namespace Parking_A.Gameplay
 
             if ((_gameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) != 0
                 && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) != 0)
+            {
                 _gameStatus |= UniversalConstant.GameStatus.LEVEL_GENERATED;
+                OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_GENERATED, -1);
+            }
 
             // if ((_gameStatus & UniversalConstant.GameStatus.NPC_HIT) != 0)
             //     _gameStatus |= UniversalConstant.GameStatus.LEVEL_FAILED;

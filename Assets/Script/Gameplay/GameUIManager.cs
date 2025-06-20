@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Parking_A.Global;
 using UnityEngine;
@@ -26,14 +27,20 @@ namespace Parking_A.Gameplay
         [SerializeField] private TMPro.TMP_Text _playerGoldTxt;
         [SerializeField] private Button _watchAds;
 
+        private CancellationTokenSource _cts;
+
         private void OnDestroy()
         {
             GameManager.Instance.OnUISelected -= UpdateUIFromResult;
             GameManager.Instance.OnGameStatusChange -= UpdateUIFromGameStatus;
+
+            if (_cts != null) _cts.Cancel();
         }
 
         private void Start()
         {
+            _cts = new CancellationTokenSource();
+
             // GameManager.Instance.OnNPCHit += (dummyVal) => { UpdateUI(UISelected.LEVEL_RESULT_PANEL, true); };
             GameManager.Instance.OnUISelected += UpdateUIFromResult;
             GameManager.Instance.OnGameStatusChange += UpdateUIFromGameStatus;
@@ -69,7 +76,7 @@ namespace Parking_A.Gameplay
             }
         }
 
-        private void UpdateUIFromGameStatus(UniversalConstant.GameStatus gameStatus, int value)
+        private async void UpdateUIFromGameStatus(UniversalConstant.GameStatus gameStatus, int value)
         {
             switch (gameStatus)
             {
@@ -90,13 +97,17 @@ namespace Parking_A.Gameplay
                     break;
 
                 case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
+                    //Adding a delay, as sometimes, InputManager can get fired in between button pressed and reset happening
+                    await Task.Delay(100);
+                    if (_cts.IsCancellationRequested) return;
+
                     _levelResultPanel.gameObject.SetActive(false);
 
                     break;
             }
         }
 
-        private void UpdateUI(UISelected uISelected, bool value)
+        private async void UpdateUI(UISelected uISelected, bool value)
         {
             switch (uISelected)
             {
@@ -109,6 +120,10 @@ namespace Parking_A.Gameplay
                     break;
 
                 case UISelected.RESET_UI:
+                    //Adding a delay, as sometimes, InputManager can get fired in between button pressed and reset happening
+                    await Task.Delay(100);
+                    if (_cts.IsCancellationRequested) return;
+
                     GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.RESET_LEVEL, -1);
                     GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.RESET_LEVEL);
                     _levelResultPanel.SetActive(false);
@@ -146,6 +161,8 @@ namespace Parking_A.Gameplay
         private async void ClearDisclaimerAsync(int flag)
         {
             await Task.Delay(2000);
+            if (_cts.IsCancellationRequested) return;
+
             _disclaimerStatus &= ~(1 << flag);
             if (_disclaimerStatus == 0)
                 _disclaimerTxt.text = "";

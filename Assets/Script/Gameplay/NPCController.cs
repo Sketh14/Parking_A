@@ -72,6 +72,7 @@ namespace Parking_A.Gameplay
 
         private async void CallNPCSpawner(byte[] boundaryData)
         {
+            Debug.Log($"Spawning NPCs");
             try
             {
                 if (boundaryData == null)
@@ -79,6 +80,17 @@ namespace Parking_A.Gameplay
                     Debug.LogError($"Boundary Data is null");
                     return;
                 }
+
+                //Below while block, so as to repeat exact levels
+                while (true)
+                {
+                    if ((GameManager.Instance.GameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) != 0)
+                        break;
+
+                    await Task.Delay(100);
+                    if (_cts.IsCancellationRequested) return;
+                }
+
                 await _npcSpawner.SpawnNpcs(boundaryData, InitializeNPCData);
                 if (_cts.IsCancellationRequested) return;
             }
@@ -121,6 +133,12 @@ namespace Parking_A.Gameplay
             // Debug.Log($"UpdateNPCs | gameStatus: {gameStatus}");
             switch (gameStatus)
             {
+                case UniversalConstant.GameStatus.LEVEL_GENERATED:
+                    for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
+                        _npcSpawner.NPCsSpawned[i].gameObject.SetActive(true);
+
+                    break;
+
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 npcPos, npcRot;
                     for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)

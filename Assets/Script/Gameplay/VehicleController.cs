@@ -86,6 +86,7 @@ namespace Parking_A.Gameplay
 
         private async void CallVehicleSpawner(byte[] boundaryData)
         {
+            Debug.Log($"Spawning Vehicles");
             try
             {
                 // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
@@ -136,6 +137,12 @@ namespace Parking_A.Gameplay
             // Debug.Log($"UpdateVehicles | gameStatus: {gameStatus}");
             switch (gameStatus)
             {
+                case UniversalConstant.GameStatus.LEVEL_GENERATED:
+                    for (int i = 0; i < _vehicleInfos.Count; i++)
+                        _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(true);
+
+                    break;
+
                 case UniversalConstant.GameStatus.NPC_HIT:
                     _vehicleInfos[value].VehicleStatus |= VehicleStatus.HIT_NPC;
                     break;
@@ -242,7 +249,7 @@ namespace Parking_A.Gameplay
         {
             // Debug.Log($"selectionStatus: {selectionStatus} | vehicleID: {vehicleID}"
             // + $" | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
-            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
+            for (int i = 0; i < _vehicleInfos.Count; i++)
             {
                 if (vehicleID == _vehicleSpawner.VehiclesSpawned[i].GetInstanceID()
                     // && !vehicleInfos[i].hasInteracted

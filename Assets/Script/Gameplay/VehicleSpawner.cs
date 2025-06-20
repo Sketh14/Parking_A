@@ -271,6 +271,11 @@ namespace Parking_A.Gameplay
             for (gridMapIndex = 100; gridMapIndex < 122; gridMapIndex++)
 #endif
             {
+
+#if VEHICLE_TYPE_ORIENTATION_DEBUG
+                vehicleTyOrDebug.Append($", [{gridMapIndex}]");
+#endif
+
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0
                     || (gridMapIndex % UniversalConstant._GridXC) == 0 || (gridMapIndex % UniversalConstant._GridXC) == (UniversalConstant._GridXC - 1)    //Vertical Gaps
@@ -295,6 +300,9 @@ namespace Parking_A.Gameplay
                 // 0: Blank | 1-3: Vehicle Index
                 vehicleType = Random.Range(0, 4);           //Original
 
+#if VEHICLE_TYPE_ORIENTATION_DEBUG
+                vehicleTyOrDebug.Append($"Ty[{vehicleType}]");
+#endif
                 if (vehicleType == 0) continue;
 
                 //Random Orientation
@@ -302,7 +310,7 @@ namespace Parking_A.Gameplay
                 vehicleOrientation = Random.Range(0, 4);         //Original
 
 #if VEHICLE_TYPE_ORIENTATION_DEBUG
-                vehicleTyOrDebug.Append($"[{gridMapIndex}]Ty[{vehicleType}]Or[{vehicleOrientation}], ");
+                vehicleTyOrDebug.Append($"Or[{vehicleOrientation}]");
 #endif
 
 #else

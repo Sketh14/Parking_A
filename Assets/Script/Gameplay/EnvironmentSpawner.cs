@@ -243,6 +243,10 @@ namespace Parking_A.Gameplay
                 await Task.Yield();
                 if (_cts.IsCancellationRequested) return;
             }
+
+            for (int i = 0; i < _boundariesSpawned.Count; i++)
+                _boundariesSpawned[i].SetActive(true);
+
             Debug.Log($"Spawning Boundary Finished");
             // */
             #endregion VERTICAL_SPAWN

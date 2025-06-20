@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Parking_A.Global;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 namespace Parking_A.Gameplay
 {
@@ -94,7 +95,7 @@ namespace Parking_A.Gameplay
         private void GetPooledObject(GameObject pooledObject)
         {
             // Debug.Log($"Activating Pooled Object | Name: {pooledObject.name} | Active : {pooledObject.activeInHierarchy}");
-            pooledObject.SetActive(true);
+            pooledObject.SetActive(false);
         }
 
         private void ReleasePooledObject(GameObject pooledObject)
