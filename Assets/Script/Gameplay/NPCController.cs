@@ -114,7 +114,7 @@ namespace Parking_A.Gameplay
                 else if (Mathf.Abs(_npcSpawner.NPCsSpawned[i].forward[0]) >= 0.9f)
                     _npcInfos[i].NpcStatus |= NPCStatus.HORIZONTAL_ALIGNED;
 
-                _npcInfos[i].NpcStatus = 0;         //REset
+                // _npcInfos[i].NpcStatus = 0;         //REset
                 _npcInfos[i].NpcStatus |= NPCStatus.MOVING;
                 _npcInfos[i].InitialPos.Set(_npcSpawner.NPCsSpawned[i].position.x,
                     _npcSpawner.NPCsSpawned[i].position.z);
@@ -122,7 +122,8 @@ namespace Parking_A.Gameplay
                 _npcInfos[i].InitialStatus = (byte)_npcInfos[i].NpcStatus;
 
                 // Debug.Log($"{_npcSpawner.NPCsSpawned[i].name} | i: {i} | forward-Z: {Mathf.Round(_npcSpawner.NPCsSpawned[i].forward[2])}"
-                //     + $" | Horizontal Status: {_npcInfos[i].NpcStatus & NPCStatus.HORIZONTAL_ALIGNED}");
+                //     + $" | Euler Angles: {_npcSpawner.NPCsSpawned[i].localEulerAngles}"
+                //     + $" | NPC Status: {_npcInfos[i].NpcStatus}");
             }
 
             GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_SPAWNED);
@@ -314,7 +315,9 @@ namespace Parking_A.Gameplay
                 // If collided with anything, turn the NPC around
                 if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
                 {
-                    // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
+                    // Debug.Log($"npcIndex: {npcIndex} | RayCast Hit | Name: {colliderHitInfo.transform.name} "
+                    // + $"| colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}"
+                    // + $"| NPC Status: {_npcInfos[npcIndex].NpcStatus}");
 
                     npcRot = Vector3.zero;
 

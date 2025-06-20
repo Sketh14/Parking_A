@@ -1,6 +1,6 @@
 // #define EMERGENCY_LOOP_EXIT
 // #define SPAWN_LOOP_TEST
-#define VEHICLE_TYPE_ORIENTATION_DEBUG
+// #define VEHICLE_TYPE_ORIENTATION_DEBUG
 
 using System;
 using System.Collections.Generic;

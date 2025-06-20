@@ -216,6 +216,7 @@ namespace Parking_A.Gameplay
             // /*
             for (int gapIndex = 0; gapIndex < emptyGapArr.Length && npcCount < _totalNPCsCountC; gapIndex++)
             {
+                // int gapIndex = 2;            //Use this to test only 1 vehicle | Comment upper for loop
                 spawnPos = spawnRot = Vector3.zero;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner

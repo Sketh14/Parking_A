@@ -835,6 +835,12 @@ CAR PARKING
         {+} Activating gameObjects after LEVEL_GENERATED is set
     [=] InputManager
         {+} Refactoring
+
+- Scripts
+    [=] Commenting some debug statements 
+    [=] NPCController
+        {+} Fixing NPC Not turning correctly | Removing reset flag
+        {+} Broke during Next-Level-Generation logic update
 --------------------------------------------------------------------------------------------------------------
 - [FIX] Next Level Generation
     [=] [FIXED] Vehicle_L not instantiated properly
