@@ -1,5 +1,7 @@
 #define TESTING
 
+using System.Threading;
+using System.Threading.Tasks;
 using Parking_A.Global;
 using UnityEngine;
 
@@ -56,10 +58,20 @@ namespace Parking_A.Gameplay
         public System.Action<UniversalConstant.GameStatus, int> OnGameStatusChange;
         public System.Action<byte[]> OnEnvironmentSpawned;
 
+        private CancellationTokenSource _cts;
+
+        private void Oestroy()
+        {
+            if (_cts != null) _cts.Cancel();
+        }
+
         private void Start()
         {
+            _cts = new CancellationTokenSource();
+
             PoolManager.Instance.InitializePool();
             InitializeLevel();
+            _envSpawner = new EnvironmentSpawner();
         }
 
         public void SavePlayerStats()
@@ -90,12 +102,11 @@ namespace Parking_A.Gameplay
                 Debug.Log($"Selected Random Seed: {tempRandomSeed}");
             }
 
-            _envSpawner = new EnvironmentSpawner();
-
             try
             {
                 // await envSpawner.SpawnBoundary((values) => boundaryData = values);
                 await _envSpawner.SpawnBoundary();
+                if (_cts.IsCancellationRequested) return;
             }
             //Cannot initialize boundary | Stop level generation, show some message and restart
             catch (System.Exception ex)
@@ -106,7 +117,7 @@ namespace Parking_A.Gameplay
             SetGameStatus(UniversalConstant.GameStatus.BOUNDARY_GENERATED);
         }
 
-        public UniversalConstant.GameStatus SetGameStatus(UniversalConstant.GameStatus gameStatus)
+        public UniversalConstant.GameStatus SetGameStatus(UniversalConstant.GameStatus gameStatus, bool status = true)
         {
             // if ((gameStatus & UniversalConstant.GameStatus.RESET_LEVEL) != 0)
             // {
@@ -129,10 +140,15 @@ namespace Parking_A.Gameplay
 
                 case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
                     DeSpawnBoundary();
+                    _gameStatus &= ~UniversalConstant.GameStatus.LEVEL_GENERATED;
+                    RequestLevelGeneration();
                     return GameStatus;
             }
 
-            _gameStatus |= gameStatus;
+            if (status)
+                _gameStatus |= gameStatus;
+            else
+                _gameStatus &= ~gameStatus;
 
             if ((_gameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) != 0
                 && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) != 0)
@@ -144,6 +160,22 @@ namespace Parking_A.Gameplay
             return GameStatus;
         }
 
+        private async void RequestLevelGeneration()
+        {
+            await Task.Delay(100);
+            if (_cts.IsCancellationRequested) return;
+
+            if ((_gameStatus & UniversalConstant.GameStatus.VEHICLE_SPAWNED) == 0
+                && (_gameStatus & UniversalConstant.GameStatus.NPC_SPAWNED) == 0
+                && (_gameStatus & UniversalConstant.GameStatus.BOUNDARY_GENERATED) == 0)
+            {
+                _gameStatus = UniversalConstant.GameStatus.UNINITIALIZED;
+                InitializeLevel();
+            }
+            else
+                RequestLevelGeneration();
+        }
+
         private void DeSpawnBoundary()
         {
             for (int i = 0; i < _envSpawner.BoundariesSpawned.Count; i++)
@@ -152,6 +184,8 @@ namespace Parking_A.Gameplay
                     .Release(_envSpawner.BoundariesSpawned[i]);
             }
             _envSpawner.ClearBoundaries();
+            SetGameStatus(UniversalConstant.GameStatus.BOUNDARY_GENERATED, false);
+            // _gameStatus &= ~UniversalConstant.GameStatus.BOUNDARY_GENERATED;
         }
     }
 }

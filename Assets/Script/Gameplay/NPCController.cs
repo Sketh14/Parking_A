@@ -134,9 +134,24 @@ namespace Parking_A.Gameplay
                         _npcSpawner.NPCsSpawned[i].GetChild(0).localEulerAngles = Vector3.zero;     //.Set(0f, 0f, 0f);
                         // _npcSpawner.NPCsSpawned[i].GetChild(0).localEulerAngles.Set(0f, _npcInfos[i].InitialRot, 0f);
 
-                        _npcInfos[i].NpcStatus = 0;
+                        // _npcInfos[i].NpcStatus = 0;
                         _npcInfos[i].NpcStatus = (NPCStatus)_npcInfos[i].InitialStatus;
                     }
+
+                    break;
+
+                case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
+
+                    for (int i = 0; i < _npcInfos.Length; i++)
+                    {
+                        PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.NPC]
+                            .Release(_npcSpawner.NPCsSpawned[i].gameObject);
+
+                        _npcInfos[i].NpcStatus = 0;
+                    }
+
+                    _npcSpawner.ClearNPCs();
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NPC_SPAWNED, false);
                     break;
             }
         }
@@ -344,42 +359,6 @@ namespace Parking_A.Gameplay
                     //  - Since forward will be on the same orienatation as the vehicle, would just need to determine 
                     //    if its going forward or backward
                     //  - Just need to check the quadrant in which the vehicle is present
-
-                    /*
-                    int dirMult = 1;
-                    // HORIZONTAL | Right Side
-                    if (colliderHitInfo.transform.position.x > 0.05)
-                    {
-                        if (colliderHitInfo.transform.forward.x > 0)
-                            dirMult = 1;
-                        else
-                            dirMult = -1;
-                    }
-                    // HORIZONTAL | Left Side
-                    else if (colliderHitInfo.transform.position.x < -0.05)
-                    {
-                        if (colliderHitInfo.transform.forward.x < 0)
-                            dirMult = 1;
-                        else
-                            dirMult = -1;
-                    }
-
-                    // VERTICAL | Up Side
-                    else if (colliderHitInfo.transform.position.z > 0)
-                    {
-                        if (colliderHitInfo.transform.forward.z > 0)
-                            dirMult = 1;
-                        else
-                            dirMult = -1;
-                    }
-                    // VERTICAL | Down Side
-                    else
-                    {
-                        if (colliderHitInfo.transform.forward.z < 0)
-                            dirMult = 1;
-                        else
-                            dirMult = -1;
-                    }*/
 
                     int dirMult2 = 1 * (int)colliderHitInfo.transform.forward.x
                         * (int)(colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x))  //Check if the vehicle is "Right" or "Left" from the center

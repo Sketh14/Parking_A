@@ -181,12 +181,17 @@ namespace Parking_A.Gameplay
                         PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
                             .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
 
+                        //These do not need explicit reset
+                        _vehicleInfos[i].OgVehicleType = 0;
+                        _vehicleInfos[i].MarkerIndex = 0;
+                        _vehicleInfos[i].InitialRot = 0;
+
                         _vehicleInfos[i].VehicleStatus = 0;
                         _vehicleInfos[i].VehicleType = 255;
                         _vehicleInfos[i].InteractedDir = Vector2.zero;
                     }
 
-                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_UNLOADED);
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_SPAWNED, false);
                     break;
             }
         }

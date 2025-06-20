@@ -20,6 +20,10 @@ namespace Parking_A.Gameplay
         // private const string _randomSeed = "SKETH";
 
         // public async Task SpawnBoundary(Action<byte[]> onBoundarySpawned)
+        public EnvironmentSpawner()
+        {
+            _boundariesSpawned = new List<GameObject>();
+        }
 
         public void ClearBoundaries()
         {

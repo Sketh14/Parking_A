@@ -794,6 +794,20 @@ CAR PARKING
         {+} Despawning Environment
     [=] EnvironmentSpawner
         {+} Using a list to store boundaryObjects | For despawning also
+
+--------------------------------------------------------------------------------------------------------------
+                                                    20 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] GameManager / VehicleController
+        {+} Resetting flags
+    [=] NPCController
+        {+} Resetting flags
+        {+} NExt level logic
+    [=] UniversalConstant
+        {+} Fixing enum values for GameStatus
+
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Maybe follow the routine of setting flag for resetting level
     [=] Request Made, Values Changed, Continue With Gameplay

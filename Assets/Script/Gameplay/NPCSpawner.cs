@@ -45,6 +45,11 @@ namespace Parking_A.Gameplay
             _npcsSpawned = new List<Transform>();
         }
 
+        public void ClearNPCs()
+        {
+            _npcsSpawned.Clear();
+        }
+
         public async Task SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         // public void SpawnNpcs(byte[] boundaryData, Action OnNpcsSpawned)
         {
