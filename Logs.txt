@@ -859,6 +859,11 @@ CAR PARKING
     [=] VehicleSpawner
         {+} Splitting SpawnVehicles() into seprate internal functions
 
+- Scripts
+    [=] VehicleSpawner
+        {+} Adding Vehicle-Indexes to gridMap along with Vehicle_Type
+            <~> Needed during spawning to check if a cluster of cells belong to same vehicle
+        {+} Adjacent Vehicles check for HOrizontal
 --------------------------------------------------------------------------------------------------------------
 - [DO] Reduce MoveVehicle() in VehicleController
     [=] Move the common parts together
