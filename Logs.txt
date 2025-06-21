@@ -851,6 +851,14 @@ CAR PARKING
     [=] VehicleController
         {+} ONBOARDING_ROAD check if Vehicle is about to get to the middle of the road
         {+} Increasing raycount for ONBOARDING_ROAD collision detection
+
+--------------------------------------------------------------------------------------------------------------
+                                                    21 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Splitting SpawnVehicles() into seprate internal functions
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Reduce MoveVehicle() in VehicleController
     [=] Move the common parts together
