@@ -153,7 +153,7 @@ namespace Parking_A.Gameplay
                     break;
 
                 case UISelected.GO_HOME:
-                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(0);
+                    _ = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(0);
                     break;
             }
         }

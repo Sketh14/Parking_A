@@ -864,7 +864,18 @@ CAR PARKING
         {+} Adding Vehicle-Indexes to gridMap along with Vehicle_Type
             <~> Needed during spawning to check if a cluster of cells belong to same vehicle
         {+} Adjacent Vehicles check for HOrizontal
+
 --------------------------------------------------------------------------------------------------------------
+                                                    22 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Adjacent Vehicles check for Vertical
+        {+} Fixing Horizontal Adjacent Check
+        {+} Adding a indexOffset parameter to simplify code
+
+--------------------------------------------------------------------------------------------------------------
+- [DO] [IMP] Add Bounds Check to Adjacent Vehicles Check
 - [DO] Reduce MoveVehicle() in VehicleController
     [=] Move the common parts together
 - [FIX] [FIXED] When ONBOARDING_ROAD, Vehicle can get stuck
