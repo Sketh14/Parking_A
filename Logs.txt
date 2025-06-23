@@ -875,6 +875,12 @@ CAR PARKING
         {+} Adding a indexOffset parameter to simplify code
 
 --------------------------------------------------------------------------------------------------------------
+                                                    22 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Fixing VehicleSpawner Adjacent Check | Adding Bounds Check
+--------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Add Bounds Check to Adjacent Vehicles Check
 - [DO] Reduce MoveVehicle() in VehicleController
     [=] Move the common parts together

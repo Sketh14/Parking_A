@@ -19,6 +19,7 @@ using Random = UnityEngine.Random;
 using Parking_A.Global;
 using UnityEditor.Search;
 using System.Runtime.CompilerServices;
+using Unity.Mathematics;
 
 namespace Parking_A.Gameplay
 {
@@ -54,7 +55,7 @@ namespace Parking_A.Gameplay
             // SpawnVehicles();
             // SpawnVehicles2();
             // AdjacentHorizontalVehiclesTest();
-            AdjacentVerticalVehiclesTest();
+            // AdjacentVerticalVehiclesTest();
         }
 
         public void ClearVehicles()
@@ -606,7 +607,7 @@ namespace Parking_A.Gameplay
         #region AdjacentVehicle
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool ValidateHorPairForAdjacentVehicles(ref int[] gridMap, ref int gridMapIndex,
+        internal bool ValidateHorPairForAdjacentVehicles(ref int[] gridMap, ref int gridMapIndex, ref int indexOffset, ref int switchDir,
             ref int neighbourX, ref int neighbourY, ref int validateVal, ref int validateCounter)
         {
             // Check if the opposing side or same side has a vehicle partially on the same row
@@ -691,13 +692,17 @@ namespace Parking_A.Gameplay
 #endif
             //[WARNING]: THE CODE BELOW CAN BREAK AND CAUSE AN INFINITE LOOP, WHERE THE EDITOR IS STUCK AND CANT GET OUT. BE CAREFUL!!
 
-            int switchDir = 10;              // To toggle between up/down   | 0th digit -> Toggle UP/Down | 1st digit -> Check 1_Up/1_Down
+            switchDir = 10;              // To toggle between up/down   | 0th digit -> Toggle UP/Down | 1st digit -> Check 1_Up/1_Down
             for (; switchDir > -12; switchDir -= 21)
             {
                 // Check right-side
-                for (neighbourX = 1; neighbourX < (UniversalConstant._GridXC - (gridMapIndex % UniversalConstant._GridXC)); neighbourX++)
+                for (neighbourX = 1;
+                    neighbourX < (UniversalConstant._GridXC - (gridMapIndex % UniversalConstant._GridXC));
+                    neighbourX++)
                 {
-                    validateVal = gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX] % 10;                // Same-row Or Row-Down
+                    // Index Offset(UP/DOWN) | Check which ROW is active(UP/DOWN) 
+                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
+                    validateVal = gridMap[gridMapIndex + indexOffset] % 10;                // Same-row Or Row-Down
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                     emergencyExit++;
@@ -706,9 +711,9 @@ namespace Parking_A.Gameplay
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
 
-                    debugAdjacent.Append($", [{gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX}]]");
+                    debugAdjacent.Append($", [{gridMapIndex + indexOffset}]]");
                     debugAdjacent.Append($"SW[{Mathf.Abs(switchDir % 10)}]");
-                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX]}]");
+                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + indexOffset]}]");
                     debugAdjacent.Append($"TY[{validateVal}]");
 #endif
 
@@ -716,32 +721,34 @@ namespace Parking_A.Gameplay
                     if (validateVal < 1 || validateVal > 3) continue;
 
                     validateCounter = 0;
-                    validateVal = gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX] / 10;         //Get the Vehicle-Index
+                    validateVal = gridMap[gridMapIndex + indexOffset] / 10;         //Get the Vehicle-Index
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                     debugAdjacent.Append($"In[{validateVal}]");
 #endif
 
-                    // Moving Forward
+                    // Moving Forward 
                     for (; neighbourX < (UniversalConstant._GridXC - (gridMapIndex % UniversalConstant._GridXC)); neighbourX++)
                     {
+                        indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
                         // Empty Cell | Other Vehicle
-                        if (validateVal != gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX] / 10)       //Get the Vehicle-Index
+                        if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
 
                         validateCounter++;      // Checking Vehicle-Length
                     }
                     neighbourX--;           //Prep for next Vehicle
+                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                     debugAdjacent.Append($"C[{validateCounter}]");
 
-                    Debug.Log($"Checking Adj | Vehicle-Type: {gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX] % 10}"
-                            + $"| neighbourX: {neighbourX}");
+                    Debug.Log($"Checking Adj | Val: {gridMapIndex + indexOffset} | Grid-Map: {gridMap[gridMapIndex + indexOffset]} "
+                        + $"| Vehicle-Type: {gridMap[gridMapIndex + indexOffset] % 10} | neighbourX: {neighbourX} | neighbourY: {neighbourY} | validateCounter: {validateCounter}");
 #endif
 
-                    // Check how many cells occupied
-                    if (validateCounter > 2 || (gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX] % 10)  // Offset due to 0th index
+                    // Check how many cells occupied 
+                    if (validateCounter > 2 || (gridMap[gridMapIndex + indexOffset] % 10)  // Offset due to 0th index
                         == (int)UniversalConstant.PoolType.VEHICLE_S)
                     {
                         // Check 1-Up/1-Down if the same vehicle is up OR on the same lines as current vehicle
@@ -751,18 +758,25 @@ namespace Parking_A.Gameplay
                         {
                             // Current index + UP/Down_Row - Offset - 1_Row
 
+                            indexOffset = gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
+                                        - neighbourY        //Row-Offset
+                                        + (UniversalConstant._GridXC * (switchDir / 10) * -1);            // 1_Up/1_Down Row
+
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                             //[IMPORTANT] DOWN IS POSITIVE | UP IS NEGATIVE
-                            Debug.Log($"Val: {gridMapIndex + neighbourX - neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + (UniversalConstant._GridXC * (switchDir / 10) * -1)} "
-                            + $"| gridMap: {gridMap[gridMapIndex + neighbourX - neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + (UniversalConstant._GridXC * (switchDir / 10) * -1)]} "
-                            + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
-                            + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDir: {switchDir / 10}"
-                            + $"| UniversalConstant._GridXC: {UniversalConstant._GridXC}");
+
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4))     //Bounds Check UP/Down     //TESTING
+                            {
+                                Debug.Log($"Val: {indexOffset} | gridMap: {gridMap[indexOffset]} | UniversalConstant._GridXC: {UniversalConstant._GridXC}"
+                                + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
+                                + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDir: {switchDir / 10} | switchDirMod: {Mathf.Abs(switchDir % 10)}");
+                            }
 #endif
 
-                            if ((gridMap[gridMapIndex + neighbourX - neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10))         //Get the Vehicle-Index
-                                + (UniversalConstant._GridXC * (switchDir / 10) * -1)] / 10) == validateVal)            // 1_Up/1_Down Row
-                            // - neighbourY - UniversalConstant._GridXC] / 10) == validateVal)         //Get the Vehicle-Index
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4)     //Bounds Check UP/Down     //TESTING
+                                && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                                 Debug.Log($"Same Found");
@@ -772,6 +786,7 @@ namespace Parking_A.Gameplay
                                 //validateCounter--;
                                 return false;
                             }
+
                         }
                         // if (gridMap[gridMapIndex - (UniversalConstant._GridXC)] == validateVal) return false;
                         // else continue;
@@ -794,7 +809,8 @@ namespace Parking_A.Gameplay
                 for (neighbourX = 1; neighbourX <= (gridMapIndex % UniversalConstant._GridXC); neighbourX++)  // FORWARDS
                 // for (neighbourX = (gridMapIndex % UniversalConstant._GridXC) - 1; neighbourX >= 0; neighbourX--)   //BACKWARDS
                 {
-                    validateVal = gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX] % 10;
+                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
+                    validateVal = gridMap[gridMapIndex + indexOffset] % 10;
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                     emergencyExit++;
@@ -803,9 +819,9 @@ namespace Parking_A.Gameplay
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
 
-                    debugAdjacent.Append($", [{gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX}]");
+                    debugAdjacent.Append($", [{gridMapIndex + indexOffset}]");
                     debugAdjacent.Append($"SW[{Mathf.Abs(switchDir % 10)}]");
-                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX]}]");
+                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + indexOffset]}]");
                     debugAdjacent.Append($"TY[{validateVal}]");
 #endif
 
@@ -813,17 +829,18 @@ namespace Parking_A.Gameplay
                     if (validateVal < 1 || validateVal > 3) continue;
 
                     validateCounter = 0;
-                    validateVal = gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX] / 10;         //Get the Vehicle-Index
+                    validateVal = gridMap[gridMapIndex + indexOffset] / 10;         //Get the Vehicle-Index
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                     debugAdjacent.Append($"In[{validateVal}]");
 #endif
 
                     for (; neighbourX <= (gridMapIndex % UniversalConstant._GridXC); neighbourX++)      // FORWARDS
-                    // for (; neighbourX >= 0; neighbourX--)   //BACKWARDS
+                    // for (; neighbourX >= 0; neighbourX--)   //BACKWARDS 
                     {
+                        indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
                         // Empty Cell | Other Vehicle
-                        if (validateVal != gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX] / 10)       //Get the Vehicle-Index
+                        if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
 
                         validateCounter++;      // Checking Vehicle-Length
@@ -831,39 +848,46 @@ namespace Parking_A.Gameplay
 
                     // neighbourX++;           // FORWARDS Prep for next Vehicle
                     neighbourX--;           // BACKWARDS Prep for next Vehicle
+                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                     debugAdjacent.Append($"C[{validateCounter}]");
 
                     Debug.Log($"Checking Adj "
-                        + $"| Val: {gridMapIndex - neighbourX + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10))}"
-                        + $"| Grid-Map: {gridMap[gridMapIndex - neighbourX + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10))]}"
-                        + $"| Vehicle-Type: {gridMap[gridMapIndex - neighbourX + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10))] % 10}"
+                        + $"| Val: {gridMapIndex + indexOffset }"
+                        + $"| Grid-Map: {gridMap[gridMapIndex + indexOffset ]}"
+                        + $"| Vehicle-Type: {gridMap[gridMapIndex + indexOffset] % 10}"
                         + $" | neighbourX: {neighbourX} | validateCounter: {validateCounter} | ");
 #endif
 
-
                     // Check how many cells occupied   
-                    if (validateCounter > 2 || (gridMap[gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX] % 10)
+                    if (validateCounter > 2 || (gridMap[gridMapIndex + indexOffset] % 10)
                         == (int)UniversalConstant.PoolType.VEHICLE_S)
                     {
                         // Check 1-Up if the same vehicle is up OR on the same lines as current vehicle
                         // Going right, there can't be any vehicle on the same lines as the spawning happens from the left
                         for (neighbourY = validateCounter - 1; neighbourY >= 0; neighbourY--)
                         {
+                            // Current index + UP/Down_Row - Offset - 1_Row 
+                            indexOffset = gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
+                                        - neighbourY        //Row-Offset
+                                        + (UniversalConstant._GridXC * (switchDir / 10) * -1);            // 1_Up/1_Down Row
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                             //[IMPORTANT] DOWN IS POSITIVE | UP IS NEGATIVE
-                            Debug.Log($"Val: {gridMapIndex - neighbourX + neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + (UniversalConstant._GridXC * (switchDir / 10) * -1)} "
-                            + $"| gridMap: {gridMap[gridMapIndex - neighbourX + neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + (UniversalConstant._GridXC * (switchDir / 10) * -1)]} "
-                            + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
-                            + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDirDiv: {switchDir / 10} | switchDirMod: {Mathf.Abs(switchDir % 10)}"
-                            + $"| UniversalConstant._GridXC: {UniversalConstant._GridXC}");
+                            
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4))     //Bounds Check UP/Down     //TESTING
+                            {
+                                Debug.Log($"Val: {indexOffset} | gridMap: {gridMap[indexOffset]} | UniversalConstant._GridXC: {UniversalConstant._GridXC}"
+                                + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
+                                + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDirDiv: {switchDir / 10} | switchDirMod: {Mathf.Abs(switchDir % 10)}");
+                            }
 #endif
 
-                            // Current index + UP/Down_Row - Offset - 1_Row 
-                            if ((gridMap[gridMapIndex - neighbourX + neighbourY + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10))         //Get the Vehicle-Index
-                                + (UniversalConstant._GridXC * (switchDir / 10) * -1)] / 10) == validateVal)            // 1_Up/1_Down Row
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4)     //Bounds Check UP/Down     //TESTING
+                                && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                                 Debug.Log($"Same Found");
@@ -874,6 +898,7 @@ namespace Parking_A.Gameplay
                                 //validateCounter--;        
                                 return false;
                             }
+
                         }
 
                         // if (gridMap[gridMapIndex - (UniversalConstant._GridXC)] == validateVal) return false;
@@ -943,9 +968,9 @@ namespace Parking_A.Gameplay
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
 
-                    debugAdjacent.Append($", [{gridMapIndex + indexOffSet}]");
+                    debugAdjacent.Append($", [{gridMapIndex + indexOffset}]");
                     debugAdjacent.Append($"SW[{Mathf.Abs(switchDir % 10)}]");
-                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + indexOffSet]}]");
+                    debugAdjacent.Append($"GD[{gridMap[gridMapIndex + indexOffset]}]");
                     debugAdjacent.Append($"TY[{validateVal}]");
 #endif
 
@@ -963,6 +988,7 @@ namespace Parking_A.Gameplay
                     for (; neighbourY < (10 - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)           // VEHICLE_ADJACENT_DEBUG_DOWN
                     // for (; neighbourY < (UniversalConstant._GridYC - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)
                     {
+                        indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC);
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -975,8 +1001,8 @@ namespace Parking_A.Gameplay
 #if VEHICLE_ADJACENT_DEBUG_DOWN
                     debugAdjacent.Append($"C[{validateCounter}]");
 
-                    Debug.Log($"Checking Adj | Val: {gridMapIndex + indexOffSet} | Grid-Map: {gridMap[gridMapIndex + indexOffSet]} "
-                        + $"| Vehicle-Type: {gridMap[gridMapIndex + indexOffSet] % 10} | neighbourY: {neighbourY} | validateCounter: {validateCounter}");
+                    Debug.Log($"Checking Adj | Val: {gridMapIndex + indexOffset} | Grid-Map: {gridMap[gridMapIndex + indexOffset]} "
+                        + $"| Vehicle-Type: {gridMap[gridMapIndex + indexOffset] % 10} | neighbourY: {neighbourY} | validateCounter: {validateCounter}");
 #endif
 
                     // Check how many cells occupied
@@ -988,19 +1014,26 @@ namespace Parking_A.Gameplay
                         {
                             // Current index + UP/Down_Row - Offset - 1_Row
 
+                            // Get the Current Vehicle-Index | Check which COLUMN is active(LEFT/RIGHT)
+                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC)
+                                - (neighbourX * UniversalConstant._GridXC)          // Adjust for Counter Offset 
+                                + ((switchDir / 10) * -1);            // Offset 1_LEFT/1_RIGHT COLUMN to check
+
 #if VEHICLE_ADJACENT_DEBUG_DOWN
                             //[IMPORTANT] RIGHT IS POSITIVE | LEFT IS NEGATIVE
-                            Debug.Log($"Val: {gridMapIndex + indexOffset - (neighbourX * UniversalConstant._GridXC) + ((switchDir / 10) * -1)} "
-                            + $"| gridMap: {gridMap[gridMapIndex + indexOffset - (neighbourX * UniversalConstant._GridXC) + ((switchDir / 10) * -1)]} "
-                            + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
-                            + $"| neighbourY: {neighbourY} | neighbourX: {neighbourX} | switchDir: {switchDir / 10}"
-                            + $"| UniversalConstant._GridXC: {UniversalConstant._GridXC}");
+
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 10))     //Bounds Check UP/Down     //TESTING
+                            {
+                                Debug.Log($"Val: {indexOffset} | gridMap: {gridMap[indexOffset]} | UniversalConstant._GridXC: {UniversalConstant._GridXC}"
+                                + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
+                                + $"| neighbourY: {neighbourY} | neighbourX: {neighbourX} | switchDir: {switchDir / 10}");
+                            }
 #endif
 
-                            if ((gridMap[gridMapIndex + indexOffset        // Get the Current Vehicle-Index | Check which COLUMN is active(LEFT/RIGHT)
-                                - (neighbourX * UniversalConstant._GridXC)          // Adjust for Counter Offset 
-                                + ((switchDir / 10) * -1)] / 10) == validateVal)            // Offset 1_LEFT/1_RIGHT COLUMN to check
-                            // - neighbourY - UniversalConstant._GridXC] / 10) == validateVal)         // Get the Vehicle-Index
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 10)     //Bounds Check UP/Down     //TESTING
+                                && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_DOWN
                                 Debug.Log($"Same Found");
@@ -1057,6 +1090,7 @@ namespace Parking_A.Gameplay
                     for (; neighbourY <= (gridMapIndex / UniversalConstant._GridXC); neighbourY++)      // FORWARDS
                     // for (; neighbourX >= 0; neighbourX--)   //BACKWARDS
                     {
+                        indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC);
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -1083,20 +1117,28 @@ namespace Parking_A.Gameplay
                         // Going right, there can't be any vehicle on the same lines as the spawning happens from the left
                         for (neighbourX = validateCounter - 1; neighbourX >= 0; neighbourX--)
                         {
+                            // Current index + UP/Down_Row - Offset - 1_Row  
+
+                            // Get the Current Vehicle-Index | Check which COLUMN is active(LEFT/RIGHT)
+                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC)
+                                - (neighbourX * UniversalConstant._GridXC)          // Adjust for Counter Offset 
+                                + ((switchDir / 10) * -1);            // Offset 1_LEFT/1_RIGHT COLUMN to check
 
 #if VEHICLE_ADJACENT_DEBUG_UP
                             //[IMPORTANT] DOWN IS POSITIVE | UP IS NEGATIVE
-                            Debug.Log($"Val: {gridMapIndex + indexOffset + (neighbourX * UniversalConstant._GridXC) + ((switchDir / 10) * -1)} "
-                            + $"| gridMap: {gridMap[gridMapIndex + indexOffset + (neighbourX * UniversalConstant._GridXC) + ((switchDir / 10) * -1)]} "
-                            + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
-                            + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDirDiv: {switchDir / 10} | switchDirMod: {Mathf.Abs(switchDir % 10)}"
-                            + $"| UniversalConstant._GridXC: {UniversalConstant._GridXC}");
+
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 10))     //Bounds Check UP/Down     //TESTING
+                            {
+                                Debug.Log($"Val: {indexOffset} | gridMap: {gridMap[indexOffset]} | UniversalConstant._GridXC: {UniversalConstant._GridXC}"
+                                + $"| validateVal: {validateVal} | validateCounter: {validateCounter}| gridMapIndex: {gridMapIndex} "
+                                + $"| neighbourX: {neighbourX} | neighbourY: {neighbourY} | switchDirDiv: {switchDir / 10} | switchDirMod: {Mathf.Abs(switchDir % 10)}");
+                            }
 #endif
 
-                            // Current index + UP/Down_Row - Offset - 1_Row  
-                            if ((gridMap[gridMapIndex + indexOffset                         // Get the Vehicle-Index
-                                + (neighbourX * UniversalConstant._GridXC)                  // Counter Offset Index
-                                + ((switchDir / 10) * -1)] / 10) == validateVal)            // 1_Up/1_Down Row
+                            // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 110)     //Bounds Check UP/Down     //TESTING
+                                && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_UP
                                 Debug.Log($"Same Found");
@@ -1288,23 +1330,23 @@ namespace Parking_A.Gameplay
                 11, 11, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 31, 31, 00, 00, 00, 00, 00, 00, 00,
                 // */
 
-                // /*
-                //                                              12|
-                00, 00, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
-                //  23|         26| 27|                 32|     34|
-                11, 11, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 31, 31, 00, 00, 00, 00, 00, 00, 00,
+                // /* 
+                //                   6|                         13|                 18|
+                00, 00, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 42, 42, 00, 00, 00,
+                //  23|         26| 27|                 32|     34|                 40|
+                11, 11, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 42, 42, 00, 00, 00,
                 //  45|         48| 49|                 54|     56|
-                11, 11, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 31, 31, 00, 00, 00, 00, 00, 00, 00,
+                11, 11, 00, 00, 22, 22, 00, 00, 00, 00, 00, 00, 00, 31, 31, 00, 00, 42, 42, 00, 00, 00,
                 //  67| 68|                             76|     78|
-                00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
+                00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 31, 31, 00, 00, 00, 00, 00, 00, 00,
                 // */
             };
 
-            int gridMapIndex = 32, validateVal = 0, validateCounter = 0;
-            int neighbourX = 0, neighbourY = 0;
+            int gridMapIndex = 10, validateVal = 0, validateCounter = 0;
+            int neighbourX = 0, neighbourY = 0, indexOffset = 0, switchDir = 0;
 
-            bool valid = ValidateHorPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref neighbourX, ref neighbourY,
-                        ref validateVal, ref validateCounter);
+            bool valid = ValidateHorPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref indexOffset, ref switchDir,
+             ref neighbourX, ref neighbourY, ref validateVal, ref validateCounter);
 
             Debug.Log($"Valid: {valid}");
         }
@@ -1313,8 +1355,8 @@ namespace Parking_A.Gameplay
         {
             int[] gridMap = new int[]
             {
-                // /*
-                //                                  09| 10|     12|
+                // /* 
+                //                   5|             09| 10|     12|
                 00, 11, 11, 00, 22, 22, 00, 00, 00, 42, 42, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
                 //  23|         26| 27|             31| 32|     34|
                 00, 11, 11, 00, 22, 22, 00, 00, 00, 42, 42, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
@@ -1337,7 +1379,7 @@ namespace Parking_A.Gameplay
                 // */
             };
 
-            int gridMapIndex = 97, validateVal = 0, validateCounter = 0;
+            int gridMapIndex = 159, validateVal = 0, validateCounter = 0;
             int neighbourX = 0, neighbourY = 0, indexOffset = 0, switchDir = 0;
 
             bool valid = ValidateVerPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref indexOffset, ref switchDir,
