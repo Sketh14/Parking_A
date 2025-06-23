@@ -880,6 +880,10 @@ CAR PARKING
 - Scripts
     [=] VehicleSpawner
         {+} Fixing VehicleSpawner Adjacent Check | Adding Bounds Check
+
+- Scripts
+    [=] VehicleSpawner
+        {+} Integrating Vehicle Adjacent Check to VehicleSpawns
 --------------------------------------------------------------------------------------------------------------
 - [DO] [IMP] Add Bounds Check to Adjacent Vehicles Check
 - [DO] Reduce MoveVehicle() in VehicleController

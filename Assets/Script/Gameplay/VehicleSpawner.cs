@@ -6,9 +6,9 @@
 // #define VEHICLE_ADJACENT_DEBUG_RIGHT
 // #define VEHICLE_ADJACENT_DEBUG_LEFT
 
-#define VEHICLE_ADJACENT_DEBUG_VER
+// #define VEHICLE_ADJACENT_DEBUG_VER
 // #define VEHICLE_ADJACENT_DEBUG_DOWN
-#define VEHICLE_ADJACENT_DEBUG_UP
+// #define VEHICLE_ADJACENT_DEBUG_UP
 
 using System;
 using System.Collections.Generic;
@@ -202,7 +202,7 @@ namespace Parking_A.Gameplay
 
             int vehicleType, vehicleOrientation, vehicleCount = 0, neighbourX = 0, neighbourY = 0;
             int xDir, yDir;
-            int validateType = 0, validateCounter = 0;
+            int validateType = 0, validateCounter = 0, switchDir = 0, indexOffset = 0;
             Vector3 spawnPos, spawnRot;
 
 #if EMERGENCY_LOOP_EXIT
@@ -360,9 +360,9 @@ namespace Parking_A.Gameplay
                         if (!ValidateHorPairCanExit(ref gridMap, ref gridMapIndex, ref neighbourX, ref neighbourY))
                             goto case 6;
 
-                        // if (!ValidateHorPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref neighbourX, ref neighbourY,
-                        //     ref validateType, ref validateCounter))
-                        //     goto case 6;
+                        if (!ValidateHorPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref indexOffset, ref switchDir,
+                            ref neighbourX, ref neighbourY, ref validateType, ref validateCounter))
+                            goto case 6;
 
                         if (!ValidateHorPairForEmptySpaces(ref gridMap, ref vehicleType, ref neighbourX, ref neighbourY,
                             ref indexToCheck, ref gridMapIndex, ref xDir, ref yDir))
@@ -410,18 +410,9 @@ namespace Parking_A.Gameplay
                             goto case 6;
 
                         // Check if the opposing side or same side has a vehicle partially on the same row
-                        /*
-                        Avoid below condition
-                        | x | x |   |
-                        -------------
-                        | x | x |   |
-                        -------------
-                        |   |   |   |
-                        -------------
-                        |   | x | x |
-                        -------------
-                        |   | x | x |
-                        */
+                        if (!ValidateVerPairForAdjacentVehicles(ref gridMap, ref gridMapIndex, ref indexOffset, ref switchDir,
+                            ref neighbourX, ref neighbourY, ref validateType, ref validateCounter))
+                            goto case 6;
 
                         //Check if vehicle can be placed
                         if (!ValidateVerPairForEmptySpaces(ref gridMap, ref vehicleType, ref neighbourX, ref neighbourY,
@@ -706,7 +697,7 @@ namespace Parking_A.Gameplay
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                     emergencyExit++;
-                    if (emergencyExit > 50)
+                    if (emergencyExit > 300)
                     {
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
@@ -814,7 +805,7 @@ namespace Parking_A.Gameplay
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                     emergencyExit++;
-                    if (emergencyExit > 50)
+                    if (emergencyExit > 300)
                     {
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
@@ -917,7 +908,7 @@ namespace Parking_A.Gameplay
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool ValidateVerPairForAdjacentVehicles(ref int[] gridMap, ref int gridMapIndex, ref int indexOffset, ref int switchDir,
-            ref int neighbourY, ref int neighbourX, ref int validateVal, ref int validateCounter)
+            ref int neighbourX, ref int neighbourY, ref int validateVal, ref int validateCounter)
         {
             // Check if the opposing side or same side has a vehicle partially on the same row
             /*
@@ -963,7 +954,7 @@ namespace Parking_A.Gameplay
 
 #if VEHICLE_ADJACENT_DEBUG_DOWN
                     emergencyExit++;
-                    if (emergencyExit > 50)
+                    if (emergencyExit > 300)
                     {
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
@@ -1066,7 +1057,7 @@ namespace Parking_A.Gameplay
 
 #if VEHICLE_ADJACENT_DEBUG_UP
                     emergencyExit++;
-                    if (emergencyExit > 50)
+                    if (emergencyExit > 300)
                     {
                         Debug.LogError($"Emergency Exit Hit!! | Vehicles Adjacent : {debugAdjacent}");
                     }
