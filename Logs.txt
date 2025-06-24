@@ -914,6 +914,12 @@ CAR PARKING
 - Scene
     [=] Adding AdsManager to scene
 
+- Script
+    [=] ToastUtility
+        {+} Utility file for displaying toast messages
+- Scene
+    [=] Making a simple Toast-Prefab
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles

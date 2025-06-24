@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Threading;
 
 using UnityEngine;
+using Parking_A.Utility;
+
+
 
 #if UNITY_IOS || UNITY_ANDROID
 using UnityEngine.Advertisements;
@@ -39,12 +42,16 @@ namespace Parking_A.Global
 		private const string _ANDROIDGAMEID = "1234";
 		private readonly string[] _ADIDS = new string[] { "Interstitial_Id", "Rewarded_Id" };
 #endif
+		public bool enableTestMode = true;
+		private const string LOADING_AD = "Loading Ad. Try again after\nsome time";
+		private const string SEARCHING_FOR_AD = "Searching for Ad. Try again after\nsome time";
+		private const string ERROR_OCCURED = "An Error Occured. Try again";
+		private const string NO_INTERNET = "Unable to load. No Internet";
+		private const string VIDEO_PLAYER_ERROR = "Video-Player Error. Try Again";
 
 		private AdType _currentAdType;
 		public AdStatus CurrentAdsStatus;
 		private int _loadFailCount;
-
-		public bool enableTestMode = true;
 
 		private CancellationTokenSource _cts;
 
@@ -201,6 +208,7 @@ namespace Parking_A.Global
 			{
 				case UnityAdsLoadError.INITIALIZE_FAILED:
 					// Debug.Log($"SDK not properly initialized | Initializing again");
+					ToastUtility.Instance.ShowPopUp(LOADING_AD);
 
 					// Try initializing again
 					InitializeAds();
@@ -223,6 +231,7 @@ namespace Parking_A.Global
 					if ((CurrentAdsStatus & AdStatus.USER_REQUESTED_AD) != 0)
 					{
 						//Show something to user to try Ads after some time as they are loading
+						ToastUtility.Instance.ShowPopUp(SEARCHING_FOR_AD);
 					}
 
 					AdType requestedAdType = _currentAdType;
@@ -253,16 +262,19 @@ namespace Parking_A.Global
 
 				case UnityAdsShowError.NOT_READY:
 					//Show something to the user to try again after some time after ad is ready
+					ToastUtility.Instance.ShowPopUp(LOADING_AD);
 
 					break;
 
 				case UnityAdsShowError.VIDEO_PLAYER_ERROR:
 					//Show something to the user to wait for some time
+					ToastUtility.Instance.ShowPopUp(VIDEO_PLAYER_ERROR);
 
 					break;
 
 				case UnityAdsShowError.NO_CONNECTION:
 					//Show something to the user to enable the internet connection
+					ToastUtility.Instance.ShowPopUp(NO_INTERNET);
 
 					break;
 
@@ -272,6 +284,7 @@ namespace Parking_A.Global
 				case UnityAdsShowError.INTERNAL_ERROR:
 				case UnityAdsShowError.UNKNOWN:
 					//Try user to try to load Ads again
+					ToastUtility.Instance.ShowPopUp(ERROR_OCCURED);
 
 					break;
 
@@ -329,7 +342,7 @@ namespace Parking_A.Global
 					break;
 
 				case UnityAdsShowCompletionState.UNKNOWN:
-
+					ToastUtility.Instance.ShowPopUp(ERROR_OCCURED);
 
 					//Resetting flags
 					CurrentAdsStatus = AdStatus.AD_NOT_LOADED;
@@ -350,13 +363,20 @@ namespace Parking_A.Global
 		public void ShowAd(AdType adType)
 		{
 			_currentAdType = adType;
+			CurrentAdsStatus |= AdStatus.USER_REQUESTED_AD;
 
 			if ((CurrentAdsStatus & AdStatus.AD_NOT_SUPPORTED) != 0)
 				Debug.LogError("Failed to show ad. Unity Ads is not supported under the current build platform.");
 			else if ((CurrentAdsStatus & AdStatus.AD_ERROR) != 0)
+			{
+				ToastUtility.Instance.ShowPopUp(LOADING_AD);
 				InitializeAds();
+			}
 			else if ((CurrentAdsStatus & AdStatus.AD_NOT_LOADED) != 0)
+			{
+				ToastUtility.Instance.ShowPopUp(LOADING_AD);
 				Advertisement.Load(_ADIDS[(int)adType], this);
+			}
 			else
 				Advertisement.Show(_ADIDS[(int)adType], this);
 		}
