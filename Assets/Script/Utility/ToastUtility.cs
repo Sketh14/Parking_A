@@ -1,4 +1,5 @@
 #define TESTING
+// #define DEBUG_TOAST_POP_PULL
 
 using System;
 using System.Runtime.CompilerServices;
@@ -54,42 +55,52 @@ namespace Parking_A.Utility
         //     _popUpTask = PopUpToast(toastMsg);
         // }
 
-        private CancellationTokenSource _prevPopUpCts;
         private CancellationTokenSource _currentPopUpCts;
+        // private CancellationTokenSource _currentPopUpCts2;
 
-        public async Task ShowPopUp(string toastMsg)
+        public async void ShowPopUp(string toastMsg)
         {
             // _waitCts = new CancellationTokenSource();
 
-            _prevPopUpCts = _currentPopUpCts;
+            // _prevPopUpCts = _currentPopUpCts;
 
             CancellationTokenSource popUpCts = new CancellationTokenSource();
-            _currentPopUpCts = popUpCts;
+            // _currentPopUpCts2 = popUpCts;
 
             if ((_currentToastStatus & ToastStatus.BEING_USED) != 0)
             {
+#if DEBUG_TOAST_POP_PULL
+                Debug.Log($"Called Again | prev: {_currentPopUpCts.Token.GetHashCode()} | popUps: {popUpCts.Token.GetHashCode()}");
+#endif
                 _currentToastStatus |= ToastStatus.CALLED_AGAIN;
-                _prevPopUpCts.Cancel();
+                _currentPopUpCts.Cancel();
                 // _waitCts.Dispose();
 
                 // popUpCts = new CancellationTokenSource();
                 // _currentPopUpCts = popUpCts;
+                _currentPopUpCts = popUpCts;
 
                 // _waitCts = new CancellationTokenSource();
-                Debug.Log($"Toast called again");
+                // Debug.Log($"Toast called again");
             }
             else
             {
-                // popUpCts = new CancellationTokenSource();
+#if DEBUG_TOAST_POP_PULL
+                Debug.Log($"New: {popUpCts.Token.GetHashCode()}");
+#endif
+                _currentPopUpCts = popUpCts;
                 _currentToastStatus &= ~ToastStatus.FREE;
                 _currentToastStatus |= ToastStatus.BEING_USED;
+                // popUpCts = new CancellationTokenSource();
                 // _currentPopUpCts = popUpCts;
             }
 
-            await Task.Delay(200);              //Wait for the previous async call to stop
+            // await Task.Delay(200);              //Wait for the previous async call to stop
             _currentToastStatus &= ~ToastStatus.CALLED_AGAIN;
 
-            // Debug.Log($"Popping Toast");
+#if DEBUG_TOAST_POP_PULL
+            Debug.Log($"Popping Toast | popUps: {popUpCts.Token.GetHashCode()}");
+#endif
             // Transition to Floating from Down
             float timeElapsed = 0f;
             const float speedMult = 2f;
@@ -122,6 +133,7 @@ namespace Parking_A.Utility
                     await Task.Yield();
                 }
                 // Debug.Log($"debugEase : {debugEase}");
+
                 _currentToastStatus |= ToastStatus.FLOATING;
                 // Debug.Log($"Toast Floating");
 
@@ -130,8 +142,13 @@ namespace Parking_A.Utility
             }
             catch
             {
-                // Debug.Log($"Cancelled Early");
-                _currentPopUpCts.Dispose();
+#if DEBUG_TOAST_POP_PULL
+                Debug.Log($"Cancelled Pop UP | popUps: {_currentPopUpCts.Token.GetHashCode()} "
+                    // + $"| current: {_currentPopUpCts2.Token.GetHashCode()} "
+                    + $"| popUps: {popUpCts.Token.GetHashCode()}");
+#endif
+
+                popUpCts.Dispose();
                 return;
             }
 
@@ -140,11 +157,21 @@ namespace Parking_A.Utility
             if (_cts.IsCancellationRequested || popUpCts.IsCancellationRequested) return;
 
             // Debug.Log($"Pulling Down Toast");
-            PullDownToast(popUpCts.Token);
+            try { PullDownToast(popUpCts.Token); }
+            finally
+            {
+#if DEBUG_TOAST_POP_PULL
+                Debug.Log($"Disposing Token | popUps: {_currentPopUpCts.Token.GetHashCode()} "
+                    // + $"| current: {_currentPopUpCts2.Token.GetHashCode()} "
+                    + $"| popUps: {popUpCts.Token.GetHashCode()}");
+#endif
+
+                popUpCts.Dispose();
+            }
         }
 
 
-        public async void PullDownToast(CancellationToken popUpToken)
+        private async void PullDownToast(CancellationToken popUpToken)
         {
             // Transition Down from Floating
             float timeElapsed = 0f;
@@ -174,10 +201,7 @@ namespace Parking_A.Utility
                     await Task.Yield();
                 }
             }
-            finally
-            {
-                _currentPopUpCts.Dispose();
-            }
+            catch { throw; }
 
             _currentToastStatus = ToastStatus.FREE;
         }
@@ -206,43 +230,9 @@ namespace Parking_A.Utility
 
             ShowPopUp("Test Message");
 
-            await Task.Delay(2000);
+            await Task.Delay(1000);
 
             ShowPopUp("Test Message 2");
-        }
-
-
-        private CancellationTokenSource _testCts;
-        private bool cancelEarly = false;
-        private async void Test1()
-        {
-            // _testCts = new CancellationTokenSource();
-            CancellationTokenSource tempCts;
-
-            if (cancelEarly)
-            {
-                _testCts.Cancel();
-            }
-            tempCts = new CancellationTokenSource();
-            _testCts = tempCts;
-
-            int tempInt = 0;
-            try
-            {
-
-                while (true)
-                {
-                    if (tempCts.IsCancellationRequested) return;
-
-                    if (tempInt > 100) break;
-
-                    await Task.Yield();
-                }
-            }
-            catch (Exception ex)
-            {
-                _testCts.Dispose();
-            }
         }
     }
 }

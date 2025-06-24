@@ -920,6 +920,10 @@ CAR PARKING
 - Scene
     [=] Making a simple Toast-Prefab
 
+- Script
+    [=] ToastUtility
+        {+} Simultaneous calls handling
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles
