@@ -33,6 +33,7 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnUISelected -= UpdateUIFromResult;
             GameManager.Instance.OnGameStatusChange -= UpdateUIFromGameStatus;
+            UnityAdsManager.Instance.OnAdStatusChange -= UpdateUIWRTAds;
 
             if (_cts != null) _cts.Cancel();
         }
@@ -44,6 +45,7 @@ namespace Parking_A.Gameplay
             // GameManager.Instance.OnNPCHit += (dummyVal) => { UpdateUI(UISelected.LEVEL_RESULT_PANEL, true); };
             GameManager.Instance.OnUISelected += UpdateUIFromResult;
             GameManager.Instance.OnGameStatusChange += UpdateUIFromGameStatus;
+            UnityAdsManager.Instance.OnAdStatusChange += UpdateUIWRTAds;
 
             _tryAgainBt.onClick.AddListener(() => UpdateUI(UISelected.RESET_UI, true));
             _openPowerPanelBt.onClick.AddListener(() => UpdateUI(UISelected.POWER_PANEL, true));
@@ -54,6 +56,13 @@ namespace Parking_A.Gameplay
             // GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1));
             _homeBt.onClick.AddListener(() => UpdateUI(UISelected.GO_HOME, false));
 
+            _watchAds.interactable = false;
+            _watchAds.onClick.AddListener(() =>
+            {
+                _watchAds.interactable = false;
+                UnityAdsManager.Instance.OnAdRequested?.Invoke(UnityAdsManager.AdType.REWARDED_AD);
+            });
+
             for (int i = 0; i < _usePowerBts.Length; i++)
             {
                 int tempIndex = i;
@@ -63,6 +72,29 @@ namespace Parking_A.Gameplay
             }
 
             _playerGoldTxt.text = GameManager.Instance.CurrentPlayerStats.Gold.ToString();
+        }
+
+        private void UpdateUIWRTAds(UnityAdsManager.AdStatus adStatus)
+        {
+            // Debug.Log($"Ads response | adStatus: {adStatus}");
+
+            switch (adStatus)
+            {
+                case UnityAdsManager.AdStatus.AD_NOT_LOADED:
+                    _watchAds.interactable = false;
+
+                    break;
+
+                case UnityAdsManager.AdStatus.AD_LOADED:
+                    _watchAds.interactable = true;
+
+                    break;
+
+                case UnityAdsManager.AdStatus.SHOWING_AD:
+                    _watchAds.interactable = false;
+
+                    break;
+            }
         }
 
         private void UpdateUIFromResult(UISelected uISelected, int value)

@@ -63,15 +63,29 @@ namespace Parking_A.Gameplay
         private void OnDestroy()
         {
             if (_cts != null) _cts.Cancel();
+            UnityAdsManager.Instance.OnAdStatusChange -= RewardPlayer;
         }
 
         private void Start()
         {
+            UnityAdsManager.Instance.OnAdStatusChange += RewardPlayer;
             _cts = new CancellationTokenSource();
 
             PoolManager.Instance.InitializePool();
             _envSpawner = new EnvironmentSpawner();
             InitializeLevel();
+        }
+
+        private void RewardPlayer(UnityAdsManager.AdStatus adStatus)
+        {
+            switch (adStatus)
+            {
+                case UnityAdsManager.AdStatus.AD_COMPLETED:
+                    CurrentPlayerStats.Gold += UniversalConstant.COINS_RECEIVED;
+                    SavePlayerStats();
+
+                    break;
+            }
         }
 
         public void SavePlayerStats()

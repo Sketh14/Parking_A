@@ -891,12 +891,28 @@ CAR PARKING
 - Project
     [=] Adding Ads Package
 - Scripts
-    [=] UnityAdsHelper
+    [=] UnityAdsManager
         {+} Control Ads through here
         {+} Adding AdType / AdStatus to keep track of Ads
         {+} Keeping Ids in ADIDS array
         {+} Ads initialization / loading / showing logic
 
+- Scripts
+    [=] UnityAdsManager
+        {+} Making _currentAdStatus public
+        {+} Fixing/Adding values enums
+        {+} Resetting flags logic
+        {+} Invoking AdStatusChange event logic
+    [=] GameUIManager
+        {+} Adding callbacks from UnityAdsManager and for watchBt
+    [=] GameManager
+        {+} Adding callback to AdsStatusChange
+            <~> Increasing Gold for Ads completed and saving
+    [=] UniversalConstant
+        {+} Renaming constants
+        {+} Adding COIN_RECEIVED const for coins given to player after watching an Ad
+- Scene
+    [=] Adding AdsManager to scene
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check

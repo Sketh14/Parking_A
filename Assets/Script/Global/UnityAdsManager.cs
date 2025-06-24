@@ -2,14 +2,16 @@
 /// Extension of original Code by Nikkolai Davenport <nikkolai@unity3d.com> 
 /// </summary>
 
+//https://docs.unity3d.com/Packages/com.unity.ads@3.4/manual/MonetizationBasicIntegrationUnity.html#testing
+
+#define TESTING
+#define DELAY_TESTING
+
 using System;
 using System.Threading.Tasks;
 using System.Threading;
 
 using UnityEngine;
-
-
-
 
 #if UNITY_IOS || UNITY_ANDROID
 using UnityEngine.Advertisements;
@@ -22,18 +24,24 @@ namespace Parking_A.Global
 	{
 		public enum AdStatus
 		{
-			AD_NOT_LOADED, LOADING_AD, AD_LOADED, SHOWING_AD, AD_SEEN,
-			AD_COMPLETED, AD_SKIPPED,
-			AD_ERROR, AD_NOT_SUPPORTED, USER_REQUESTED_AD
+			AD_NOT_LOADED = 0, LOADING_AD = 1 << 0, AD_LOADED = 1 << 1, SHOWING_AD = 1 << 2,
+			AD_COMPLETED = 1 << 3, AD_SKIPPED = 1 << 4,
+			AD_ERROR = 1 << 5, AD_NOT_SUPPORTED = 1 << 6, USER_REQUESTED_AD = 1 << 7
 		}
 		public enum AdType { INTERSTITIAL_AD, REWARDED_AD }
 
-		private const string _IOSGAMEID = "24300";
-		private const string _ANDROIDGAMEID = "24299";
-
+#if TESTING
+		private const string _IOSGAMEID = "5883760";
+		private const string _ANDROIDGAMEID = "5883761";
 		private readonly string[] _ADIDS = new string[] { "Interstitial_Android", "Rewarded_Android" };
+#else
+		private const string _IOSGAMEID = "1234";
+		private const string _ANDROIDGAMEID = "1234";
+		private readonly string[] _ADIDS = new string[] { "Interstitial_Id", "Rewarded_Id" };
+#endif
+
 		private AdType _currentAdType;
-		private AdStatus _currentAdsStatus;
+		public AdStatus CurrentAdsStatus;
 		private int _loadFailCount;
 
 		public bool enableTestMode = true;
@@ -45,9 +53,9 @@ namespace Parking_A.Global
 
 		#region Singleton
 		private static UnityAdsManager _instance;
-		public static UnityAdsManager Instance;
+		public static UnityAdsManager Instance { get => _instance; }
 
-		private void OnAwake()
+		private void Awake()
 		{
 			if (_instance == null)
 				_instance = this;
@@ -68,9 +76,10 @@ namespace Parking_A.Global
 
 		private void Start()
 		{
-			_currentAdType = AdType.INTERSTITIAL_AD;
-			_currentAdsStatus = AdStatus.AD_NOT_LOADED;
+			_currentAdType = AdType.REWARDED_AD;
+			CurrentAdsStatus = AdStatus.AD_NOT_LOADED;
 			_loadFailCount = 0;
+			_cts = new CancellationTokenSource();
 			InitializeAds();
 
 			OnAdRequested += ShowAd;
@@ -91,7 +100,11 @@ namespace Parking_A.Global
 			if (!Advertisement.isSupported)
 				Debug.LogWarning("Unity Ads is not supported on the current runtime platform.");
 			else if (Advertisement.isInitialized)
+			{
+				_loadFailCount = 0;
+				CurrentAdsStatus &= ~AdStatus.AD_ERROR;
 				Debug.LogWarning("Unity Ads is already initialized.");
+			}
 			else if (string.IsNullOrEmpty(gameID))
 				Debug.LogError("The game ID value is not set. A valid game ID is required to initialize Unity Ads.");
 			else
@@ -103,12 +116,11 @@ namespace Parking_A.Global
 				Debug.Log(string.Format("Precheck done. Initializing Unity Ads for game ID {0} with test mode {1}...",
 										gameID, isTestModeEnabled ? "enabled" : "disabled"));
 
-				Advertisement.Initialize(gameID, isTestModeEnabled, this);
-#if UNITY_IOS || UNITY_ANDROID
-#else
-			_currentAdsStatus |= AdStatus.AD_NOT_SUPPORTED;
-			Debug.LogWarning("Unity Ads is not supported under the current build platform.");
+#if !UNITY_IOS || !UNITY_ANDROID
+				Debug.LogWarning($"Unity Ads test will not work without an internet connection in Editor");
 #endif
+
+				Advertisement.Initialize(gameID, isTestModeEnabled, this);
 			}
 		}
 
@@ -118,16 +130,17 @@ namespace Parking_A.Global
 		{
 			Debug.Log($"Unity Ads Initialized!");
 
-#if UNITY_IOS || UNITY_ANDROID
-			Advertisement.Load(_ADIDS[(int)_currentAdType], this);
-#endif
+			_loadFailCount = 0;
+			CurrentAdsStatus &= ~AdStatus.AD_ERROR;
 
-			_currentAdsStatus |= AdStatus.LOADING_AD;
+			Advertisement.Load(_ADIDS[(int)_currentAdType], this);
+
+			CurrentAdsStatus |= AdStatus.LOADING_AD;
 		}
 
 		public async void OnInitializationFailed(UnityAdsInitializationError errorType, string message)
 		{
-			Debug.LogError($"Error Initializing Ads! | Error: {message}");
+			Debug.LogWarning($"Error Initializing Ads! | ErrorTyep: {errorType} | ErrorMsg: {message}");
 			switch (errorType)
 			{
 				case UnityAdsInitializationError.AD_BLOCKER_DETECTED:
@@ -140,11 +153,15 @@ namespace Parking_A.Global
 					_loadFailCount++;
 					if (_loadFailCount > 4)
 					{
-						_currentAdsStatus |= AdStatus.AD_ERROR;
+						Debug.LogError($"Load failed | _loadFailCount: {_loadFailCount}");
+						CurrentAdsStatus |= AdStatus.AD_ERROR;
 						return;
 					}
 
 					await Task.Delay(2000);
+					if (_cts.IsCancellationRequested) return;
+
+					// Debug.Log($"SDK not properly initialized | Initializing again | _loadFailCount: {_loadFailCount}");
 					InitializeAds();
 
 					break;
@@ -154,7 +171,7 @@ namespace Parking_A.Global
 					break;
 
 				case UnityAdsInitializationError.UNKNOWN:
-					break;
+					goto case UnityAdsInitializationError.INTERNAL_ERROR;
 			}
 		}
 
@@ -162,19 +179,29 @@ namespace Parking_A.Global
 
 		#region IUnityAdsLoadListener
 
-		public void OnUnityAdsAdLoaded(string placementId)
+		public async void OnUnityAdsAdLoaded(string placementId)
 		{
-			_currentAdsStatus &= ~AdStatus.AD_NOT_LOADED;
-			_currentAdsStatus |= AdStatus.AD_LOADED;
+			CurrentAdsStatus &= ~AdStatus.AD_NOT_LOADED;
+			CurrentAdsStatus |= AdStatus.AD_LOADED;
+
+#if DELAY_TESTING
+			await Task.Delay(5000);         //Awaiting if any system needs to use the CurrentAdsStatus flag
+#endif
+
+			OnAdStatusChange?.Invoke(AdStatus.AD_LOADED);
+
+			Debug.Log($"{_currentAdType} Loaded");
 		}
 
 		public async void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError errorType, string message)
 		{
-			Debug.LogWarning($"Failed to load Ad | Id: {placementId} | ErrorType: {errorType} | ErrorMsg: {message}");
+			Debug.LogError($"Failed to load Ad | Id: {placementId} | ErrorType: {errorType} | ErrorMsg: {message}");
 
 			switch (errorType)
 			{
 				case UnityAdsLoadError.INITIALIZE_FAILED:
+					// Debug.Log($"SDK not properly initialized | Initializing again");
+
 					// Try initializing again
 					InitializeAds();
 
@@ -193,13 +220,15 @@ namespace Parking_A.Global
 					break;
 
 				case UnityAdsLoadError.NO_FILL:
-					if ((_currentAdsStatus & AdStatus.USER_REQUESTED_AD) != 0)
+					if ((CurrentAdsStatus & AdStatus.USER_REQUESTED_AD) != 0)
 					{
 						//Show something to user to try Ads after some time as they are loading
 					}
 
 					AdType requestedAdType = _currentAdType;
 					await Task.Delay(2000);
+					if (_cts.IsCancellationRequested) return;
+
 					Advertisement.Load(_ADIDS[(int)requestedAdType], this);
 
 					break;
@@ -256,28 +285,54 @@ namespace Parking_A.Global
 
 		public void OnUnityAdsShowClick(string placementId)
 		{
-			_currentAdsStatus |= AdStatus.SHOWING_AD;
+			CurrentAdsStatus |= AdStatus.SHOWING_AD;
 		}
 
-		public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
+		public async void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
 		{
-			_currentAdsStatus |= AdStatus.AD_SEEN;
-
 			switch (showCompletionState)
 			{
 				case UnityAdsShowCompletionState.COMPLETED:
+					CurrentAdsStatus |= AdStatus.AD_COMPLETED;
+					OnAdStatusChange?.Invoke(AdStatus.AD_COMPLETED);
+
+#if DELAY_TESTING
+					await Task.Delay(5000);         //Awaiting if any system needs to use the CurrentAdsStatus flag
+#else
+					await Task.Delay(1000);         //Awaiting if any system needs to use the CurrentAdsStatus flag
+#endif
+
+					if (_cts.IsCancellationRequested) return;
+
+					//Resetting flags
+					CurrentAdsStatus = AdStatus.AD_NOT_LOADED;
 					Advertisement.Load(_ADIDS[(int)_currentAdType], this);
-					_currentAdsStatus |= AdStatus.AD_COMPLETED;
 
 					break;
 
 				case UnityAdsShowCompletionState.SKIPPED:
+					CurrentAdsStatus |= AdStatus.AD_SKIPPED;
+					OnAdStatusChange?.Invoke(AdStatus.AD_SKIPPED);
+
+#if DELAY_TESTING
+					await Task.Delay(5000);         //Awaiting if any system needs to use the CurrentAdsStatus flag
+#else
+					await Task.Delay(1000);         //Awaiting if any system needs to use the CurrentAdsStatus flag
+#endif
+
+					if (_cts.IsCancellationRequested) return;
+
+					//Resetting flags
+					CurrentAdsStatus = AdStatus.AD_NOT_LOADED;
 					Advertisement.Load(_ADIDS[(int)_currentAdType], this);
-					_currentAdsStatus |= AdStatus.AD_SKIPPED;
 
 					break;
 
 				case UnityAdsShowCompletionState.UNKNOWN:
+
+
+					//Resetting flags
+					CurrentAdsStatus = AdStatus.AD_NOT_LOADED;
 					Advertisement.Load(_ADIDS[(int)_currentAdType], this);
 
 					break;
@@ -296,11 +351,11 @@ namespace Parking_A.Global
 		{
 			_currentAdType = adType;
 
-			if ((_currentAdsStatus & AdStatus.AD_NOT_SUPPORTED) != 0)
+			if ((CurrentAdsStatus & AdStatus.AD_NOT_SUPPORTED) != 0)
 				Debug.LogError("Failed to show ad. Unity Ads is not supported under the current build platform.");
-			else if ((_currentAdsStatus & AdStatus.AD_ERROR) != 0)
+			else if ((CurrentAdsStatus & AdStatus.AD_ERROR) != 0)
 				InitializeAds();
-			else if ((_currentAdsStatus & AdStatus.AD_NOT_LOADED) != 0)
+			else if ((CurrentAdsStatus & AdStatus.AD_NOT_LOADED) != 0)
 				Advertisement.Load(_ADIDS[(int)adType], this);
 			else
 				Advertisement.Show(_ADIDS[(int)adType], this);

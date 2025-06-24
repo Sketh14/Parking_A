@@ -42,7 +42,7 @@ namespace Parking_A.Gameplay
         {
             // Debug.Log($"Spawning Boundary | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[(UniversalConstant._GridXC * 2) + ((UniversalConstant._GridYC - 1) * 2)];         //Additional 2 cells just in case
+            byte[] gridMap = new byte[(UniversalConstant.GRID_X * 2) + ((UniversalConstant.GRID_Y - 1) * 2)];         //Additional 2 cells just in case
 
             int gridMapIndex = 0, indexToCheck;
             //Initialize Array to all spots being empty
@@ -74,13 +74,13 @@ namespace Parking_A.Gameplay
             #region HORIZONTAL_SPAWN
             // 1 cell gap for last-boundary
 #if !SPAWN_HORIZONTAL_TEST
-            for (gridMapIndex = 0; gridMapIndex < (UniversalConstant._GridXC * 2) - 1; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < (UniversalConstant.GRID_X * 2) - 1; gridMapIndex++)
 #else
             for (gridMapIndex = 0; gridMapIndex < 22; gridMapIndex++)
 #endif
             {
                 //Check if the space is occupied or not | Skip if occupied
-                if (gridMap[gridMapIndex] != 0 || (gridMapIndex == UniversalConstant._GridXC - 1))
+                if (gridMap[gridMapIndex] != 0 || (gridMapIndex == UniversalConstant.GRID_X - 1))
                     continue;
 #if EMERGENCY_LOOP_EXIT
                 else
@@ -104,12 +104,12 @@ namespace Parking_A.Gameplay
                 // <------------ {(UniversalConstant._cGridX / 4),(UniversalConstant._cGridY / 4)} ------------> Top-Left placement of a car
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
-                spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._GridXC * 0.5f) + 0.5f;
+                spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant.GRID_X * 0.5f) + 0.5f;
                 // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
 
                 //Both will be down in Y for horizontal pair
-                spawnPos.z = (UniversalConstant._GridYC / 4.0f) - 0.25f
-                    - (UniversalConstant._GridXC * (UniversalConstant._GridYC - 1) / UniversalConstant._GridXC * 0.5f * (gridMapIndex / UniversalConstant._GridXC));
+                spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - 0.25f
+                    - (UniversalConstant.GRID_X * (UniversalConstant.GRID_Y - 1) / UniversalConstant.GRID_X * 0.5f * (gridMapIndex / UniversalConstant.GRID_X));
                 // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
 
                 //Check if boundary can be placed
@@ -121,7 +121,7 @@ namespace Parking_A.Gameplay
                     //     + $" | indexToCheck: {indexToCheck}");
 
                     //Bounds Check
-                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC * 2))      //Out of Range
+                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y * 2))      //Out of Range
                     {
                         // Debug.Log($"(gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
                         // + $"| Bounds: {indexToCheck}");
@@ -156,8 +156,8 @@ namespace Parking_A.Gameplay
             #region VERTICAL_SPAWN
             // /*
 #if !SPAWN_VERTICAL_TEST
-            for (gridMapIndex = UniversalConstant._GridXC * 2;
-                gridMapIndex < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
+            for (gridMapIndex = UniversalConstant.GRID_X * 2;
+                gridMapIndex < (UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
                 gridMapIndex++)
 #else
             for (gridMapIndex = 44; gridMapIndex < 45; gridMapIndex++)
@@ -165,7 +165,7 @@ namespace Parking_A.Gameplay
             {
                 //Check if the space is occupied or not | Skip if occupied
                 if (gridMap[gridMapIndex] != 0
-                    || gridMapIndex == UniversalConstant._GridYC - 3 + (UniversalConstant._GridXC * 2))          //Avoid Last cell for 1st iteration
+                    || gridMapIndex == UniversalConstant.GRID_Y - 3 + (UniversalConstant.GRID_X * 2))          //Avoid Last cell for 1st iteration
                 {
                     // Debug.Log($"Cell Occupied | index: {gridMapIndex} | Type: {gridMap[gridMapIndex]}");
                     continue;
@@ -178,7 +178,7 @@ namespace Parking_A.Gameplay
                 }
 #endif
 
-                const int startOffset = UniversalConstant._GridXC * 2;
+                const int startOffset = UniversalConstant.GRID_X * 2;
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
                 spawnRot.y = 90f;
@@ -197,17 +197,17 @@ namespace Parking_A.Gameplay
                 // Any combination done with the above co-odrinates will result in a co-ordinate at the top-left of the current cell
 
                 spawnRot.y = 90f;
-                spawnPos.z = (UniversalConstant._GridYC / 4.0f) - ((gridMapIndex - startOffset)
-                    % (UniversalConstant._GridYC - 2) * (UniversalConstant._CellHalfSizeC * 2f)) - 1.0f;       //Extra 1f to offset above boundary
+                spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - ((gridMapIndex - startOffset)
+                    % (UniversalConstant.GRID_Y - 2) * (UniversalConstant.HALF_CELL_SIZE * 2f)) - 1.0f;       //Extra 1f to offset above boundary
                 // - (UniversalConstant._cGridX * (UniversalConstant._cGridY - 1) / UniversalConstant._cGridX * 0.5f * (gridMapIndex / UniversalConstant._cGridX));
 
                 //Both will be right in X for Vertical pair
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f + ((UniversalConstant._cGridX - 1) * 0.5f);       // For objects on the left-side
                 // spawnPos.x = (UniversalConstant._cGridX / 4.0f * -1.0f) + 0.25f;        // For objects on the left-side
                 // If cGridX:22 | cGridY:42, then 84 would be on the right side, as 40/40 is 1
-                spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                    + ((gridMapIndex - startOffset) / (UniversalConstant._GridYC - 2)
-                    * (UniversalConstant._GridXC - 1) * 0.5f);        // For both-sides
+                spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + 0.25f
+                    + ((gridMapIndex - startOffset) / (UniversalConstant.GRID_Y - 2)
+                    * (UniversalConstant.GRID_X - 1) * 0.5f);        // For both-sides
 
                 //Check if vehicle can be placed
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)

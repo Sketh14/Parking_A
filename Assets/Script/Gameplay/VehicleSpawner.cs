@@ -185,7 +185,7 @@ namespace Parking_A.Gameplay
         {
             // Debug.Log($"Spawning Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
             //Create a grid of 22 x 42 cells
-            int[] gridMap = new int[UniversalConstant._GridXC * UniversalConstant._GridYC];
+            int[] gridMap = new int[UniversalConstant.GRID_X * UniversalConstant.GRID_Y];
 
             int gridMapIndex = 0, indexToCheck = 0;
             //Initialize Array to all spots being empty
@@ -214,7 +214,7 @@ namespace Parking_A.Gameplay
             #region SpawnVehicles
             // 1 cell gap for boundary
 #if !SPAWN_LOOP_TEST
-            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._GridXC * UniversalConstant._GridYC; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < UniversalConstant.GRID_X * UniversalConstant.GRID_Y; gridMapIndex++)
 #else
             for (gridMapIndex = 100; gridMapIndex < 122; gridMapIndex++)
 #endif
@@ -226,8 +226,8 @@ namespace Parking_A.Gameplay
 
                 //Check if the space is occupied or not | Skip if occupied
                 if ((gridMap[gridMapIndex] % 10) != 0
-                    || (gridMapIndex % UniversalConstant._GridXC) == 0 || (gridMapIndex % UniversalConstant._GridXC) == (UniversalConstant._GridXC - 1)    //Vertical Gaps
-                    || (gridMapIndex / UniversalConstant._GridXC) == 0 || (gridMapIndex / UniversalConstant._GridXC) == (UniversalConstant._GridYC - 1))
+                    || (gridMapIndex % UniversalConstant.GRID_X) == 0 || (gridMapIndex % UniversalConstant.GRID_X) == (UniversalConstant.GRID_X - 1)    //Vertical Gaps
+                    || (gridMapIndex / UniversalConstant.GRID_X) == 0 || (gridMapIndex / UniversalConstant.GRID_X) == (UniversalConstant.GRID_Y - 1))
                     continue;
 #if EMERGENCY_LOOP_EXIT
                 else
@@ -334,8 +334,8 @@ namespace Parking_A.Gameplay
                         spawnRot.y = -90f;
 
                         //By default, the car will be placed in the left-orientation
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
-                            + (gridMapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) - (UniversalConstant.HALF_CELL_SIZE * (vehicleType - 1))
+                            + (gridMapIndex % UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2));
                         goto case 4;
 
                     //Check Right
@@ -343,16 +343,16 @@ namespace Parking_A.Gameplay
                         xDir = 1;
                         spawnRot.y = 90f;
 
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) - (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
-                            + (gridMapIndex % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2)) + (UniversalConstant._CellHalfSizeC * 2 * vehicleType);
+                        spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) - (UniversalConstant.HALF_CELL_SIZE * (vehicleType - 1))
+                            + (gridMapIndex % UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2)) + (UniversalConstant.HALF_CELL_SIZE * 2 * vehicleType);
                         // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {(gridMapIndex % UniversalConstant._cGridX)} | top-left: {(UniversalConstant._cGridX / 4.0f * -1.0f)} ");
                         goto case 4;
 
                     //Check Horizontal Pairs
                     case 4:
                         //Both will be down in Y for horizontal pair
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (gridMapIndex / UniversalConstant._GridXC
-                            * (UniversalConstant._CellHalfSizeC * 2)) - (UniversalConstant._CellHalfSizeC * 2);
+                        spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - (gridMapIndex / UniversalConstant.GRID_X
+                            * (UniversalConstant.HALF_CELL_SIZE * 2)) - (UniversalConstant.HALF_CELL_SIZE * 2);
                         // Debug.Log($"spawnPos.x: {spawnPos.x} | mod: {gridMapIndex / (UniversalConstant._cGridX - 1)} | top-left: {UniversalConstant._cGridY / 4.0f} ");
 
                         if (!ValidateHorPairCanExit(ref gridMap, ref gridMapIndex, ref neighbourX, ref neighbourY))
@@ -383,8 +383,8 @@ namespace Parking_A.Gameplay
                         yDir = -1;
                         spawnRot.y = 0f;
 
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
-                            - (gridMapIndex / UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
+                        spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) + (UniversalConstant.HALF_CELL_SIZE * (vehicleType - 1))
+                            - (gridMapIndex / UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2));
                         goto case 5;
 
                     // Check down
@@ -392,15 +392,15 @@ namespace Parking_A.Gameplay
                         yDir = 1;
                         spawnRot.y = 180f;
 
-                        spawnPos.z = (UniversalConstant._GridYC / 4.0f) + (UniversalConstant._CellHalfSizeC * (vehicleType - 1))
-                            - (gridMapIndex / UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2)) - (UniversalConstant._CellHalfSizeC * 2 * vehicleType);
+                        spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) + (UniversalConstant.HALF_CELL_SIZE * (vehicleType - 1))
+                            - (gridMapIndex / UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2)) - (UniversalConstant.HALF_CELL_SIZE * 2 * vehicleType);
                         goto case 5;
 
                     //Check vertical pairs
                     case 5:
                         //Both will be right in X for Vertical pair
-                        spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._GridXC
-                            * (UniversalConstant._CellHalfSizeC * 2)) + (UniversalConstant._CellHalfSizeC * 2);
+                        spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant.GRID_X
+                            * (UniversalConstant.HALF_CELL_SIZE * 2)) + (UniversalConstant.HALF_CELL_SIZE * 2);
                         xDir = 1;
 
                         //Check if vehicle can exit the parking lot
@@ -465,14 +465,14 @@ namespace Parking_A.Gameplay
             System.Text.StringBuilder debugGrid = new System.Text.StringBuilder();
 #endif
             //Top / Bottom
-            for (int bIndex = 0; bIndex < UniversalConstant._GridXC * 2; bIndex++)
+            for (int bIndex = 0; bIndex < UniversalConstant.GRID_X * 2; bIndex++)
             {
-                gridMap[bIndex + (bIndex / UniversalConstant._GridXC
-                    * UniversalConstant._GridXC * (UniversalConstant._GridYC - 2))] = boundaryData[bIndex];
+                gridMap[bIndex + (bIndex / UniversalConstant.GRID_X
+                    * UniversalConstant.GRID_X * (UniversalConstant.GRID_Y - 2))] = boundaryData[bIndex];
             }
             //Left / Right
-            for (int bIndex = UniversalConstant._GridXC, bDataIndex = UniversalConstant._GridXC * 2;
-                bDataIndex < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
+            for (int bIndex = UniversalConstant.GRID_X, bDataIndex = UniversalConstant.GRID_X * 2;
+                bDataIndex < (UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2) * 2 - 1;       //Avoid top/bottom boudnaries and last cell
                 bDataIndex++)
             {
                 gridMap[bIndex] = boundaryData[bDataIndex];
@@ -481,10 +481,10 @@ namespace Parking_A.Gameplay
                 //     - (bDataIndex - (UniversalConstant._cGridX * 2)) / (UniversalConstant._cGridY - 2)
                 //         * (bDataIndex - UniversalConstant._cGridX) + (UniversalConstant._cGridX - 1);
                 // Debug.Log($"bIndex: {bIndex} | bDataIndex: {bDataIndex} | gridMap[{bIndex}]: {boundaryData[bDataIndex]}");
-                bIndex += UniversalConstant._GridXC;
+                bIndex += UniversalConstant.GRID_X;
 
-                if (bIndex == UniversalConstant._GridXC * (UniversalConstant._GridYC - 1))
-                    bIndex = (UniversalConstant._GridXC * 2) - 1;
+                if (bIndex == UniversalConstant.GRID_X * (UniversalConstant.GRID_Y - 1))
+                    bIndex = (UniversalConstant.GRID_X * 2) - 1;
             }
 
 #if DEBUG_GRID_BOUNDARY_TOP_BOTTOM
@@ -541,10 +541,10 @@ namespace Parking_A.Gameplay
                 //     + $" | grid[0]: {gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + ((UniversalConstant._cGridX - 1) * neighbourX)]}"
                 //     + $" | grid[1]: {gridMap[((gridMapIndex / UniversalConstant._cGridX) * UniversalConstant._cGridX) + UniversalConstant._cGridX + ((UniversalConstant._cGridX - 1) * neighbourX)]}");
                 //Check if gridMapIndex | (gridMapIndex + gridX) has boundary on the same row or not
-                if ((gridMap[((gridMapIndex / UniversalConstant._GridXC) * UniversalConstant._GridXC)
-                    + ((UniversalConstant._GridXC - 1) * neighbourX)] % 10) != 0
-                    || (gridMap[((gridMapIndex / UniversalConstant._GridXC) * UniversalConstant._GridXC) + UniversalConstant._GridXC
-                    + ((UniversalConstant._GridXC - 1) * neighbourX)] % 10) != 0)
+                if ((gridMap[((gridMapIndex / UniversalConstant.GRID_X) * UniversalConstant.GRID_X)
+                    + ((UniversalConstant.GRID_X - 1) * neighbourX)] % 10) != 0
+                    || (gridMap[((gridMapIndex / UniversalConstant.GRID_X) * UniversalConstant.GRID_X) + UniversalConstant.GRID_X
+                    + ((UniversalConstant.GRID_X - 1) * neighbourX)] % 10) != 0)
                     neighbourY++;
             }
 
@@ -573,10 +573,10 @@ namespace Parking_A.Gameplay
                 //Check if gridMapIndex | (gridMapIndex + gridX) has boundary on the same row or not
 
                 //Check if gridMapIndex | (gridMapIndex + gridX) has boundary on the same row or not
-                if ((gridMap[(gridMapIndex % UniversalConstant._GridXC)
-                    + (UniversalConstant._GridXC * (UniversalConstant._GridYC - 1) * neighbourX)] % 10) != 0
-                    || (gridMap[((gridMapIndex + 1) % UniversalConstant._GridXC)
-                    + (UniversalConstant._GridXC * (UniversalConstant._GridYC - 1) * neighbourX)] % 10) != 0)
+                if ((gridMap[(gridMapIndex % UniversalConstant.GRID_X)
+                    + (UniversalConstant.GRID_X * (UniversalConstant.GRID_Y - 1) * neighbourX)] % 10) != 0
+                    || (gridMap[((gridMapIndex + 1) % UniversalConstant.GRID_X)
+                    + (UniversalConstant.GRID_X * (UniversalConstant.GRID_Y - 1) * neighbourX)] % 10) != 0)
                     neighbourY++;
             }
 
@@ -686,11 +686,11 @@ namespace Parking_A.Gameplay
             {
                 // Check right-side
                 for (neighbourX = 1;
-                    neighbourX < (UniversalConstant._GridXC - (gridMapIndex % UniversalConstant._GridXC));
+                    neighbourX < (UniversalConstant.GRID_X - (gridMapIndex % UniversalConstant.GRID_X));
                     neighbourX++)
                 {
                     // Index Offset(UP/DOWN) | Check which ROW is active(UP/DOWN) 
-                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
+                    indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) + neighbourX;
                     validateVal = gridMap[gridMapIndex + indexOffset] % 10;                // Same-row Or Row-Down
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
@@ -717,9 +717,9 @@ namespace Parking_A.Gameplay
 #endif
 
                     // Moving Forward 
-                    for (; neighbourX < (UniversalConstant._GridXC - (gridMapIndex % UniversalConstant._GridXC)); neighbourX++)
+                    for (; neighbourX < (UniversalConstant.GRID_X - (gridMapIndex % UniversalConstant.GRID_X)); neighbourX++)
                     {
-                        indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
+                        indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) + neighbourX;
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -727,7 +727,7 @@ namespace Parking_A.Gameplay
                         validateCounter++;      // Checking Vehicle-Length
                     }
                     neighbourX--;           //Prep for next Vehicle
-                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX;
+                    indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) + neighbourX;
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                     debugAdjacent.Append($"C[{validateCounter}]");
@@ -747,9 +747,9 @@ namespace Parking_A.Gameplay
                         {
                             // Current index + UP/Down_Row - Offset - 1_Row
 
-                            indexOffset = gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
+                            indexOffset = gridMapIndex + (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
                                         - neighbourY        //Row-Offset
-                                        + (UniversalConstant._GridXC * (switchDir / 10) * -1);            // 1_Up/1_Down Row
+                                        + (UniversalConstant.GRID_X * (switchDir / 10) * -1);            // 1_Up/1_Down Row
 
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
                             //[IMPORTANT] DOWN IS POSITIVE | UP IS NEGATIVE
@@ -764,7 +764,7 @@ namespace Parking_A.Gameplay
 #endif
 
                             // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
-                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4)     //Bounds Check UP/Down     //TESTING
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant.GRID_X * 4)     //Bounds Check UP/Down     //TESTING
                                 && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_RIGHT
@@ -795,10 +795,10 @@ namespace Parking_A.Gameplay
             {
                 //This might run more as the previous vehicle if successfully placed would have already checked if there are any discrepencies on its left-side
                 //Easier to integrate with above tho
-                for (neighbourX = 1; neighbourX <= (gridMapIndex % UniversalConstant._GridXC); neighbourX++)  // FORWARDS
+                for (neighbourX = 1; neighbourX <= (gridMapIndex % UniversalConstant.GRID_X); neighbourX++)  // FORWARDS
                 // for (neighbourX = (gridMapIndex % UniversalConstant._GridXC) - 1; neighbourX >= 0; neighbourX--)   //BACKWARDS
                 {
-                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
+                    indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) - neighbourX;
                     validateVal = gridMap[gridMapIndex + indexOffset] % 10;
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
@@ -824,10 +824,10 @@ namespace Parking_A.Gameplay
                     debugAdjacent.Append($"In[{validateVal}]");
 #endif
 
-                    for (; neighbourX <= (gridMapIndex % UniversalConstant._GridXC); neighbourX++)      // FORWARDS
+                    for (; neighbourX <= (gridMapIndex % UniversalConstant.GRID_X); neighbourX++)      // FORWARDS
                     // for (; neighbourX >= 0; neighbourX--)   //BACKWARDS 
                     {
-                        indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
+                        indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) - neighbourX;
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -837,7 +837,7 @@ namespace Parking_A.Gameplay
 
                     // neighbourX++;           // FORWARDS Prep for next Vehicle
                     neighbourX--;           // BACKWARDS Prep for next Vehicle
-                    indexOffset = (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) - neighbourX;
+                    indexOffset = (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) - neighbourX;
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                     debugAdjacent.Append($"C[{validateCounter}]");
@@ -858,9 +858,9 @@ namespace Parking_A.Gameplay
                         for (neighbourY = validateCounter - 1; neighbourY >= 0; neighbourY--)
                         {
                             // Current index + UP/Down_Row - Offset - 1_Row 
-                            indexOffset = gridMapIndex + (UniversalConstant._GridXC * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
+                            indexOffset = gridMapIndex + (UniversalConstant.GRID_X * Mathf.Abs(switchDir % 10)) + neighbourX         //Get the Vehicle-Index
                                         - neighbourY        //Row-Offset
-                                        + (UniversalConstant._GridXC * (switchDir / 10) * -1);            // 1_Up/1_Down Row
+                                        + (UniversalConstant.GRID_X * (switchDir / 10) * -1);            // 1_Up/1_Down Row
 
 #if VEHICLE_ADJACENT_DEBUG_LEFT
                             //[IMPORTANT] DOWN IS POSITIVE | UP IS NEGATIVE
@@ -875,7 +875,7 @@ namespace Parking_A.Gameplay
 #endif
 
                             // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
-                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 4)     //Bounds Check UP/Down     //TESTING
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant.GRID_X * 4)     //Bounds Check UP/Down     //TESTING
                                 && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_LEFT
@@ -942,12 +942,12 @@ namespace Parking_A.Gameplay
                 // continue;               //TESTING ONLY UP
 
                 // Check DOWN 
-                for (neighbourY = 1; neighbourY < (10 - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)           // VEHICLE_ADJACENT_DEBUG_DOWN
+                for (neighbourY = 1; neighbourY < (10 - (gridMapIndex / UniversalConstant.GRID_X)); neighbourY++)           // VEHICLE_ADJACENT_DEBUG_DOWN
                 // for (neighbourY = 1; neighbourY < (UniversalConstant._GridYC - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)
                 {
                     // SAME-COLUMN Or COLUMN-DOWN
                     // Index Offset(UP/DOWN) | Check which COLUMN is active(LEFT/RIGHT)
-                    indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC);
+                    indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant.GRID_X);
                     validateVal = gridMap[gridMapIndex + indexOffset] % 10;
 
 #if VEHICLE_ADJACENT_DEBUG_DOWN
@@ -974,10 +974,10 @@ namespace Parking_A.Gameplay
 #endif
 
                     // Moving DOWN
-                    for (; neighbourY < (10 - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)           // VEHICLE_ADJACENT_DEBUG_DOWN
+                    for (; neighbourY < (10 - (gridMapIndex / UniversalConstant.GRID_X)); neighbourY++)           // VEHICLE_ADJACENT_DEBUG_DOWN
                     // for (; neighbourY < (UniversalConstant._GridYC - (gridMapIndex / UniversalConstant._GridXC)); neighbourY++)
                     {
-                        indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC);
+                        indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant.GRID_X);
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -985,7 +985,7 @@ namespace Parking_A.Gameplay
                         validateCounter++;      // Checking Vehicle-Length
                     }
                     neighbourY--;           //Prep for next Vehicle
-                    indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC);
+                    indexOffset = Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant.GRID_X);
 
 #if VEHICLE_ADJACENT_DEBUG_DOWN
                     debugAdjacent.Append($"C[{validateCounter}]");
@@ -1004,8 +1004,8 @@ namespace Parking_A.Gameplay
                             // Current index + UP/Down_Row - Offset - 1_Row
 
                             // Get the Current Vehicle-Index | Check which COLUMN is active(LEFT/RIGHT)
-                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant._GridXC)
-                                - (neighbourX * UniversalConstant._GridXC)          // Adjust for Counter Offset 
+                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) + (neighbourY * UniversalConstant.GRID_X)
+                                - (neighbourX * UniversalConstant.GRID_X)          // Adjust for Counter Offset 
                                 + ((switchDir / 10) * -1);            // Offset 1_LEFT/1_RIGHT COLUMN to check
 
 #if VEHICLE_ADJACENT_DEBUG_DOWN
@@ -1021,7 +1021,7 @@ namespace Parking_A.Gameplay
 #endif
 
                             // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
-                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 10)     //Bounds Check UP/Down     //TESTING
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant.GRID_X * 10)     //Bounds Check UP/Down     //TESTING
                                 && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_DOWN
@@ -1046,11 +1046,11 @@ namespace Parking_A.Gameplay
             {
                 // Check UP
                 // Down will be empty | Same as Horizontal in terms of checking empty slots
-                for (neighbourY = 1; neighbourY <= (gridMapIndex / UniversalConstant._GridXC); neighbourY++)  // INCREASE
+                for (neighbourY = 1; neighbourY <= (gridMapIndex / UniversalConstant.GRID_X); neighbourY++)  // INCREASE
                 // for (neighbourY = (gridMapIndex / UniversalConstant._GridXC) - 1; neighbourY >= 0; neighbourY--)   //DECREASE
                 {
                     // Index Offset(UP/DOWN) | Check which COLUMN is active(LEFT/RIGHT)
-                    indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC);
+                    indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant.GRID_X);
                     validateVal = gridMap[gridMapIndex + indexOffset] % 10;
 
 #if VEHICLE_ADJACENT_DEBUG_UP
@@ -1076,10 +1076,10 @@ namespace Parking_A.Gameplay
                     debugAdjacent.Append($"In[{validateVal}]");
 #endif
 
-                    for (; neighbourY <= (gridMapIndex / UniversalConstant._GridXC); neighbourY++)      // FORWARDS
+                    for (; neighbourY <= (gridMapIndex / UniversalConstant.GRID_X); neighbourY++)      // FORWARDS
                     // for (; neighbourX >= 0; neighbourX--)   //BACKWARDS
                     {
-                        indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC);
+                        indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant.GRID_X);
                         // Empty Cell | Other Vehicle
                         if (validateVal != gridMap[gridMapIndex + indexOffset] / 10)       //Get the Vehicle-Index
                             break;
@@ -1089,7 +1089,7 @@ namespace Parking_A.Gameplay
 
                     neighbourY--;           // INCREASE | Prep for next Vehicle
                     // neighbourY++;           // DECREASE | Prep for next Vehicle
-                    indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC);
+                    indexOffset = Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant.GRID_X);
 
 #if VEHICLE_ADJACENT_DEBUG_UP
                     debugAdjacent.Append($"C[{validateCounter}]");
@@ -1109,8 +1109,8 @@ namespace Parking_A.Gameplay
                             // Current index + UP/Down_Row - Offset - 1_Row  
 
                             // Get the Current Vehicle-Index | Check which COLUMN is active(LEFT/RIGHT)
-                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant._GridXC)
-                                - (neighbourX * UniversalConstant._GridXC)          // Adjust for Counter Offset 
+                            indexOffset = gridMapIndex + Mathf.Abs(switchDir % 10) - (neighbourY * UniversalConstant.GRID_X)
+                                - (neighbourX * UniversalConstant.GRID_X)          // Adjust for Counter Offset 
                                 + ((switchDir / 10) * -1);            // Offset 1_LEFT/1_RIGHT COLUMN to check
 
 #if VEHICLE_ADJACENT_DEBUG_UP
@@ -1126,7 +1126,7 @@ namespace Parking_A.Gameplay
 #endif
 
                             // if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * UniversalConstant._GridYC)       //Bounds Check UP/Down
-                            if (indexOffset >= 0 && indexOffset < (UniversalConstant._GridXC * 110)     //Bounds Check UP/Down     //TESTING
+                            if (indexOffset >= 0 && indexOffset < (UniversalConstant.GRID_X * 110)     //Bounds Check UP/Down     //TESTING
                                 && (gridMap[indexOffset] / 10) == validateVal)
                             {
 #if VEHICLE_ADJACENT_DEBUG_UP
@@ -1170,16 +1170,16 @@ namespace Parking_A.Gameplay
                 //Check the cells down below also
                 for (neighbourY = 0; neighbourY < 2; neighbourY++)
                 {
-                    indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * UniversalConstant._GridXC);
+                    indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * UniversalConstant.GRID_X);
                     // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
                     //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
                     //     + $" | indexToCheck: {indexToCheck}");
 
                     //Bounds Check
-                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._GridXC * UniversalConstant._GridYC)      //Out of Range
-                        || (indexToCheck / UniversalConstant._GridXC) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant._GridXC)) / UniversalConstant._GridXC)      //On the same line check
-                        || (indexToCheck % UniversalConstant._GridXC) == 0 || (indexToCheck % UniversalConstant._GridXC) == (UniversalConstant._GridXC - 1)    //Vertical Gaps
-                        || (indexToCheck / UniversalConstant._GridXC) == 0 || (indexToCheck / UniversalConstant._GridXC) == (UniversalConstant._GridYC - 1))      //Horizontal Gaps
+                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant.GRID_X * UniversalConstant.GRID_Y)      //Out of Range
+                        || (indexToCheck / UniversalConstant.GRID_X) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant.GRID_X)) / UniversalConstant.GRID_X)      //On the same line check
+                        || (indexToCheck % UniversalConstant.GRID_X) == 0 || (indexToCheck % UniversalConstant.GRID_X) == (UniversalConstant.GRID_X - 1)    //Vertical Gaps
+                        || (indexToCheck / UniversalConstant.GRID_X) == 0 || (indexToCheck / UniversalConstant.GRID_X) == (UniversalConstant.GRID_Y - 1))      //Horizontal Gaps
                     {
                         // Debug.Log($"([OUT OF BOUNDS] gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
                         // + $"| Bounds: {indexToCheck}");
@@ -1209,17 +1209,17 @@ namespace Parking_A.Gameplay
                 //Check the cells down below also
                 for (neighbourY = 0; neighbourY < (2 + vehicleType); neighbourY++)
                 {
-                    indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant._GridXC);
+                    indexToCheck = gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant.GRID_X);
                     // Debug.Log($"[BOUNDS CHECK] (indexToCheck%UniversalConstant._cGridX): {indexToCheck % UniversalConstant._cGridX}"
                     //     + $" | (indexToCheck/UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX}"
                     //     + $" | indexToCheck: {indexToCheck}");
 
                     //Bounds Check
                     // - No matter what the value, this (indexToCheck % UniversalConstant._cGridX) will always be between (0 - UniversalConstant._cGridX)
-                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant._GridXC * UniversalConstant._GridYC)      //Out of Range
-                        || (indexToCheck / UniversalConstant._GridXC) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant._GridXC)) / UniversalConstant._GridXC)      //On the same line check
-                        || (indexToCheck % UniversalConstant._GridXC) == 0 || (indexToCheck % UniversalConstant._GridXC) == (UniversalConstant._GridXC - 1)    //Vertical Gaps
-                        || (indexToCheck / UniversalConstant._GridXC) == 0 || (indexToCheck / UniversalConstant._GridXC) == (UniversalConstant._GridYC - 1))      //Horizontal Gaps
+                    if (indexToCheck < 0 || indexToCheck >= (UniversalConstant.GRID_X * UniversalConstant.GRID_Y)      //Out of Range
+                        || (indexToCheck / UniversalConstant.GRID_X) != ((gridMapIndex + (neighbourY * yDir * UniversalConstant.GRID_X)) / UniversalConstant.GRID_X)      //On the same line check
+                        || (indexToCheck % UniversalConstant.GRID_X) == 0 || (indexToCheck % UniversalConstant.GRID_X) == (UniversalConstant.GRID_X - 1)    //Vertical Gaps
+                        || (indexToCheck / UniversalConstant.GRID_X) == 0 || (indexToCheck / UniversalConstant.GRID_X) == (UniversalConstant.GRID_Y - 1))      //Horizontal Gaps
                     {
                         // Debug.Log($"([OUT OF BOUNDS] gridMapIndex / UniversalConstant._cGridX): {indexToCheck / UniversalConstant._cGridX} | (gridMapIndex % UniversalConstant._cGridX):{indexToCheck % UniversalConstant._cGridX} "
                         // + $"| Bounds: {indexToCheck}");
@@ -1251,16 +1251,16 @@ namespace Parking_A.Gameplay
             for (neighbourX = 0; neighbourX < (2 + vehicleType * placeHorizontal); neighbourX++)
             {
                 for (neighbourY = 0; neighbourY < (2 + vehicleType * (1 - placeHorizontal)); neighbourY++)
-                    gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant._GridXC)] = vehicleCount * 10 + vehicleType;
+                    gridMap[gridMapIndex + (neighbourX * xDir) + (neighbourY * yDir * UniversalConstant.GRID_X)] = vehicleCount * 10 + vehicleType;
             }
         }
 
         //Test if vehicles spawn within bounds
         public void SpanwVehiclesTest()
         {
-            Debug.Log($"Spawning Test Vehicles | gridMap[{UniversalConstant._GridXC}x{UniversalConstant._GridYC}] | Size: {UniversalConstant._GridXC * UniversalConstant._GridYC}");
+            Debug.Log($"Spawning Test Vehicles | gridMap[{UniversalConstant.GRID_X}x{UniversalConstant.GRID_Y}] | Size: {UniversalConstant.GRID_X * UniversalConstant.GRID_Y}");
             //Create a grid of 22 x 42 cells
-            byte[] gridMap = new byte[UniversalConstant._GridXC * UniversalConstant._GridYC];
+            byte[] gridMap = new byte[UniversalConstant.GRID_X * UniversalConstant.GRID_Y];
 
             int gridMapIndex = 0, vehicleCount = 0;
             //Initialize Array to all spots being empty
@@ -1270,17 +1270,17 @@ namespace Parking_A.Gameplay
             Vector3 spawnPos, spawnRot;
             int vehicleType;
 
-            for (gridMapIndex = 0; gridMapIndex < UniversalConstant._GridXC * UniversalConstant._GridYC; gridMapIndex++)
+            for (gridMapIndex = 0; gridMapIndex < UniversalConstant.GRID_X * UniversalConstant.GRID_Y; gridMapIndex++)
             {
-                if (gridMapIndex % UniversalConstant._GridXC != 0) continue;
+                if (gridMapIndex % UniversalConstant.GRID_X != 0) continue;
 
                 spawnPos = Vector3.zero;
                 spawnRot = Vector3.zero;
 
                 vehicleType = 1;              //Test | Only include small vehicles
 
-                spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant._GridXC * 0.5f) + 0.25f;
-                spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (gridMapIndex / UniversalConstant._GridXC * 0.5f) - 0.25f;   // + (UniversalConstant._cGridY / 4) - 0.5f;
+                spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + (gridMapIndex % UniversalConstant.GRID_X * 0.5f) + 0.25f;
+                spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - (gridMapIndex / UniversalConstant.GRID_X * 0.5f) - 0.25f;   // + (UniversalConstant._cGridY / 4) - 0.5f;
 
 
                 _vehiclesSpawned.Add(PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)vehicleType].Get().transform);

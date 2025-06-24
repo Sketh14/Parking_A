@@ -22,7 +22,8 @@ namespace Parking_A.Global
         }
         public enum PoolType { BLANK = 0, VEHICLE_S = 1, VEHICLE_M, VEHICLE_L, BOUNDARY, NPC }
 
-        public const byte _GridXC = 22, _GridYC = 42;
-        public const float _CellHalfSizeC = 0.25f;
+        public const byte GRID_X = 22, GRID_Y = 42;
+        public const float HALF_CELL_SIZE = 0.25f;
+        public const int COINS_RECEIVED = 5;
     }
 }

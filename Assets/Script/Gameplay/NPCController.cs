@@ -310,10 +310,10 @@ namespace Parking_A.Gameplay
                 // {
 
 #if COLLISIONCHECK_DEBUG
-                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
+                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant.HALF_CELL_SIZE, Color.cyan);
 #endif
                 // If collided with anything, turn the NPC around
-                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _collisionLayerMaskC))
+                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant.HALF_CELL_SIZE, _collisionLayerMaskC))
                 {
                     // Debug.Log($"npcIndex: {npcIndex} | RayCast Hit | Name: {colliderHitInfo.transform.name} "
                     // + $"| colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}"
@@ -366,11 +366,11 @@ namespace Parking_A.Gameplay
                 }
 
 #if COLLISIONCHECK_DEBUG
-                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant._CellHalfSizeC, Color.cyan);
+                Debug.DrawRay(rayStartPos, rayDir * UniversalConstant.HALF_CELL_SIZE, Color.cyan);
 #endif
                 // Only register hit from the sides
                 // Check if the NPC has been hit by a vehicle
-                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant._CellHalfSizeC, _vehicleLayerMaskC))
+                if (Physics.Raycast(rayStartPos, rayDir, out colliderHitInfo, UniversalConstant.HALF_CELL_SIZE, _vehicleLayerMaskC))
                 {
                     // Debug.Log($"RayCast Hit | Name: {colliderHitInfo.transform.name} | colliderHitInfo-layer: {colliderHitInfo.transform.gameObject.layer}");
                     // _hitNPCINdex = npcIndex;

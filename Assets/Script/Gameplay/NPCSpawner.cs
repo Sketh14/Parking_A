@@ -73,30 +73,30 @@ namespace Parking_A.Gameplay
 
             byte tempBData = 255;
             // First Flip Left
-            for (int i = UniversalConstant._GridXC * 2, j = 1;
-                i < ((UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) / 2); i++, j++)
+            for (int i = UniversalConstant.GRID_X * 2, j = 1;
+                i < ((UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2) / 2); i++, j++)
             {
                 tempBData = boundaryData[i];
-                boundaryData[i] = boundaryData[(UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) - j];
-                boundaryData[(UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2) - j] = tempBData;
+                boundaryData[i] = boundaryData[(UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2) - j];
+                boundaryData[(UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2) - j] = tempBData;
             }
 
             // Flip Down
             // /*
-            for (int i = UniversalConstant._GridXC, j = 1; i < UniversalConstant._GridXC + (UniversalConstant._GridXC / 2); i++, j++)
+            for (int i = UniversalConstant.GRID_X, j = 1; i < UniversalConstant.GRID_X + (UniversalConstant.GRID_X / 2); i++, j++)
             {
                 tempBData = boundaryData[i];
-                boundaryData[i] = boundaryData[(UniversalConstant._GridXC * 2) - j];
-                boundaryData[(UniversalConstant._GridXC * 2) - j] = tempBData;
+                boundaryData[i] = boundaryData[(UniversalConstant.GRID_X * 2) - j];
+                boundaryData[(UniversalConstant.GRID_X * 2) - j] = tempBData;
             }
             // */
 
             // First swap Right | Left
-            for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+            for (int i = UniversalConstant.GRID_X * 2; i < (UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2); i++)
             {
                 tempBData = boundaryData[i];
-                boundaryData[i] = boundaryData[i + (UniversalConstant._GridYC - 2)];
-                boundaryData[i + (UniversalConstant._GridYC - 2)] = tempBData;
+                boundaryData[i] = boundaryData[i + (UniversalConstant.GRID_Y - 2)];
+                boundaryData[i + (UniversalConstant.GRID_Y - 2)] = tempBData;
             }
 
 #if BOUNDARY_SWAP_DEBUG
@@ -120,9 +120,9 @@ namespace Parking_A.Gameplay
                 boundaryData[i - UniversalConstant._GridXC] = tempBData;
             }*/
 
-            for (int i = UniversalConstant._GridXC * 2; i < (UniversalConstant._GridXC * 2) + (UniversalConstant._GridYC - 2); i++)
+            for (int i = UniversalConstant.GRID_X * 2; i < (UniversalConstant.GRID_X * 2) + (UniversalConstant.GRID_Y - 2); i++)
             {
-                for (int j = i; j > i - UniversalConstant._GridXC; j--)
+                for (int j = i; j > i - UniversalConstant.GRID_X; j--)
                 {
                     tempBData = boundaryData[j];
                     boundaryData[j] = boundaryData[j - 1];
@@ -223,12 +223,12 @@ namespace Parking_A.Gameplay
 
 
                 // Vertical | Left [84 - 125]
-                if (emptyGapArr[gapIndex] >= (UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2)
+                if (emptyGapArr[gapIndex] >= (UniversalConstant.GRID_X * 2) + UniversalConstant.GRID_Y - 2)
                 {
-                    spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
-                    spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                        + ((emptyGapArr[gapIndex] - ((UniversalConstant._GridXC * 2) + UniversalConstant._GridYC - 2))
-                        % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                    spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + UniversalConstant.HALF_CELL_SIZE;
+                    spawnPos.z = (UniversalConstant.GRID_Y / 4.0f * -1.0f) + (UniversalConstant.HALF_CELL_SIZE * 3)            //Offset as ignoring top/bottom row
+                        + ((emptyGapArr[gapIndex] - ((UniversalConstant.GRID_X * 2) + UniversalConstant.GRID_Y - 2))
+                        % UniversalConstant.GRID_Y * (UniversalConstant.HALF_CELL_SIZE * 2));
 
                     spawnRot.y = 0f;
 
@@ -239,12 +239,12 @@ namespace Parking_A.Gameplay
                     // npc.name = $"NPC[{bIndex}]_V";
                 }
                 // Horizontal | Down [62 - 83]
-                else if (emptyGapArr[gapIndex] >= UniversalConstant._GridXC + UniversalConstant._GridYC - 2)
+                else if (emptyGapArr[gapIndex] >= UniversalConstant.GRID_X + UniversalConstant.GRID_Y - 2)
                 {
-                    spawnPos.x = (UniversalConstant._GridXC / 4.0f) - 0.25f
-                        - ((emptyGapArr[gapIndex] - (UniversalConstant._GridXC + UniversalConstant._GridYC - 2))
-                        % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
-                    spawnPos.z = (UniversalConstant._GridYC / 4.0f * -1.0f) + UniversalConstant._CellHalfSizeC;
+                    spawnPos.x = (UniversalConstant.GRID_X / 4.0f) - 0.25f
+                        - ((emptyGapArr[gapIndex] - (UniversalConstant.GRID_X + UniversalConstant.GRID_Y - 2))
+                        % UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2));
+                    spawnPos.z = (UniversalConstant.GRID_Y / 4.0f * -1.0f) + UniversalConstant.HALF_CELL_SIZE;
 
                     spawnRot.y = 270f;
 
@@ -254,12 +254,12 @@ namespace Parking_A.Gameplay
                     // npc.name = $"NPC[{bIndex}]_H";
                 }
                 // Vertical | Right [22 - 61]
-                else if (emptyGapArr[gapIndex] >= UniversalConstant._GridXC)
+                else if (emptyGapArr[gapIndex] >= UniversalConstant.GRID_X)
                 {
-                    spawnPos.x = (UniversalConstant._GridXC / 4.0f) - UniversalConstant._CellHalfSizeC;
-                    spawnPos.z = (UniversalConstant._GridYC / 4.0f) - (UniversalConstant._CellHalfSizeC * 3)            //Offset as ignoring top/bottom row
-                        - ((emptyGapArr[gapIndex] - UniversalConstant._GridXC)
-                        % UniversalConstant._GridYC * (UniversalConstant._CellHalfSizeC * 2));
+                    spawnPos.x = (UniversalConstant.GRID_X / 4.0f) - UniversalConstant.HALF_CELL_SIZE;
+                    spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - (UniversalConstant.HALF_CELL_SIZE * 3)            //Offset as ignoring top/bottom row
+                        - ((emptyGapArr[gapIndex] - UniversalConstant.GRID_X)
+                        % UniversalConstant.GRID_Y * (UniversalConstant.HALF_CELL_SIZE * 2));
 
                     spawnRot.y = 180f;
 
@@ -272,9 +272,9 @@ namespace Parking_A.Gameplay
                 // Horizontal | Up [0 - 21]
                 else
                 {
-                    spawnPos.x = (UniversalConstant._GridXC / 4.0f * -1.0f) + 0.25f
-                        + (emptyGapArr[gapIndex] % UniversalConstant._GridXC * (UniversalConstant._CellHalfSizeC * 2));
-                    spawnPos.z = (UniversalConstant._GridYC / 4.0f) - UniversalConstant._CellHalfSizeC;
+                    spawnPos.x = (UniversalConstant.GRID_X / 4.0f * -1.0f) + 0.25f
+                        + (emptyGapArr[gapIndex] % UniversalConstant.GRID_X * (UniversalConstant.HALF_CELL_SIZE * 2));
+                    spawnPos.z = (UniversalConstant.GRID_Y / 4.0f) - UniversalConstant.HALF_CELL_SIZE;
 
                     spawnRot.y = 90f;
 
