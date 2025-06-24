@@ -17,9 +17,7 @@ using UnityEngine;
 
 using Random = UnityEngine.Random;
 using Parking_A.Global;
-using UnityEditor.Search;
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
 
 namespace Parking_A.Gameplay
 {

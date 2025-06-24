@@ -9083,8 +9083,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 475fb149010c42f40b80ab317c6cd5a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slowTime: 0
-  slowTime2: 0
 --- !u!1 &2041845773
 GameObject:
   m_ObjectHideFlags: 0
@@ -9714,6 +9712,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mainGameConfig: {fileID: 11400000, guid: 2c7ea7c079c8e134bb490530e88f02c5, type: 2}
+  slowTime: 0
+  slowTime2: 1
 --- !u!1001 &2141187623
 PrefabInstance:
   m_ObjectHideFlags: 0

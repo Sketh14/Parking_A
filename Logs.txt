@@ -884,23 +884,41 @@ CAR PARKING
 - Scripts
     [=] VehicleSpawner
         {+} Integrating Vehicle Adjacent Check to VehicleSpawns
+
 --------------------------------------------------------------------------------------------------------------
-- [DO] [IMP] Add Bounds Check to Adjacent Vehicles Check
+                                                    23 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Project
+    [=] Adding Ads Package
+- Scripts
+    [=] UnityAdsHelper
+        {+} Control Ads through here
+        {+} Adding AdType / AdStatus to keep track of Ads
+        {+} Keeping Ids in ADIDS array
+        {+} Ads initialization / loading / showing logic
+
+
+--------------------------------------------------------------------------------------------------------------
+- [DO] Someway combine adjacent and boundary check
+    [=] This will help improve the spawn count of vehicles
+    [=] Right now, the vehicles which are adjacent are lost even with a valid boundary
+- [DO] [IMP] [DONE] Add Bounds Check to Adjacent Vehicles Check
 - [DO] Reduce MoveVehicle() in VehicleController
     [=] Move the common parts together
 - [FIX] [FIXED] When ONBOARDING_ROAD, Vehicle can get stuck
     [=] Raycast detects oncoming vehicle and current vehicle gets stuck in the middle of ONBOARDING_ROAD,
         despite having enough space to Onboard
-- [FIX] Vehicle Placment Validation | Random Seed - "20173054"
+- [FIX] [FIXED!] Vehicle Placment Validation | Random Seed - "20173054"
     [=] Opposing vehicles can block each other by 1 block
         <~> Ex: Vehicle[2]I[019]O[1]_0000 | Vehicle[2]I[021]O[0]_0000 | Vehicle[3]I[020]O[1]_0000 block each other by 1 block horizontally
+        <~> [FIXED SOMEWHAT] Position validation is done, but spawning is way less now
 - [FIX] [FIXED] Next Level Generation
     [=] [FIXED] Vehicle_L not instantiated properly
     [=] [FIXED] vehicleInfo is less than VehiclesSpawned
     [=] [ALT] Random in Flasher gets different result if vehicle is enabled at Instantiation
         <~> Enabling after LEVEL_GENERATED
 - [FIX] [FIXED] NPC not following route now | Random Seed - "1316642"
-- [FIX] ONBOARDING_ROAD check fail | Car boards the road and stops | bottom-right | Random Seed - "1316642"
+- [FIX] [FIXED For NOW] ONBOARDING_ROAD check fail | Car boards the road and stops | bottom-right | Random Seed - "1316642"
 - [FIX] [IMP] Boundary Validation is wrong
 - [DO] Maybe follow the routine of setting flag for resetting level
     [=] Request Made, Values Changed, Continue With Gameplay
