@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: NPC_0
   m_EditorClassIdentifier: 
   poolType: 1
-  poolPrefab: {fileID: 9166389849956346350, guid: 57315a3025701fb45a49c21959f76f9b, type: 3}
+  poolPrefab: {fileID: 8908843390221134022, guid: 6794890c7df2bb1459f0382177fd3123, type: 3}

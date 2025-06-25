@@ -935,6 +935,18 @@ CAR PARKING
 - Scene
     [=] Adding/Fixing animations
 
+- Scripts
+    [=] NPCController
+        {+} Adding Animator array to store references
+        {+} Random float array to keep track of random values
+        {+} Playing animations directly instead of waiting for transition
+- Scene
+    [=] Changing NPC Prefab model to Stickman
+    [=] Stickman_AC
+        {+} Removing transitions and playing directly
+    [=] Stickman Prefab
+        {+} Adding a mesh parent to rotate the mesh. Skeleton is controlled by AC
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles

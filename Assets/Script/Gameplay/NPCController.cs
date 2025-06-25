@@ -36,6 +36,12 @@ namespace Parking_A.Gameplay
 
         private NPCInfo[] _npcInfos;
         private System.Text.StringBuilder _npcName;
+
+        private Animator[] _npcAnimators;
+        private float[] _randomFloats;
+        private const byte _TOTALRANDOMCOUNT = 30, _COLLIDEOFFSET = 10;
+        private byte _randomCollideCount, _randomWaitCount;
+
         private CancellationTokenSource _cts;
         private int _hitNPCINdex;
 
@@ -45,6 +51,9 @@ namespace Parking_A.Gameplay
         private const float _idleThreshold = 0.35f;
         private readonly float[] _walkingBoundaries = { 10.25f, 5.25f };                 //Vertical | Horizontal
         private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
+
+        // private const string MOVEMENTSTATUS = "MovementStatus";
+        private readonly string[] _npcAnimatorStates = { "Idle", "Run" };
 
 #if SLOWTIME_DEBUG
         public bool slowTime = false, slowTime2 = false;
@@ -64,7 +73,8 @@ namespace Parking_A.Gameplay
             _npcName = new System.Text.StringBuilder();
 
             _npcSpawner = new NPCSpawner();
-            _npcInfos = new NPCInfo[8];             //Max should never be lesser than set  in Spawner
+            _npcInfos = new NPCInfo[5];             //Max should never be lesser than set  in Spawner
+            _npcAnimators = new Animator[5];             //Max should never be lesser than set  in Spawner
 
             GameManager.Instance.OnGameStatusChange += UpdateNPCs;
             GameManager.Instance.OnEnvironmentSpawned += CallNPCSpawner;
@@ -120,6 +130,7 @@ namespace Parking_A.Gameplay
                     _npcSpawner.NPCsSpawned[i].position.z);
                 _npcInfos[i].InitialRot = _npcSpawner.NPCsSpawned[i].localEulerAngles.y;
                 _npcInfos[i].InitialStatus = (byte)_npcInfos[i].NpcStatus;
+                _npcAnimators[i] = _npcSpawner.NPCsSpawned[i].GetComponent<Animator>();
 
                 // Debug.Log($"{_npcSpawner.NPCsSpawned[i].name} | i: {i} | forward-Z: {Mathf.Round(_npcSpawner.NPCsSpawned[i].forward[2])}"
                 //     + $" | Euler Angles: {_npcSpawner.NPCsSpawned[i].localEulerAngles}"
@@ -135,13 +146,30 @@ namespace Parking_A.Gameplay
             switch (gameStatus)
             {
                 case UniversalConstant.GameStatus.LEVEL_GENERATED:
+                    _randomFloats = new float[_TOTALRANDOMCOUNT];
+                    _randomCollideCount = _COLLIDEOFFSET;
+                    _randomWaitCount = 0;
+                    {
+                        int i;
+                        for (i = 0; i < 10; i++)            //Fill first 10 values from (0.1 - 0.2) for Idle-Wait-Moving
+                            _randomFloats[i] = UnityEngine.Random.Range(0.1f, 0.2f);
+                        for (i = 10; i < _TOTALRANDOMCOUNT; i++)            //Next 20 values will be for going into IDLE                        
+                            _randomFloats[i] = UnityEngine.Random.Range(0f, 0.6f);
+                    }
+
                     for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
+                    {
                         _npcSpawner.NPCsSpawned[i].gameObject.SetActive(true);
+                        _npcAnimators[i].Play(_npcAnimatorStates[1]);
+                    }
 
                     break;
 
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 npcPos, npcRot;
+                    _randomCollideCount = _COLLIDEOFFSET;
+                    _randomWaitCount = 0;
+
                     for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
                     {
                         npcPos = _npcSpawner.NPCsSpawned[i].position;
@@ -159,6 +187,7 @@ namespace Parking_A.Gameplay
 
                         // _npcInfos[i].NpcStatus = 0;
                         _npcInfos[i].NpcStatus = (NPCStatus)_npcInfos[i].InitialStatus;
+                        _npcAnimators[i].Play(_npcAnimatorStates[1]);
                     }
 
                     break;
@@ -330,13 +359,20 @@ namespace Parking_A.Gameplay
 
                     _npcSpawner.NPCsSpawned[npcIndex].localEulerAngles = npcRot;
 
-                    if (UnityEngine.Random.Range(0f, 1f) < _idleThreshold)
+                    if (_randomFloats[_randomCollideCount] < _idleThreshold)
                     {
                         _npcInfos[npcIndex].NpcStatus |= NPCStatus.IDLE;
                         _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.MOVING;
-                        _ = StartMoving(npcIndex);
+                        // _npcAnimators[npcIndex].SetInteger(MOVEMENTSTATUS, 0);
+                        _npcAnimators[npcIndex].Play(_npcAnimatorStates[0]);
+                        _ = StartMovingAfterSomeTime(npcIndex);
                         // Debug.Log($"Idling | npcIndex: {npcIndex} | Status: {_npcInfos[npcIndex].NpcStatus}");
                     }
+                    else
+                        _npcAnimators[npcIndex].Play(_npcAnimatorStates[1]);
+
+                    // Debug.Log($"npcIndex: {npcIndex} | _randomCount: {_randomCount} | _randomFloats: {_randomFloats[_randomCount]}");
+                    _randomCollideCount = (_randomCollideCount + 1) < _TOTALRANDOMCOUNT ? ++_randomCollideCount : _COLLIDEOFFSET;
                 }
 
                 //Rotate the rayDir according to NPC Orientation
@@ -414,13 +450,18 @@ namespace Parking_A.Gameplay
         /// Start Moving after a delay
         /// </summary>
         /// <param name="npcIndex"> Index of NPC</param>
-        private async Task StartMoving(int npcIndex)
+        private async Task StartMovingAfterSomeTime(int npcIndex)
         {
-            const int delayInSec = 2;
-            await Task.Delay(delayInSec * 1000);
+            const int delayInMS = 3700;
+            // await Task.Delay(delayInMS * (int)(_randomFloats[_randomCollideCount % 10] * 10));
+            // _randomCollideCount = (_randomCollideCount + 1) < _TOTALRANDOMCOUNT ? ++_randomCollideCount : (byte)0;
+            await Task.Delay(delayInMS * (int)(_randomFloats[_randomWaitCount] * 10));
+            _randomWaitCount = (_randomWaitCount + 1) < 10 ? ++_randomWaitCount : (byte)0;
+
             if (_cts.IsCancellationRequested) return;
             _npcInfos[npcIndex].NpcStatus &= ~NPCStatus.IDLE;
             _npcInfos[npcIndex].NpcStatus |= NPCStatus.MOVING;
+            _npcAnimators[npcIndex].Play(_npcAnimatorStates[1]);
         }
 
         // Throw NPC in the direction of being hit
