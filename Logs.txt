@@ -932,6 +932,8 @@ CAR PARKING
 - Scene
     [=] Making Stickman prefab | Extracting mat from model
 
+- Scene
+    [=] Adding/Fixing animations
 
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
