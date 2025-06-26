@@ -948,6 +948,15 @@ CAR PARKING
         {+} Adding a mesh parent to rotate the mesh. Skeleton is controlled by AC
 
 --------------------------------------------------------------------------------------------------------------
+                                                    26 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Project
+    [=] Updating NPC prefab, Stickman model and animations
+        {+} Adding new materials
+- Script
+    [=] Updating npc position
+
+--------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles
     [=] Right now, the vehicles which are adjacent are lost even with a valid boundary

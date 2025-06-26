@@ -53,7 +53,7 @@ namespace Parking_A.Gameplay
         private readonly float[] _rotationMatrixBy90CW = { 0, -1, 1, 0 };            //Og: [1,0] | [0,1] / 90CW : [0,-1] | [1, 0] / 90CCW : [0, 1] | [-1, 0]
 
         // private const string MOVEMENTSTATUS = "MovementStatus";
-        private readonly string[] _npcAnimatorStates = { "Idle", "Run" };
+        private readonly string[] _npcAnimatorStates = { "Idle", "Walking" };
 
 #if SLOWTIME_DEBUG
         public bool slowTime = false, slowTime2 = false;

@@ -218,6 +218,7 @@ namespace Parking_A.Gameplay
             {
                 // int gapIndex = 2;            //Use this to test only 1 vehicle | Comment upper for loop
                 spawnPos = spawnRot = Vector3.zero;
+                spawnPos.y = 0.1f;
                 // Should be such that, the NPCs spawn at the four corners mostly
                 // No 2 NPCs at the same corner
 
