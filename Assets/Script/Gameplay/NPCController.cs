@@ -160,7 +160,7 @@ namespace Parking_A.Gameplay
                     for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
                     {
                         _npcSpawner.NPCsSpawned[i].gameObject.SetActive(true);
-                        _npcAnimators[i].gameObject.SetActive(true);
+                        _npcAnimators[i].enabled = true;
                         _npcAnimators[i].Play(_npcAnimatorStates[1]);
                     }
 
@@ -188,6 +188,8 @@ namespace Parking_A.Gameplay
 
                         // _npcInfos[i].NpcStatus = 0;
                         _npcInfos[i].NpcStatus = (NPCStatus)_npcInfos[i].InitialStatus;
+                        _npcAnimators[i].enabled = true;
+                        _npcSpawner.NPCsSpawned[i].gameObject.SetActive(true);
                         _npcAnimators[i].Play(_npcAnimatorStates[1]);
                     }
 
@@ -435,7 +437,6 @@ namespace Parking_A.Gameplay
                     // + $"|x: {1 * (int)colliderHitInfo.transform.forward.x} "
                     // + $"|xPos: {colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x)} ");
 
-                    _npcAnimators[npcIndex].gameObject.SetActive(false);
                     GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
                     // GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
                     GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NPC_HIT, vehicleID);
@@ -505,7 +506,8 @@ namespace Parking_A.Gameplay
                 if (_cts.Token.IsCancellationRequested
                     || (GameManager.Instance.GameStatus & UniversalConstant.GameStatus.RESET_LEVEL) != 0) return;
             }
-
+            _npcAnimators[npcIndex].enabled = false;
+            // _npcSpawner.NPCsSpawned[npcIndex].gameObject.SetActive(false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

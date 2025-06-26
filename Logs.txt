@@ -962,6 +962,15 @@ CAR PARKING
 - Project
     [=] Changing shoe mat
 
+- Script
+    [=] VehicleController
+        {+} Despawn once left parking lot
+        {+} Using VehicleSpawned Count instead of _vehicleInfo as it is not being cleared
+    [=] NPCController
+        {+} Reset Level Fix
+            <~> Disabling/Re-Enabling animator instead of GameObject
+    [=] Flasher
+        {+} Fixing light logic | Did not turn on after level restart/ new-level
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles

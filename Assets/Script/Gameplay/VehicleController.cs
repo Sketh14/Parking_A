@@ -138,7 +138,7 @@ namespace Parking_A.Gameplay
             switch (gameStatus)
             {
                 case UniversalConstant.GameStatus.LEVEL_GENERATED:
-                    for (int i = 0; i < _vehicleInfos.Count; i++)
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
                         _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(true);
 
                     break;
@@ -149,7 +149,7 @@ namespace Parking_A.Gameplay
 
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 vehiclePos, vehicleRot;
-                    for (int i = 0; i < _vehicleInfos.Count; i++)
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
                     {
                         // Vehicle has been changed to Small using power | Revert it back
                         if (_vehicleInfos[i].VehicleType != 255)
@@ -182,10 +182,11 @@ namespace Parking_A.Gameplay
                     break;
 
                 case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
-                    for (int i = 0; i < _vehicleInfos.Count; i++)
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
                     {
+                        //Moved the logic down as the vehicles will get despawn as they exit the parking lot
                         // Vehicle has been changed to Small using power | Revert it back
-                        if (_vehicleInfos[i].VehicleType != 255)
+                        /*if (_vehicleInfos[i].VehicleType != 255)
                         {
                             PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S]
                                 .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
@@ -194,7 +195,7 @@ namespace Parking_A.Gameplay
                         {
                             PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
                                 .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
-                        }
+                        }*/
 
                         //These do not need explicit reset
                         _vehicleInfos[i].OgVehicleType = 0;
@@ -249,7 +250,7 @@ namespace Parking_A.Gameplay
         {
             // Debug.Log($"selectionStatus: {selectionStatus} | vehicleID: {vehicleID}"
             // + $" | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
-            for (int i = 0; i < _vehicleInfos.Count; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 if (vehicleID == _vehicleSpawner.VehiclesSpawned[i].GetInstanceID()
                     // && !vehicleInfos[i].hasInteracted
@@ -350,7 +351,7 @@ namespace Parking_A.Gameplay
         private void MoveVehicle()
         {
             Vector3 vehiclePos;
-            for (int i = 0; i < _vehicleInfos.Count; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 // if (vehicleInfos[i].hasInteracted)
                 //Check if the vehicle has been interacted with and has not reached the road
@@ -511,7 +512,7 @@ namespace Parking_A.Gameplay
         private void FerryAroundThePark()
         {
             Vector3 vehiclePos = Vector3.zero;
-            for (int i = 0; i < _vehicleInfos.Count; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 //Vehicle has reached the Road
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0
@@ -555,9 +556,10 @@ namespace Parking_A.Gameplay
 
                         case (int)RoadMarkers.LEFT_PARKING:
                             vehiclePos.Set(0f, 0f, 1f);
-                            if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] + 4f)
+                            if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] + 8f)
                             {
-                                _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.FERRY_AROUND;
+                                _vehicleInfos[i].VehicleStatus = VehicleStatus.NOT_INTERACTED;
+                                RenameVehicle(i);
 
                                 _vehicleExitedCount++;
                                 // if (_vehicleExitedCount >= 2               //TESTING
@@ -565,7 +567,17 @@ namespace Parking_A.Gameplay
                                     && (GameManager.Instance.GameStatus & UniversalConstant.GameStatus.LEVEL_FAILED) == 0)
                                     GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_PASSED, -1);
 
-                                RenameVehicle(i);
+                                // Vehicle has been changed to Small using power | Revert it back
+                                if (_vehicleInfos[i].VehicleType != 255)
+                                {
+                                    PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S]
+                                        .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                                }
+                                else
+                                {
+                                    PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
+                                        .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                                }
                             }
                             break;
 
@@ -604,7 +616,7 @@ namespace Parking_A.Gameplay
             Vector3 rayStartPos, rayDir, vehiclePos;
             RaycastHit colliderHitInfo;
             // int vehicleStatus;
-            for (int i = 0; i < _vehicleInfos.Count; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) != 0
@@ -715,7 +727,7 @@ namespace Parking_A.Gameplay
             const int rayCountC = 4;
             const int rayLengthMultC = 9;
             int vIndex, rayIndex, hitCount;
-            for (vIndex = 0; vIndex < _vehicleInfos.Count; vIndex++)
+            for (vIndex = 0; vIndex < _vehicleSpawner.VehiclesSpawned.Count; vIndex++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
                 if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
@@ -808,7 +820,7 @@ namespace Parking_A.Gameplay
             const float cellMult1C = 10f, cellMult2C = 4.5f;
             int vIndex, rayIndex, hitCount;
 
-            for (vIndex = 0; vIndex < _vehicleInfos.Count; vIndex++)
+            for (vIndex = 0; vIndex < _vehicleSpawner.VehiclesSpawned.Count; vIndex++)
             {
                 // If the vehicle has collided with oncoming vehicle before escaping the corner, then unset the flag
                 // and check if the corner is free again or not
