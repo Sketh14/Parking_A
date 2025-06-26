@@ -36,9 +36,9 @@ namespace Parking_A.Gameplay
         {
             NOT_INTERACTED = 0, INTERACTED = 1 << 0, ALIGNMENT = 1 << 1,
             REACHED_ROAD = 1 << 2, FERRY_AROUND = 1 << 3, LEFT_PARKING = 1 << 4,
-            ONBOARDING_ROAD = 1 << 5, CORNER_COLLIDED = 1 << 6, CORNER_FREE = 1 << 7,
+            ONBOARDING_ROAD = 1 << 5, ONBOARDING_CHECK_COMPLETED = 1 << 6,
+            CORNER_COLLIDED = 1 << 7, CORNER_FREE = 1 << 8, COLLIDED_ONBOARDING = 1 << 9, HIT_NPC = 1 << 10,
             // COLLIDED_PARKING = 1 << 8,
-            COLLIDED_ONBOARDING = 1 << 8, HIT_NPC = 1 << 9,
         }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
@@ -46,7 +46,7 @@ namespace Parking_A.Gameplay
         private List<VehicleInfo> _vehicleInfos;
         // private int _vehicleSetID;
 
-        private const float _vehicleSpeedMultiplierC = 5f;
+        private const float _vehicleSpeedMultiplierC = 12f;
         private readonly float[] _roadBoundaries = { 11.1f, 6.1f };                 //Vertical | Horizontal
         private readonly float[] _vehicleSizes = { 0.5f, 0.75f, 1.0f };                 //Vertical | Horizontal
 
@@ -724,13 +724,14 @@ namespace Parking_A.Gameplay
             RaycastHit colliderHitInfo;
 
             // System.Text.StringBuilder debugOnBoarding = new System.Text.StringBuilder();
-            const int rayCountC = 4;
+            const int rayCountC = 5;
             const int rayLengthMultC = 9;
             int vIndex, rayIndex, hitCount;
             for (vIndex = 0; vIndex < _vehicleSpawner.VehiclesSpawned.Count; vIndex++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_CHECK_COMPLETED) != 0   // Car is about to reach the road and no vehicles in front detected
+                    || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
                     || ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
                     && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_ROAD) == 0)
                     || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.CORNER_COLLIDED) != 0)
@@ -765,11 +766,12 @@ namespace Parking_A.Gameplay
                 }
 
                 hitCount = 0;
-                // Debug.Log($"Checking Vehicle | index: {i} | name: {_vehicleSpawner.VehiclesSpawned[i].name}"
-                // + $" | interactedDir: {_vehicleInfos[i].InteractedDir}"
-                // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
+                // Debug.Log($"Checking Vehicle | index: {vIndex} | name: {_vehicleSpawner.VehiclesSpawned[vIndex].name}"
+                // + $" | interactedDir: {_vehicleInfos[vIndex].InteractedDir}"
+                // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[vIndex].position}");
+
                 for (rayIndex = rayCountC + (_vehicleInfos[vIndex].OgVehicleType - 1);
-                    rayIndex > -(rayCountC - 1); rayIndex--)
+                    rayIndex > -(rayCountC - 2); rayIndex--)
                 {
                     tempRayPos = rayStartPos;
                     tempRayPos.z += (UniversalConstant.HALF_CELL_SIZE * 2f) * _vehicleInfos[vIndex].InteractedDir.x * rayIndex;
@@ -801,6 +803,7 @@ namespace Parking_A.Gameplay
                     // Debug.Log($"All Clear | vIndex: {rayIndex} | hitCount: {hitCount}");
                     _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
                     _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                    _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.ONBOARDING_CHECK_COMPLETED;
 
                     RenameVehicle(vIndex);
                 }

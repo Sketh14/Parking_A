@@ -971,7 +971,17 @@ CAR PARKING
             <~> Disabling/Re-Enabling animator instead of GameObject
     [=] Flasher
         {+} Fixing light logic | Did not turn on after level restart/ new-level
+
+- Script
+    [=] VehicleController 
+        {+} Adding ONBOARDING_CHECK_COMPLETE enum to indicate that no vehicles are in front of the vehicle
+            <~> Under OnBoarding-Colliosion Check, if the raycasts dont hit anything, then stop raycasting
+        {+} Increase speed multiplier to 12, 5 is too slow.
+        {+} Increasing raycast in response to speed increase
 --------------------------------------------------------------------------------------------------------------
+- [DO] [DONE MAYBE] If 2/3 vehicles try to exit side-by-side, they will stuck
+    [=] Happens more in the middle-left section if the small vehicle is midway of leaving 
+        and 2 medium vehicles are on the sides just behind it
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles
     [=] Right now, the vehicles which are adjacent are lost even with a valid boundary
