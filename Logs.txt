@@ -956,6 +956,12 @@ CAR PARKING
 - Script
     [=] Updating npc position
 
+- Script
+    [=] NPCController
+        {+} Disable animator for NPC when hit
+- Project
+    [=] Changing shoe mat
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] Someway combine adjacent and boundary check
     [=] This will help improve the spawn count of vehicles

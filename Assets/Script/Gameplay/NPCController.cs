@@ -160,6 +160,7 @@ namespace Parking_A.Gameplay
                     for (int i = 0; i < _npcSpawner.NPCsSpawned.Count; i++)
                     {
                         _npcSpawner.NPCsSpawned[i].gameObject.SetActive(true);
+                        _npcAnimators[i].gameObject.SetActive(true);
                         _npcAnimators[i].Play(_npcAnimatorStates[1]);
                     }
 
@@ -434,6 +435,7 @@ namespace Parking_A.Gameplay
                     // + $"|x: {1 * (int)colliderHitInfo.transform.forward.x} "
                     // + $"|xPos: {colliderHitInfo.transform.position.x / Math.Abs(colliderHitInfo.transform.position.x)} ");
 
+                    _npcAnimators[npcIndex].gameObject.SetActive(false);
                     GoFlying(npcIndex, colliderHitInfo.transform.forward * dirMult2);
                     // GameManager.Instance.OnNPCHit?.Invoke(vehicleID);
                     GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NPC_HIT, vehicleID);
