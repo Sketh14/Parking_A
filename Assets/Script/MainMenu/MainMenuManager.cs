@@ -21,10 +21,10 @@ namespace Parking_A.MainMenu
         public int LoadStatsFailCount { get; set; }
         public const int _maxLoadFailCount = 3;
 
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        public System.Action<MainMenuUIStatus> OnUIInteraction;
+
         void Start()
         {
-
             SaveSystem.LoadProgress(LoadPlayerStats);
         }
 

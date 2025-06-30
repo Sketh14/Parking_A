@@ -10,7 +10,7 @@ namespace Parking_A.MainMenu
         {
             SELECT_VEHICLE_S = 0, SELECT_VEHICLE_M, SELECT_VEHICLE_L,
             NEXT_VEHICLE_SKIN, PREV_VEHICLE_SKIN, BUY_EQUIP_VEHICLE,
-            VEHICLE_SKIN_BOUGHT, UPDATE_VEHICLE_INFO
+            VEHICLE_SKIN_BOUGHT, UPDATE_VEHICLE_INFO, CLOSE_SHOP
         }
 
         [SerializeField] private Button _nextVehicleSkinBt, _prevVehicleSkinBt;
@@ -18,17 +18,21 @@ namespace Parking_A.MainMenu
         [SerializeField] private Button _buyOrEquipSkinBt;
         [SerializeField] private TMPro.TMP_Text _skinPriceTxt;
         [SerializeField] private Button[] _selectVehicleBts;
+        [SerializeField] private Button _closeShopBt;
+        [SerializeField] private GameObject _shopPanel;
 
         public Action<InteractionStatus, int> OnVehicleInteraction;             //Pass additional value | index of Bts
 
-        private void Oestroy()
+        private void OnDestroy()
         {
             OnVehicleInteraction -= UpdateUI;
+            MainMenuManager.Instance.OnUIInteraction -= UpdateUIFromMain;
         }
 
         private void Start()
         {
             OnVehicleInteraction += UpdateUI;
+            MainMenuManager.Instance.OnUIInteraction += UpdateUIFromMain;
 
             #region Buttons
             for (int i = 0; i < _selectVehicleBts.Length; i++)
@@ -51,7 +55,28 @@ namespace Parking_A.MainMenu
             //      when the player goes to the next skin.
             if (MainMenuManager.Instance.PlayerStats.EquippedVehicleSkinIndexes[0] == 0)
                 _buyOrEquipSkinBt.GetComponentInChildren<TMPro.TMP_Text>().text = "EQUIPPED";
+
+            _closeShopBt.onClick.AddListener(() =>
+            {
+                _shopPanel.SetActive(false);
+                MainMenuManager.Instance.OnUIInteraction?.Invoke(MainMenuUIStatus.MAIN_MENU);
+            });
             #endregion Buttons
+        }
+
+        private void UpdateUIFromMain(MainMenuUIStatus status)
+        {
+            switch (status)
+            {
+                // case MainMenuUIStatus.MAIN_MENU:
+                //     _shopPanel.SetActive(false);
+                //     break;
+
+                case MainMenuUIStatus.SHOP:
+                    _shopPanel.SetActive(true);
+
+                    break;
+            }
         }
 
         private void UpdateUI(InteractionStatus interactionStatus, int value)

@@ -978,6 +978,21 @@ CAR PARKING
             <~> Under OnBoarding-Colliosion Check, if the raycasts dont hit anything, then stop raycasting
         {+} Increase speed multiplier to 12, 5 is too slow.
         {+} Increasing raycast in response to speed increase
+        
+--------------------------------------------------------------------------------------------------------------
+                                                    30 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] MainMenuController
+        {+} Shop bt and callback
+        {+} Adding enum MainMenuUIStatus
+    [=] MainMenuManager
+        {+} Adding action for Main-Menu UI callbacks
+    [=] ShopController
+        {+} Shop enable/disable logic
+    [=] ShopUIController
+        {+} Shop UI update callback/buttons
+
 --------------------------------------------------------------------------------------------------------------
 - [DO] [DONE MAYBE] If 2/3 vehicles try to exit side-by-side, they will stuck
     [=] Happens more in the middle-left section if the small vehicle is midway of leaving 

@@ -27,19 +27,43 @@ namespace Parking_A.MainMenu
         [SerializeField] private VehicleInfos[] _vehicleInfos;
         private GameObject[] _vehiclePrefabs;
 
+        [SerializeField] private GameObject _shop;
         [SerializeField] private ShopUIController _shopUIController;
         private byte _currVehicleIndex;
+        private bool _shopActive;
 
-        private void Onestroy()
+        private void OnDestroy()
         {
             _shopUIController.OnVehicleInteraction -= UpdateVehicle;
+            MainMenuManager.Instance.OnUIInteraction -= HandleUIChange;
         }
+
 
         private void Start()
         {
+            _shopActive = false;
             InitializeVehicles();
 
             _shopUIController.OnVehicleInteraction += UpdateVehicle;
+            MainMenuManager.Instance.OnUIInteraction += HandleUIChange;
+        }
+
+        private void HandleUIChange(MainMenuUIStatus status)
+        {
+            switch (status)
+            {
+                case MainMenuUIStatus.MAIN_MENU:
+                    _shopActive = false;
+                    _shop.SetActive(false);
+
+                    break;
+
+                case MainMenuUIStatus.SHOP:
+                    _shopActive = true;
+                    _shop.SetActive(true);
+
+                    break;
+            }
         }
 
         private void InitializeVehicles()
@@ -88,6 +112,8 @@ namespace Parking_A.MainMenu
 
         void Update()
         {
+            if (!_shopActive) return;
+
 #if MOBILE_CONTROLS
 #endif
             _rotatingPlatform.Rotate(Vector3.up, _turnSpeed * Time.deltaTime);
