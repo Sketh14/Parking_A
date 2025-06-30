@@ -22,6 +22,11 @@ namespace Parking_A.MainMenu
 
         [SerializeField] private GameObject _mainMenuCanvas;
 
+        private void OnDestroy()
+        {
+            MainMenuManager.Instance.OnUIInteraction -= HandleUIChange;
+        }
+
         void Start()
         {
             //Assigning Buttons
@@ -45,6 +50,19 @@ namespace Parking_A.MainMenu
                 _mainMenuCanvas.SetActive(false);
                 MainMenuManager.Instance.OnUIInteraction?.Invoke(MainMenuUIStatus.SHOP);
             });
+
+            MainMenuManager.Instance.OnUIInteraction += HandleUIChange;
+        }
+
+        private void HandleUIChange(MainMenuUIStatus status)
+        {
+            switch (status)
+            {
+                case MainMenuUIStatus.MAIN_MENU:
+                    _mainMenuCanvas.SetActive(true);
+
+                    break;
+            }
         }
     }
 }

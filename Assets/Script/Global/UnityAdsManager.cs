@@ -16,9 +16,9 @@ using Parking_A.Utility;
 
 
 
-#if UNITY_IOS || UNITY_ANDROID
+// #if UNITY_IOS || UNITY_ANDROID
 using UnityEngine.Advertisements;
-#endif
+// #endif
 
 namespace Parking_A.Global
 {

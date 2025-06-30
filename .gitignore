@@ -14,6 +14,9 @@
 /[Aa]ssets/[Mm]obile[Dd]ependency[Rr]esolver
 # /[Aa]ssets/Models/
 
+# TempFiles
+.utmp/
+
 # Ignore Keystore file
 *.keystore
 

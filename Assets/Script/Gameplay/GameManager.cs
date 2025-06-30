@@ -74,6 +74,7 @@ namespace Parking_A.Gameplay
             PoolManager.Instance.InitializePool();
             _envSpawner = new EnvironmentSpawner();
             InitializeLevel();
+            MainGameConfig.RandomString = "1316642";            //Template level
         }
 
         private void RewardPlayer(UnityAdsManager.AdStatus adStatus)
