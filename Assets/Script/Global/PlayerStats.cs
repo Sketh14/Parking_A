@@ -14,8 +14,8 @@ namespace Parking_A.Global
         {
             Coins = coins;
             Gold = gold;
-            BoughtVehicleSkinIndexes = boughtIndexes ?? new int[] { 1, 1, 1 };              //Default Skin Equipped
-            EquippedVehicleSkinIndexes = equippedIndexes ?? new byte[] { 1, 1, 1 };              //Default Skin Equipped
+            BoughtVehicleSkinIndexes = boughtIndexes ?? new int[] { 0, 0, 0 };              //Default Skin Equipped
+            EquippedVehicleSkinIndexes = equippedIndexes ?? new byte[] { 0, 0, 0 };              //Default Skin Equipped
         }
     }
 }

@@ -4210,7 +4210,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d67e89da961c4e344b70184a6d297f63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userInteracting: 0
 --- !u!1 &910896117
 GameObject:
   m_ObjectHideFlags: 0
@@ -8129,7 +8128,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1724360944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8189,7 +8188,7 @@ MonoBehaviour:
     selectedImage: {fileID: 2800000, guid: 17117a429b08e7e43b0b6c8421de69fe, type: 3}
     reporterScrollerSkin: {fileID: 11400000, guid: 1cc68832d00d3284a9324a4dc05be753, type: 2}
   size: {x: 32, y: 32}
-  maxSize: 20
+  maxSize: 19.8
   numOfCircleToShow: 1
   Initialized: 0
 --- !u!4 &1724360946
