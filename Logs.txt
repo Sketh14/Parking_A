@@ -687,22 +687,374 @@ CAR PARKING
     [=] ShopUIController
         {+} Fixing default buy/equip text
 - MainMenu_Shop Scene update for earlier commit
+
+- Scripts
+    [=] GameManager
+        {+} Save progress logic
+        {+} Adding Action for UISelected event
+        {+} Updating OnSelect to include SelectionStatus of InputManager
+    [=] GameUIManager
+        {+} Powers bt logic | Invoking Action for UISelected
+    [=] InputManager
+        {+} UISelected callback logic
+            <~> Setting _selectionStatus accordingly with powers
+        {+} SelectionStatus enum | Replacing _selectionStatus
+    [=] VehicleController
+        {+} Updating OnSelect callback logic
+            <~> Powers logic
+- Scene
+    [=] MainGameplaySc_1
+        {+} Adding power buttons
+
+- Scripts
+    [=] VehicleController
+        {+} Reset logic for vehicles when powers are used
+            <~> Changing vehicle to previous type if power is used to change the vehicle type
+        {+} Adding VehicleType for containing changed VehicleType to VehicleInfo
+        {+} Name change for spawned vehicle with power
+        {+} Rename logic fix | Working with 4 digits now
+        {+} Disallow small vehicle selection for Shrink power
+    [=] VehicleSpawner
+        {+} Name update
+    [=] InputManager
+        {+} Reset selection if small vehicle selected for shrink power
+
+- Scripts
+    [=] GameUIManager
+        {+} Adding enums to UISelected
+        {+} Adding PowerPanel buttons | Connecting callbacks to these
+        {+} Toggle Panels logic
+        {+} Adding disclaimer text | power prices | delay clear disclaimer
+        {+} Price check for powers 
+        {+} Disable Power-Panel opening if power selected | Enable after use
+        {+} Only Saveprogress if power is used
+    [=] GameManager
+        {+} Adding Power-Prices
+    [=] InputManager
+        {+} Invoking callback for power-used
+        {+} Saving player stats only when power is used
+- Scene
+    [=] MainGameplaySc_1
+        {+} Adding Power Panel UI
+        
 --------------------------------------------------------------------------------------------------------------
+                                                    18 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] InputManager
+        {+} FIx POWER_USED flag set logic
+
+- Scripts
+    [=] PoolManager
+        {+} Adding flag to check Pool-status
+        {+} Separating Pool Initialization
+    [=] GameManager
+        {+} Calling for Pool Initialization 
+        {+} Adding VehicleInfo SOs
+    [=] VehicleInfoScriptableObject
+        {+} Separate SO for vehicles
+        {+} To use for both shop and gameplay
+    [=] ShopController
+        {+} Adding VehicleInfoSO here
+    [=] PlayerStats
+        {+} Changing EquippedVehicleSkinIndexes to byte and not using as flags
+- Project
+    [=] Restructure Data Folder
+    [=] Add VehicleInfo-SO's
+
+--------------------------------------------------------------------------------------------------------------
+                                                    19 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Script
+    [=] PoolManager
+        {+} Completing skins assigning
+
+- Scripts
+    [=] NPCController
+        {+} Fixing NPC getting thrown in the wrong direction if the vehicle's orientation is flipped and forward is opposite
+        {+} Checking vehicle forward+position to determine hit-direction
+
+- Scene
+    [=] Level Win UI
+-  Scripts
+    [=] GameUIManager
+        {+} Level result logic
+            <~> Passed or Failed level
+    [=] UniversalConstant
+        {+} Adding LEVEL_PASSED to GameStatus
+
+- Scripts
+    [=] UniversalConstant
+        {+} Adding enums for Next-Level generation
+    [=] VehicleController
+        {+} Next level generation
+            <~> Despawning vehicles
+    [=] GameManager
+        {+} Replacing OnHit action with OnGameStatusChange | Adding int to value passed
+        {+} Despawning Environment
+    [=] EnvironmentSpawner
+        {+} Using a list to store boundaryObjects | For despawning also
+
+--------------------------------------------------------------------------------------------------------------
+                                                    20 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] GameManager / VehicleController
+        {+} Resetting flags
+    [=] NPCController
+        {+} Resetting flags
+        {+} NExt level logic
+    [=] UniversalConstant
+        {+} Fixing enum values for GameStatus
+
+- Scripts
+    [=] GameManager
+        {+} Setting flags
+    [=] VehicleController
+        {+} Keeping vehicle count and invoking LEVEL_PASSED
+    [=] VehicleSpawner / EnvironmentSpawner / NPCController
+        {+} CancellationTokenSource checks
+- Scripts | FIXES
+    [=] GameUIManager
+        {+} Not Invoking NEXT_LEVEL_REQUESTED directly
+            <~> Not doing this, causes every update to run during the reset call casuing error
+    [=] VehicleController
+        {+} Checking VehicleType for despawn instead of just using VehicleType
+        {+} Changing vehicleInfo to List for new-level
+    [=] NPCController
+        {+} Setting to IDLE/NPC_HIT for reset
+        {+} Changing npcInfo to List for new-level
+
+- Scripts
+    [=] Spawning things one after another, instead of all at once with async
+    [=] NPCController
+        {+} Waiting for vehicles to spawn before calling NPCSpawner
+    [=] PoolManager
+        {+} Not activating vehicles | Replicating results
+    [=] NPCController / VehicleController
+        {+} Activating gameObjects after LEVEL_GENERATED is set
+    [=] InputManager
+        {+} Refactoring
+
+- Scripts
+    [=] Commenting some debug statements 
+    [=] NPCController
+        {+} Fixing NPC Not turning correctly | Removing reset flag
+        {+} Broke during Next-Level-Generation logic update
+
+- Scripts
+    [=] Fixing Vehicle not stopping when NPC_HIT
+    [=] NPCController
+        {+} Send NPC_HIT instead of LEVEL_FAILED
+    [=] GameManager
+        {+} Invoke LEVEL_FAILED here from NPC_HIT
+    [=] VehicleController
+        {+} ONBOARDING_ROAD check if Vehicle is about to get to the middle of the road
+        {+} Increasing raycount for ONBOARDING_ROAD collision detection
+
+--------------------------------------------------------------------------------------------------------------
+                                                    21 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Splitting SpawnVehicles() into seprate internal functions
+
+- Scripts
+    [=] VehicleSpawner
+        {+} Adding Vehicle-Indexes to gridMap along with Vehicle_Type
+            <~> Needed during spawning to check if a cluster of cells belong to same vehicle
+        {+} Adjacent Vehicles check for HOrizontal
+
+--------------------------------------------------------------------------------------------------------------
+                                                    22 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Adjacent Vehicles check for Vertical
+        {+} Fixing Horizontal Adjacent Check
+        {+} Adding a indexOffset parameter to simplify code
+
+--------------------------------------------------------------------------------------------------------------
+                                                    23 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] VehicleSpawner
+        {+} Fixing VehicleSpawner Adjacent Check | Adding Bounds Check
+
+- Scripts
+    [=] VehicleSpawner
+        {+} Integrating Vehicle Adjacent Check to VehicleSpawns
+
+--------------------------------------------------------------------------------------------------------------
+                                                    24 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Project
+    [=] Adding Ads Package
+- Scripts
+    [=] UnityAdsManager
+        {+} Control Ads through here
+        {+} Adding AdType / AdStatus to keep track of Ads
+        {+} Keeping Ids in ADIDS array
+        {+} Ads initialization / loading / showing logic
+
+- Scripts
+    [=] UnityAdsManager
+        {+} Making _currentAdStatus public
+        {+} Fixing/Adding values enums
+        {+} Resetting flags logic
+        {+} Invoking AdStatusChange event logic
+    [=] GameUIManager
+        {+} Adding callbacks from UnityAdsManager and for watchBt
+    [=] GameManager
+        {+} Adding callback to AdsStatusChange
+            <~> Increasing Gold for Ads completed and saving
+    [=] UniversalConstant
+        {+} Renaming constants
+        {+} Adding COIN_RECEIVED const for coins given to player after watching an Ad
+- Scene
+    [=] Adding AdsManager to scene
+
+- Script
+    [=] ToastUtility
+        {+} Utility file for displaying toast messages
+- Scene
+    [=] Making a simple Toast-Prefab
+
+- Script
+    [=] ToastUtility
+        {+} Simultaneous calls handling
+
+--------------------------------------------------------------------------------------------------------------
+                                                    25 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Project
+    [=] Adding Stickman model
+- Scene
+    [=] Making Stickman prefab | Extracting mat from model
+
+- Scene
+    [=] Adding/Fixing animations
+
+- Scripts
+    [=] NPCController
+        {+} Adding Animator array to store references
+        {+} Random float array to keep track of random values
+        {+} Playing animations directly instead of waiting for transition
+- Scene
+    [=] Changing NPC Prefab model to Stickman
+    [=] Stickman_AC
+        {+} Removing transitions and playing directly
+    [=] Stickman Prefab
+        {+} Adding a mesh parent to rotate the mesh. Skeleton is controlled by AC
+
+--------------------------------------------------------------------------------------------------------------
+                                                    26 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Project
+    [=] Updating NPC prefab, Stickman model and animations
+        {+} Adding new materials
+- Script
+    [=] Updating npc position
+
+- Script
+    [=] NPCController
+        {+} Disable animator for NPC when hit
+- Project
+    [=] Changing shoe mat
+
+- Script
+    [=] VehicleController
+        {+} Despawn once left parking lot
+        {+} Using VehicleSpawned Count instead of _vehicleInfo as it is not being cleared
+    [=] NPCController
+        {+} Reset Level Fix
+            <~> Disabling/Re-Enabling animator instead of GameObject
+    [=] Flasher
+        {+} Fixing light logic | Did not turn on after level restart/ new-level
+
+- Script
+    [=] VehicleController 
+        {+} Adding ONBOARDING_CHECK_COMPLETE enum to indicate that no vehicles are in front of the vehicle
+            <~> Under OnBoarding-Colliosion Check, if the raycasts dont hit anything, then stop raycasting
+        {+} Increase speed multiplier to 12, 5 is too slow.
+        {+} Increasing raycast in response to speed increase
+        
+--------------------------------------------------------------------------------------------------------------
+                                                    30 JUNE 2025
+--------------------------------------------------------------------------------------------------------------
+- Scripts
+    [=] MainMenuController
+        {+} Shop bt and callback
+        {+} Adding enum MainMenuUIStatus
+    [=] MainMenuManager
+        {+} Adding action for Main-Menu UI callbacks
+    [=] ShopController
+        {+} Shop enable/disable logic
+    [=] ShopUIController
+        {+} Shop UI update callback/buttons
+
+- Scripts
+    [=] InputManager
+        {+} Fixing Mobile controls
+    [=] MainMenuController
+        {+} MainMenuCanvas enable/disable
+- Scene
+    [=] Adding reporter for debug
+- Project
+    [=] Adding simulater devices
+--------------------------------------------------------------------------------------------------------------
+- [DO] [DONE MAYBE] If 2/3 vehicles try to exit side-by-side, they will stuck
+    [=] Happens more in the middle-left section if the small vehicle is midway of leaving 
+        and 2 medium vehicles are on the sides just behind it
+- [DO] Someway combine adjacent and boundary check
+    [=] This will help improve the spawn count of vehicles
+    [=] Right now, the vehicles which are adjacent are lost even with a valid boundary
+- [DO] [IMP] [DONE] Add Bounds Check to Adjacent Vehicles Check
+- [DO] Reduce MoveVehicle() in VehicleController
+    [=] Move the common parts together
+- [FIX] [FIXED] When ONBOARDING_ROAD, Vehicle can get stuck
+    [=] Raycast detects oncoming vehicle and current vehicle gets stuck in the middle of ONBOARDING_ROAD,
+        despite having enough space to Onboard
+- [FIX] [FIXED!] Vehicle Placment Validation | Random Seed - "20173054"
+    [=] Opposing vehicles can block each other by 1 block
+        <~> Ex: Vehicle[2]I[019]O[1]_0000 | Vehicle[2]I[021]O[0]_0000 | Vehicle[3]I[020]O[1]_0000 block each other by 1 block horizontally
+        <~> [FIXED SOMEWHAT] Position validation is done, but spawning is way less now
+- [FIX] [FIXED] Next Level Generation
+    [=] [FIXED] Vehicle_L not instantiated properly
+    [=] [FIXED] vehicleInfo is less than VehiclesSpawned
+    [=] [ALT] Random in Flasher gets different result if vehicle is enabled at Instantiation
+        <~> Enabling after LEVEL_GENERATED
+- [FIX] [FIXED] NPC not following route now | Random Seed - "1316642"
+- [FIX] [FIXED For NOW] ONBOARDING_ROAD check fail | Car boards the road and stops | bottom-right | Random Seed - "1316642"
+- [FIX] [IMP] Boundary Validation is wrong
+- [DO] Maybe follow the routine of setting flag for resetting level
+    [=] Request Made, Values Changed, Continue With Gameplay
+- [FIX] [FIXED] Show correct mat for vehicle for skin equipped
+- [DONE] Assign skins to vehicles in main gameplay when equipped
+- [CHANGE] Change Boundary Prefab Colliders
+    [=] (1, 0.5, 0.45) - Collider | (1.58,1.58,1.35) - Scale of Mesh
+- [DONE] Shrink Power should not work for Small Vehicles
+- [DONE] Update RESET logic according to powers
+- [FIX] [IMP] [FIXED] NPC still take hit from parked vehicles when the vehicle has hit the dumpster and at the sides
 - [DO] Allow player to rotate the vehicle in shop | Rotate by itself when Idle
-- [DO] [IMP] Link Vehicle info to player stats
+- [DONE FOR NOW] [IMP] Link Vehicle info to player stats
     [=] Keep track of the skin of vehicles
 - [DONE] Tumble NPC when hit and goes flying
 - [FIXED] [IMP] NPCSpawner | Take corners continously
 - [DONE] Make scriptable for vehicles
-- [DO] In-game currency
-    [=] Powers to utilize in-game currency
-    [=] Shrink vehicle to different size vehicle
-    [=] Remove vehicle
-- [DO] Shop for skins
+- [DONE] In-game currency
+    [=] [DONE] Powers to utilize in-game currency
+    [=] [DONE] Shrink vehicle to different size vehicle
+        <~> Replacing Vehicle with a small vehicle
+    [=] [DONE] Remove vehicle
+- [DO] [DONE FOR NOW] Shop for skins
+    [=] Made rotating platform
+    [=] Buy/Equip mechanics
+    [=] Sacing progress to PlayerStats
 - [DO] WHeel maybe if possible 
 - [DO] [MAYBE IMP] Asss weightage to boundary spawner
     [=] Consistent empty gaps or at least feel like consistent
-- [FIX] Increase corner raycasts
+- [FIX [DONE]] Increase corner raycasts
     [=] When a vehicle is just behind, then the raycast will not detect a vehicle
 - [FIXED] [IMP] If the corner raycasts flag is set and the vehicle has passed the ONBOARDING_ROAD collision check also,
     then, if the 2nd vehicle is coming, it will collide with the current vehicle, as the current vehicle will not further
@@ -712,29 +1064,29 @@ CAR PARKING
     vehile wil collide with the 2nd vehicle and get stuck
     [=] Increasing raycast to down?
     [=] Bottom-Left needs to have raycast flipped
-- [FIXED] [IMP] On Corner checks, not all raycasts work
+- [FIXED] [IMP] [DONE] On Corner checks, not all raycasts work
     [=] Fixed, checking hitCount after the loop
-- [DO] [IMP] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
+- [DO] [IMP] [DONE] When ONBOARDING_ROAD, it would be possible to keep the raycast at the corner of the roads, as we only need
     to check for the oncoming vehicles, the raycasts for collision checks do not need to move with the vehicle
         {+} This will also somewhat fix the vehicle still moving, even when there is another oncoming vehicle at turn
-- [DO] [FIX] ONBOARDING_ROAD collisions check
+- [DO] [FIX] [DONE] ONBOARDING_ROAD collisions check
     [=] If the vehicle is at the corners ans another is approaching from the road, the current vehicle will not be 
         able to detect it with raycast
         {+} Might need to sphere check for edge cases
         {+} Can also keep indexes of moving vehicles and check if any vehicle is besides the current one
-- [DO] [FIX] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
+- [DO] [FIX] [DONE] When ONBOARDING_ROAD, the vehicle moves even when getting a tiny gap
     [=] There is a delay between onboaridng the road and getting no collisions
         {+} Within the delay, another passing vehicle can come and collide with the current vehicle
         {+} But it is too late, and the vehicle is already onboarding the road
-- [Do] [IMP] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
+- [Do] [IMP] [DONE] Might need another heck while pulling onto the road, to check whether there are any cars just about to pass
     [=] Sometimes the collision check does not work for vehicles just about to cross but 
         the vehicle has crossed the On-Road threshold
     [=] Take some offset from the road boundaries and if crossed then use WaitForVehicle collision check to check 
         for passing vehicles
     [=] Use different layermask and enable the check as soon as it touches the last cell
-- [Do] [IMP] Fill the vehicle grid with bounary values and check collisions while placement
-- [DO] [IMP] Boundary Checks
-- [DO] [IMP] Collision Checks
+- [Do] [IMP] [DONE] Fill the vehicle grid with bounary values and check collisions while placement
+- [DO] [IMP] [DONE] Boundary Checks
+- [DO] [IMP] [DONE] Collision Checks
     [=] When vehicle is moving
         {+} Check if collided wth another vehicle  [DONE FOR NOW]
         {+} Check if there is another vehicle on the road, before entering the road
@@ -753,7 +1105,7 @@ CAR PARKING
     [=] For Large Vehicle | Center will always in interval of 0.5 starting from the (-1 | 1)
     [=] Since every Vehicle has the same width and only the length differs
         {+} Need to only change the length value, breadth value can remain the same
-- [DO] Vehicle Collision Detection
+- [DO] [DONE] Vehicle Collision Detection
     [=] Make sectors and add vehicles, for less load [DONE FOR NOW]
     [=] [IMP] Detect collisions while getting on road
 - [DO] [DONE FOR NOW] Pooling System 
@@ -797,3 +1149,23 @@ REVERSE CHECK
 SPAWN_CHECK
 1316619 | 1316642 | 1316717 | 1316735 | 13161116 | 13161124 | 13161142 | 13161148 | 13161154 | 1316121
 Problem: 1316642
+
+
+Win32Exception: ApplicationName='E:\Documents\Prjt\Unity PRjct\Avinash_Sergei\HyperCasuals\Parking_A\Temp\PlayServicesResolverGradle\gradlew.bat', CommandLine='--no-daemon -b "E:\Documents\Prjt\Unity PRjct\Avinash_Sergei\HyperCasuals\Parking_A\Temp\PlayServicesResolverGradle\PlayServicesResolver.scripts.download_artifacts.gradle" "-PANDROID_HOME=E:/Documents/SftWARE/Unity Editor/6000.0.48f1/Editor/Data/PlaybackEngines/AndroidPlayer\SDK" "-PTARGET_DIR=E:\Documents\Prjt\Unity PRjct\Avinash_Sergei\HyperCasuals\Parking_A\Assets\Plugins\Android" "-PMAVEN_REPOS=https://maven.google.com/" "-PPACKAGES_TO_COPY=com.unity3d.ads:unity-ads:[4.12.0,4.13[" "-PUSE_JETIFIER=1" "-PDATA_BINDING_VERSION=8.7.2"', CurrentDirectory='E:\Documents\Prjt\Unity PRjct\Avinash_Sergei\HyperCasuals\Parking_A\Temp\PlayServicesResolverGradle', Native error= The system cannot find the file specified.
+  at System.Diagnostics.Process.StartWithCreateProcess (System.Diagnostics.ProcessStartInfo startInfo) [0x002f9] in <ce414afeeb0f4550b5da58efd5c2db86>:0 
+  at System.Diagnostics.Process.Start () [0x0003a] in <ce414afeeb0f4550b5da58efd5c2db86>:0 
+  at (wrapper remoting-invoke-with-check) System.Diagnostics.Process.Start()
+  at GooglePlayServices.CommandLine.RunViaShell (System.String toolPath, System.String arguments, System.String workingDirectory, System.Collections.Generic.Dictionary`2[TKey,TValue] envVars, GooglePlayServices.CommandLine+IOHandler ioHandler, System.Boolean useShellExecution, System.Boolean stdoutRedirectionInShellMode) [0x002e8] in <6107d0e161ea44f5b1a06a3cb63d4bc0>:0 
+  at GooglePlayServices.CommandLine.Run (System.String toolPath, System.String arguments, System.String workingDirectory, System.Collections.Generic.Dictionary`2[TKey,TValue] envVars, GooglePlayServices.CommandLine+IOHandler ioHandler) [0x00000] in <6107d0e161ea44f5b1a06a3cb63d4bc0>:0 
+  at GooglePlayServices.CommandLine+<RunAsync>c__AnonStorey0.<>m__1 () [0x0000d] in <6107d0e161ea44f5b1a06a3cb63d4bc0>:0 
+  at System.Threading.ThreadHelper.ThreadStart_Context (System.Object state) [0x00014] in <314938d17f3848e8ac683e11b27f62ee>:0 
+  at System.Threading.ExecutionContext.RunInternal (System.Threading.ExecutionContext executionContext, System.Threading.ContextCallback callback, System.Object state, System.Boolean preserveSyncCtx) [0x00071] in <314938d17f3848e8ac683e11b27f62ee>:0 
+  at System.Threading.ExecutionContext.Run (System.Threading.ExecutionContext executionContext, System.Threading.ContextCallback callback, System.Object state, System.Boolean preserveSyncCtx) [0x00000] in <314938d17f3848e8ac683e11b27f62ee>:0 
+  at System.Threading.ExecutionContext.Run (System.Threading.ExecutionContext executionContext, System.Threading.ContextCallback callback, System.Object state) [0x0002b] in <314938d17f3848e8ac683e11b27f62ee>:0 
+  at System.Threading.ThreadHelper.ThreadStart () [0x00008] in <314938d17f3848e8ac683e11b27f62ee>:0 
+UnityEngine.DebugLogHandler:Internal_LogException_Injected(Exception, IntPtr)
+UnityEngine.DebugLogHandler:Internal_LogException(Exception, Object)
+UnityEngine.DebugLogHandler:LogException(Exception, Object)
+UnityEngine.Logger:LogException(Exception, Object)
+UnityEngine.Debug:LogException(Exception)
+UnityEngine.<>c:<RegisterUECatcher>b__0_0(Object, UnhandledExceptionEventArgs)

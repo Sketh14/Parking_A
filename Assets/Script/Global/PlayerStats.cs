@@ -6,14 +6,16 @@ namespace Parking_A.Global
         public int Coins;
         public int Gold;
         public int[] BoughtVehicleSkinIndexes;            //Only 32 skins for each vehicle | Using as flags to check if the skin is bought
-        public int[] EquippedVehicleSkinIndexes;            //Using as flags to check if the skin is equipped
+        //  This will always be unique as the vehicle can only have 1 skin equipped, so not necessary for flags
+        //  [OLD] Using as flags to check if the skin is equipped
+        public byte[] EquippedVehicleSkinIndexes;
 
-        public PlayerStats(int coins = 0, int gold = 0, int[] boughtIndexes = null, int[] equippedIndexes = null)
+        public PlayerStats(int coins = 0, int gold = 0, int[] boughtIndexes = null, byte[] equippedIndexes = null)
         {
             Coins = coins;
             Gold = gold;
-            BoughtVehicleSkinIndexes = boughtIndexes ?? new int[] { 1, 1, 1 };              //Default Skin Equipped
-            EquippedVehicleSkinIndexes = equippedIndexes ?? new int[] { 1, 1, 1 };              //Default Skin Equipped
+            BoughtVehicleSkinIndexes = boughtIndexes ?? new int[] { 0, 0, 0 };              //Default Skin Equipped
+            EquippedVehicleSkinIndexes = equippedIndexes ?? new byte[] { 0, 0, 0 };              //Default Skin Equipped
         }
     }
 }

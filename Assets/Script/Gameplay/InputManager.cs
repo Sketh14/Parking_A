@@ -1,4 +1,4 @@
-// #define MOBILE_CONTROLS
+#define MOBILE_CONTROLS
 // #define DEBUGGING_TOUCH
 
 using UnityEngine;
@@ -13,8 +13,14 @@ namespace Parking_A.Gameplay
 {
     public class InputManager : MonoBehaviour
     {
+        /// <summary> POWER1: Shrink Vehicle | POWER2: Remove Vehicle </summary>
+        public enum SelectionStatus
+        {
+            NOT_SELECTED = 0, SELECTED = 1 << 0, CHECK_AGAIN = 1 << 1, POWER1_ACTIVE = 1 << 2, POWER2_ACTIVE = 1 << 3
+        }
+
         //Keeping track of mouse/touch status
-        private byte _selectionStatus;
+        private SelectionStatus _selectionStatus;
 
         private int _hitTransformID = 0;
 
@@ -24,14 +30,25 @@ namespace Parking_A.Gameplay
         // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
 
         private const int _vehicleLayerMaskC = (1 << 6);
-        private void Start()
+
+        private void OnDestroy()
         {
-            UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
+            GameManager.Instance.OnUISelected -= HandleUIAction;
         }
 
-        Vector2 interactPos = Vector2.zero;
-#if DEBUGGING_TOUCH
+        private void Start()
+        {
+            GameManager.Instance.OnUISelected += HandleUIAction;
+
+#if !MOBILE_CONTROLS
+            UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
+#endif
+        }
+
+        Vector2 _interactPos = Vector2.zero;
         Vector2 slideDir = Vector2.zero;
+
+#if DEBUGGING_TOUCH
         Vector3 hitPos = Vector2.zero;
         bool drawRay = false;
 #endif
@@ -54,28 +71,54 @@ namespace Parking_A.Gameplay
 
                 Debug.DrawRay(hitPos, drawDir, Color.cyan);
             }
-#else
-            Vector2 slideDir = Vector2.zero;
+// #else
+//             Vector2 slideDir = Vector2.zero;
 #endif
+
 
 #if !MOBILE_CONTROLS
             userInteracting = Mouse.current.leftButton.isPressed;
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
                  || !userInteracting)
             {
-                if (_selectionStatus == 1)
+                if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
                 {
-                    slideDir = (Mouse.current.position.value - interactPos).normalized;
+                    // slideDir = (Mouse.current.position.value - _interactPos).normalized;
+
+                    slideDir = Mouse.current.position.value;
+                    slideDir = (slideDir - _interactPos).normalized;
                     slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
                     slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
 
-                    GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
+                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
+                        || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
+                        _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
 
+                    GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
+
+                    // Check if user has not selected the small vehicle for Shrink power
+                    if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
+                    {
+                        // Remove this if any other way found
+                        if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
+                        {
+                            GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
+                            GameManager.Instance.SavePlayerStats();
+                        }
+
+                        _selectionStatus = SelectionStatus.NOT_SELECTED;
+                    }
+                    else
+                        _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
+
+                    // Debug.Log($"Resetting SelectionStatus | {_selectionStatus}");
 #if DEBUGGING_TOUCH
                     drawRay = true;
 #endif
                 }
-                _selectionStatus = 0;
+
+                _selectionStatus |= SelectionStatus.NOT_SELECTED;
+                _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
 #else
@@ -83,29 +126,61 @@ namespace Parking_A.Gameplay
             if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
                 || !userInteracting)
             {
-                if(_selectionStatus == 1){
-                slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;
-                GameManager.Instance.OnSelect?.Invoke(_hitTransformID, slideDir);
+                if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
+                {
+                    // slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;         //Count is already 0
+                    slideDir = (slideDir - _interactPos).normalized;
+                    slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
+                    slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
+
+                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
+                        || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
+                        _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
+
+                    GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
+
+                    // Check if user has not selected the small vehicle for Shrink power
+                    if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
+                    {
+                        // Remove this if any other way found
+                        if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
+                        {
+                            GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
+                            GameManager.Instance.SavePlayerStats();
+                        }
+
+                        _selectionStatus = SelectionStatus.NOT_SELECTED;
+                    }
+                    else
+                        _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
+
+#if DEBUGGING_TOUCH
+                    drawRay = true;
+#endif
                 }
-                _selectionStatus = 0;
+
+                _selectionStatus |= SelectionStatus.NOT_SELECTED;
+                _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
+            else if (userInteracting)
+                slideDir = Touch.activeTouches[0].screenPosition;
 #endif
 
-            if (_selectionStatus == 0)
+            if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
             {
 #if !MOBILE_CONTROLS
-                interactPos = Mouse.current.position.value;
+                _interactPos = Mouse.current.position.value;
 #else
-                interactPos = Touch.activeTouches[0].screenPosition;
+                _interactPos = Touch.activeTouches[0].screenPosition;
 #endif
 
-                Ray cameraRay = Camera.main.ScreenPointToRay(interactPos);
+                Ray cameraRay = Camera.main.ScreenPointToRay(_interactPos);
                 RaycastHit rayHit;
 
                 if (Physics.Raycast(cameraRay, out rayHit, 500f, _vehicleLayerMaskC))
                 {
-                    _selectionStatus = 1;
+                    _selectionStatus |= SelectionStatus.SELECTED;
                     _hitTransformID = rayHit.transform.GetInstanceID();
 #if DEBUGGING_TOUCH
                     hitPos = rayHit.point;
@@ -116,6 +191,26 @@ namespace Parking_A.Gameplay
             }
         }
 
+        private void HandleUIAction(GameUIManager.UISelected uISelected, int value)
+        {
+            switch (uISelected)
+            {
+                case GameUIManager.UISelected.POWER_1:
+                    // In case the player has selected a small vehicle | Event is fired again to show that small vehicle is selected
+                    // Set the CHECK_AGAIN flag, so that the Update does not modify anything
+                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0)
+                        _selectionStatus |= SelectionStatus.CHECK_AGAIN;
+
+                    _selectionStatus |= SelectionStatus.POWER1_ACTIVE;
+
+                    // Debug.Log($"Changing SelectionStatus: {_selectionStatus}");
+                    break;
+
+                case GameUIManager.UISelected.POWER_2:
+                    _selectionStatus |= SelectionStatus.POWER2_ACTIVE;
+                    break;
+            }
+        }
 
         private void CheckForTouch()
         {

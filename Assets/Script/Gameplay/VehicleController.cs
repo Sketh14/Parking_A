@@ -1,9 +1,10 @@
 #define COLLISION_DEBUG_DRAW_2
 #define COLLISION_DEBUG_DRAW_1
 #define CORNER_COLLISION_DEBUG_DRAW_1
-// #define DEBUG_SLOW_1
+#define DEBUG_SLOW_1
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Parking_A.Global;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace Parking_A.Gameplay
     public class VehicleController : MonoBehaviour
     {
         [Serializable]
-        internal struct VehicleInfo
+        internal class VehicleInfo
         {
             // public bool hasInteracted;
             /// <summary> Left: [-1, 0] | Right: [1, 0] | Up: [0, 1] | Down: [0, -1] </summary>
@@ -24,7 +25,8 @@ namespace Parking_A.Gameplay
 
             public int MarkerIndex;
             /// <summary> 1: Small | 2: Medium | 3: Long </summary>
-            public int VehicleType;
+            public byte OgVehicleType;
+            public byte VehicleType;            // Vehicle type if power is used to change the vehicle
 
             /// <summary> 0: Interacted or Not | 1: Vertical/Horizontal | 2: Reached Road Or Not | 3: Ferry Around The Road</summary>
             public VehicleStatus VehicleStatus;
@@ -32,26 +34,19 @@ namespace Parking_A.Gameplay
 
         internal enum VehicleStatus
         {
-            NOT_INTERACTED = 0,
-            INTERACTED = 1 << 0,
-            ALIGNMENT = 1 << 1,
-            REACHED_ROAD = 1 << 2,
-            FERRY_AROUND = 1 << 3,
-            LEFT_PARKING = 1 << 4,
-            ONBOARDING_ROAD = 1 << 5,
-            CORNER_COLLIDED = 1 << 6,
-            CORNER_FREE = 1 << 7,
+            NOT_INTERACTED = 0, INTERACTED = 1 << 0, ALIGNMENT = 1 << 1,
+            REACHED_ROAD = 1 << 2, FERRY_AROUND = 1 << 3, LEFT_PARKING = 1 << 4,
+            ONBOARDING_ROAD = 1 << 5, ONBOARDING_CHECK_COMPLETED = 1 << 6,
+            CORNER_COLLIDED = 1 << 7, CORNER_FREE = 1 << 8, COLLIDED_ONBOARDING = 1 << 9, HIT_NPC = 1 << 10,
             // COLLIDED_PARKING = 1 << 8,
-            COLLIDED_ONBOARDING = 1 << 8,
-            HIT_NPC = 1 << 9,
         }
         internal enum RoadMarkers { TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_LEFT, LEFT_PARKING }
 
         // private Transform[] _vehicleTransforms;
-        private VehicleInfo[] _vehicleInfos;
+        private List<VehicleInfo> _vehicleInfos;
         // private int _vehicleSetID;
 
-        private const float _vehicleSpeedMultiplierC = 5f;
+        private const float _vehicleSpeedMultiplierC = 12f;
         private readonly float[] _roadBoundaries = { 11.1f, 6.1f };                 //Vertical | Horizontal
         private readonly float[] _vehicleSizes = { 0.5f, 0.75f, 1.0f };                 //Vertical | Horizontal
 
@@ -62,6 +57,7 @@ namespace Parking_A.Gameplay
         [SerializeField] private GameConfigScriptableObject _mainGameConfig;
 
         private Func<Vector3, Vector3> _roundPosition;
+        private int _vehicleExitedCount;
 
         private const int _collisionCheckLayerMaskC = (1 << 6) | (1 << 7);
         private const int _onBoardingLayerMaskC = 1 << 6;
@@ -72,7 +68,7 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect -= VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned -= CallVehicleSpawner;
-            GameManager.Instance.OnNPCHit -= DisableVehicle;
+            // GameManager.Instance.OnNPCHit -= DisableVehicle;
             GameManager.Instance.OnGameStatusChange -= UpdateVehicles;
         }
 
@@ -80,15 +76,17 @@ namespace Parking_A.Gameplay
         {
             GameManager.Instance.OnSelect += VehicleSelected;
             GameManager.Instance.OnEnvironmentSpawned += CallVehicleSpawner;
-            GameManager.Instance.OnNPCHit += DisableVehicle;
+            // GameManager.Instance.OnNPCHit += DisableVehicle;
             GameManager.Instance.OnGameStatusChange += UpdateVehicles;
 
             _vehicleName = new System.Text.StringBuilder();
             _vehicleSpawner = new VehicleSpawner();
+            _vehicleInfos = new List<VehicleInfo>();
         }
 
         private async void CallVehicleSpawner(byte[] boundaryData)
         {
+            Debug.Log($"Spawning Vehicles");
             try
             {
                 // vehicleSpawner.SpawnVehicles(InitializeVehicleData);
@@ -115,10 +113,14 @@ namespace Parking_A.Gameplay
         private void InitializeVehicleData(int[] vehicleTypes)
         {
             // _vehiclesSpawned = true;
-            _vehicleInfos = new VehicleInfo[_vehicleSpawner.VehiclesSpawned.Count];
-            for (int i = 0; i < _vehicleInfos.Length; i++)
+            // _vehicleInfos = new VehicleInfo[_vehicleSpawner.VehiclesSpawned.Count];
+            for (int i = 0; i < vehicleTypes.Length; i++)
             {
-                _vehicleInfos[i].VehicleType = vehicleTypes[i];
+                if (_vehicleInfos.Count <= i)
+                    _vehicleInfos.Add(new VehicleInfo());
+
+                _vehicleInfos[i].OgVehicleType = (byte)vehicleTypes[i];
+                _vehicleInfos[i].VehicleType = 255;
                 _vehicleInfos[i].InitialPos.Set(_vehicleSpawner.VehiclesSpawned[i].position.x,
                     _vehicleSpawner.VehiclesSpawned[i].position.z);
                 _vehicleInfos[i].InitialRot = _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.y;
@@ -130,15 +132,36 @@ namespace Parking_A.Gameplay
             _vehicleInfos[vehicleID].VehicleStatus |= VehicleStatus.HIT_NPC;
         }
 
-        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus)
+        private void UpdateVehicles(UniversalConstant.GameStatus gameStatus, int value)
         {
             // Debug.Log($"UpdateVehicles | gameStatus: {gameStatus}");
             switch (gameStatus)
             {
+                case UniversalConstant.GameStatus.LEVEL_GENERATED:
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
+                        _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(true);
+
+                    break;
+
+                case UniversalConstant.GameStatus.NPC_HIT:
+                    _vehicleInfos[value].VehicleStatus |= VehicleStatus.HIT_NPC;
+                    break;
+
                 case UniversalConstant.GameStatus.RESET_LEVEL:
                     Vector3 vehiclePos, vehicleRot;
-                    for (int i = 0; i < _vehicleInfos.Length; i++)
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
                     {
+                        // Vehicle has been changed to Small using power | Revert it back
+                        if (_vehicleInfos[i].VehicleType != 255)
+                        {
+                            PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+
+                            _vehicleSpawner.VehiclesSpawned[i] =
+                                PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
+                                .Get().transform;
+                        }
+
                         vehiclePos = _vehicleSpawner.VehiclesSpawned[i].position;
                         vehiclePos.x = _vehicleInfos[i].InitialPos.x;
                         vehiclePos.z = _vehicleInfos[i].InitialPos.y;
@@ -152,8 +175,41 @@ namespace Parking_A.Gameplay
                         // _vehicleSpawner.VehiclesSpawned[i].localEulerAngles.Set(0f, _vehicleInfos[i].InitialRot, 0f);
 
                         _vehicleInfos[i].VehicleStatus = 0;
+                        _vehicleInfos[i].VehicleType = 255;
+                        _vehicleInfos[i].InteractedDir = Vector2.zero;
+                        _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(true);
+                    }
+                    break;
+
+                case UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED:
+                    for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
+                    {
+                        //Moved the logic down as the vehicles will get despawn as they exit the parking lot
+                        // Vehicle has been changed to Small using power | Revert it back
+                        /*if (_vehicleInfos[i].VehicleType != 255)
+                        {
+                            PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                        }
+                        else
+                        {
+                            PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                        }*/
+
+                        //These do not need explicit reset
+                        _vehicleInfos[i].OgVehicleType = 0;
+                        _vehicleInfos[i].MarkerIndex = 0;
+                        _vehicleInfos[i].InitialRot = 0;
+
+                        _vehicleInfos[i].VehicleStatus = 0;
+                        _vehicleInfos[i].VehicleType = 255;
                         _vehicleInfos[i].InteractedDir = Vector2.zero;
                     }
+
+                    _vehicleExitedCount = 0;
+                    _vehicleSpawner.ClearVehicles();
+                    GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.VEHICLE_SPAWNED, false);
                     break;
             }
         }
@@ -190,9 +246,10 @@ namespace Parking_A.Gameplay
             CornerVehicleCollisionCheck();
         }
 
-        private void VehicleSelected(int vehicleID, Vector2 slideDir)
+        private void VehicleSelected(InputManager.SelectionStatus selectionStatus, int vehicleID, Vector2 slideDir)
         {
-            // Debug.Log($"vehicleID: {vehicleID} | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
+            // Debug.Log($"selectionStatus: {selectionStatus} | vehicleID: {vehicleID}"
+            // + $" | slideDir : {slideDir} | Diff = {(Mathf.Abs(slideDir.y) - 0.75f)}");
             for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 if (vehicleID == _vehicleSpawner.VehiclesSpawned[i].GetInstanceID()
@@ -209,6 +266,52 @@ namespace Parking_A.Gameplay
                     // + $" | slideDir: {slideDir.y} | slidedir Rounded: {Mathf.RoundToInt(slideDir.y)}");
                     // + $" | VehicleOrientation: {vehicleOrientationVertical}");
 
+                    switch (selectionStatus)
+                    {
+                        //Do Nothing | Normal Selection
+                        case InputManager.SelectionStatus.SELECTED:
+                            break;
+
+                        //Replace vehicle with a smaller vehicle
+                        case InputManager.SelectionStatus.POWER1_ACTIVE:
+
+                            // Check if the player has selected a Small Vehicle
+                            //  - If small Vehicle is selected, then do not continue | Set the power again
+                            if (_vehicleInfos[i].OgVehicleType == 1)
+                            {
+                                GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_1, -1);
+                                Debug.Log($"Power 1 | Small Vehicle is selected");
+                                return;
+                            }
+
+                            System.Text.StringBuilder vehicleName =
+                                new System.Text.StringBuilder(_vehicleSpawner.VehiclesSpawned[i].name);
+                            PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
+                                .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+
+                            _vehicleSpawner.VehiclesSpawned[i] =
+                                PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S].Get().transform;
+                            vehicleName[8] = '1';
+                            _vehicleSpawner.VehiclesSpawned[i].name = vehicleName.ToString();
+
+                            _vehicleInfos[i].VehicleType = 1;
+                            _vehicleSpawner.VehiclesSpawned[i].position =
+                                new Vector3(_vehicleInfos[i].InitialPos.x, 0.28f, _vehicleInfos[i].InitialPos.y);
+
+                            Vector3 vehicleRot = Vector3.zero;
+                            vehicleRot.y = _vehicleInfos[i].InitialRot;
+                            _vehicleSpawner.VehiclesSpawned[i].localEulerAngles = vehicleRot;
+                            return;
+
+                        //Remove vehicle
+                        case InputManager.SelectionStatus.POWER2_ACTIVE:
+                            _vehicleInfos[i].VehicleStatus |= VehicleStatus.INTERACTED;
+                            _vehicleInfos[i].VehicleStatus |= VehicleStatus.LEFT_PARKING;
+                            _vehicleSpawner.VehiclesSpawned[i].gameObject.SetActive(false);
+                            // PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].VehicleType]
+                            //     .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                            return;
+                    }
 
                     // UP | DOWN
                     if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[i].forward[2]) >= 0.9f
@@ -248,7 +351,7 @@ namespace Parking_A.Gameplay
         private void MoveVehicle()
         {
             Vector3 vehiclePos;
-            for (int i = 0; i < _vehicleInfos.Length; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 // if (vehicleInfos[i].hasInteracted)
                 //Check if the vehicle has been interacted with and has not reached the road
@@ -287,8 +390,16 @@ namespace Parking_A.Gameplay
 
                             RenameVehicle(i);
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] - (UniversalConstant._CellHalfSizeC * 4.5f)
-                            - (UniversalConstant._CellHalfSizeC * _vehicleInfos[i].VehicleType))
+                        // Tip of the vehicle has touched the center of the road | Basically, vehicle has ONBOARDED the road
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] - (UniversalConstant.HALF_CELL_SIZE * 2.2f)
+                            - (UniversalConstant.HALF_CELL_SIZE * (_vehicleInfos[i].OgVehicleType - 1)))
+                        {
+                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
+                            // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
+                        }
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] - (UniversalConstant.HALF_CELL_SIZE * 4.5f)
+                            - (UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].OgVehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -308,13 +419,23 @@ namespace Parking_A.Gameplay
 
                             RenameVehicle(i);
                         }
-                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= (_roadBoundaries[0] * -1f) + (UniversalConstant._CellHalfSizeC * 4.5f)
-                            + (UniversalConstant._CellHalfSizeC * _vehicleInfos[i].VehicleType))
+                        // Tip of the vehicle has touched the center of the road | Basically, vehicle has ONBOARDED the road
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= (_roadBoundaries[0] * -1f) + (UniversalConstant.HALF_CELL_SIZE * 2.2f)
+                            + (UniversalConstant.HALF_CELL_SIZE * (_vehicleInfos[i].OgVehicleType - 1)))
+                        {
+                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
+                            // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
+                        }
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.z <= (_roadBoundaries[0] * -1f) + (UniversalConstant.HALF_CELL_SIZE * 4.5f)
+                            + (UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].OgVehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
                             // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
                         }
+
+                        // S - 10.55 | M - 10.3 | L - 10.05
                     }
                     //For Horizontal Alignment
                     else
@@ -334,10 +455,18 @@ namespace Parking_A.Gameplay
 
                             RenameVehicle(i);
                         }
+                        // Tip of the vehicle has touched the center of the road | Basically, vehicle has ONBOARDED the road
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1] - (UniversalConstant.HALF_CELL_SIZE * 2.2f)
+                            - (UniversalConstant.HALF_CELL_SIZE * (_vehicleInfos[i].OgVehicleType - 1)))
+                        {
+                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
+                            // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
+                        }
                         // Taking 0.1 extra in consideration of the boundary
                         // Road Marker is 2 cells away | Last cell is occupied by boundary | Vehicle size offset
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.x >= _roadBoundaries[1]
-                            - (UniversalConstant._CellHalfSizeC * 4.5f) - (UniversalConstant._CellHalfSizeC * _vehicleInfos[i].VehicleType))
+                            - (UniversalConstant.HALF_CELL_SIZE * 4.5f) - (UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].OgVehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -357,8 +486,16 @@ namespace Parking_A.Gameplay
 
                             RenameVehicle(i);
                         }
+                        // Tip of the vehicle has touched the center of the road | Basically, vehicle has ONBOARDED the road
+                        else if (_vehicleSpawner.VehiclesSpawned[i].position.x <= (_roadBoundaries[1] * -1f) + (UniversalConstant.HALF_CELL_SIZE * 2.2f)
+                            + (UniversalConstant.HALF_CELL_SIZE * (_vehicleInfos[i].OgVehicleType - 1)))
+                        {
+                            _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.ONBOARDING_ROAD;
+                            RenameVehicle(i);
+                            // Debug.Log($"Reaching Road | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
+                        }
                         else if (_vehicleSpawner.VehiclesSpawned[i].position.x <= (_roadBoundaries[1] * -1f)
-                            + (UniversalConstant._CellHalfSizeC * 4.5f) + (UniversalConstant._CellHalfSizeC * _vehicleInfos[i].VehicleType))
+                            + (UniversalConstant.HALF_CELL_SIZE * 4.5f) + (UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].OgVehicleType))
                         {
                             _vehicleInfos[i].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
                             RenameVehicle(i);
@@ -375,7 +512,7 @@ namespace Parking_A.Gameplay
         private void FerryAroundThePark()
         {
             Vector3 vehiclePos = Vector3.zero;
-            for (int i = 0; i < _vehicleInfos.Length; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 //Vehicle has reached the Road
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.REACHED_ROAD) != 0
@@ -419,11 +556,28 @@ namespace Parking_A.Gameplay
 
                         case (int)RoadMarkers.LEFT_PARKING:
                             vehiclePos.Set(0f, 0f, 1f);
-                            if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] + 4f)
+                            if (_vehicleSpawner.VehiclesSpawned[i].position.z >= _roadBoundaries[0] + 8f)
                             {
-                                _vehicleInfos[i].VehicleStatus &= ~VehicleStatus.FERRY_AROUND;
-
+                                _vehicleInfos[i].VehicleStatus = VehicleStatus.NOT_INTERACTED;
                                 RenameVehicle(i);
+
+                                _vehicleExitedCount++;
+                                // if (_vehicleExitedCount >= 2               //TESTING
+                                if (_vehicleExitedCount >= _vehicleSpawner.VehiclesSpawned.Count
+                                    && (GameManager.Instance.GameStatus & UniversalConstant.GameStatus.LEVEL_FAILED) == 0)
+                                    GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.LEVEL_PASSED, -1);
+
+                                // Vehicle has been changed to Small using power | Revert it back
+                                if (_vehicleInfos[i].VehicleType != 255)
+                                {
+                                    PoolManager.Instance.PrefabPool[UniversalConstant.PoolType.VEHICLE_S]
+                                        .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                                }
+                                else
+                                {
+                                    PoolManager.Instance.PrefabPool[(UniversalConstant.PoolType)_vehicleInfos[i].OgVehicleType]
+                                        .Release(_vehicleSpawner.VehiclesSpawned[i].gameObject);
+                                }
                             }
                             break;
 
@@ -462,7 +616,7 @@ namespace Parking_A.Gameplay
             Vector3 rayStartPos, rayDir, vehiclePos;
             RaycastHit colliderHitInfo;
             // int vehicleStatus;
-            for (int i = 0; i < _vehicleInfos.Length; i++)
+            for (int i = 0; i < _vehicleSpawner.VehiclesSpawned.Count; i++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.HIT_NPC) != 0
@@ -478,7 +632,7 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[i].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += UniversalConstant._CellHalfSizeC * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].VehicleType + 1)
+                    rayStartPos.z += UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].InteractedDir.y * (_vehicleInfos[i].OgVehicleType + 1)
                         - (0.1f * _vehicleInfos[i].InteractedDir.y);
                     rayDir.z = _vehicleInfos[i].InteractedDir.y;
 
@@ -487,7 +641,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Vertical | posToChange: {posToChange} | Dir: {_vehicleInfos[i].InteractedDir} "
                         //     + $"| Vehicle-Type: {_vehicleInfos[i].VehicleType}");
                         posToChange.z = posToChange.z + (0.05f * -1f * _vehicleInfos[i].InteractedDir.y)
-                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.y);
+                                                    + (_vehicleSizes[_vehicleInfos[i].OgVehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.y);
                         posToChange.x = _vehicleSpawner.VehiclesSpawned[i].position.x;
                         posToChange.y = _vehicleSpawner.VehiclesSpawned[i].position.y;
                         return posToChange;
@@ -496,7 +650,7 @@ namespace Parking_A.Gameplay
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += UniversalConstant._CellHalfSizeC * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].VehicleType + 1)
+                    rayStartPos.x += UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[i].InteractedDir.x * (_vehicleInfos[i].OgVehicleType + 1)
                         - (0.1f * _vehicleInfos[i].InteractedDir.x);
                     rayDir.x = _vehicleInfos[i].InteractedDir.x;
 
@@ -505,7 +659,7 @@ namespace Parking_A.Gameplay
                         // Debug.Log($"Horizontal | posToChange: {posToChange} | Dir: {_vehicleInfos[i].InteractedDir} "
                         //     + $"| Vehicle-Type: {_vehicleInfos[i].VehicleType}");
                         posToChange.x = posToChange.x + (0.05f * -1f * _vehicleInfos[i].InteractedDir.x)
-                                                    + (_vehicleSizes[_vehicleInfos[i].VehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.x);
+                                                    + (_vehicleSizes[_vehicleInfos[i].OgVehicleType - 1] * -1f * _vehicleInfos[i].InteractedDir.x);
                         posToChange.z = _vehicleSpawner.VehiclesSpawned[i].position.z;
                         posToChange.y = _vehicleSpawner.VehiclesSpawned[i].position.y;
                         return posToChange;
@@ -518,8 +672,8 @@ namespace Parking_A.Gameplay
                 for (int j = 1; j >= -2; j -= 3)
                 {
                     //Using Opposite, as the 2nd component is to be shifted up/down
-                    rayStartPos.x += UniversalConstant._CellHalfSizeC * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
-                    rayStartPos.z += UniversalConstant._CellHalfSizeC * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
+                    rayStartPos.x += UniversalConstant.HALF_CELL_SIZE * Mathf.Abs(_vehicleInfos[i].InteractedDir.y) * j;       //Vertical
+                    rayStartPos.z += UniversalConstant.HALF_CELL_SIZE * Mathf.Abs(_vehicleInfos[i].InteractedDir.x) * j;       //Horizontal
 #if COLLISION_DEBUG_DRAW_1
                     Debug.DrawRay(rayStartPos, rayDir * 0.25f, Color.cyan);
 #endif
@@ -570,13 +724,14 @@ namespace Parking_A.Gameplay
             RaycastHit colliderHitInfo;
 
             // System.Text.StringBuilder debugOnBoarding = new System.Text.StringBuilder();
-            const int rayCountC = 3;
+            const int rayCountC = 5;
             const int rayLengthMultC = 9;
             int vIndex, rayIndex, hitCount;
-            for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
+            for (vIndex = 0; vIndex < _vehicleSpawner.VehiclesSpawned.Count; vIndex++)
             {
                 //Check if the vehicle has been interacted with or have reached the road
-                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
+                if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_CHECK_COMPLETED) != 0   // Car is about to reach the road and no vehicles in front detected
+                    || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.HIT_NPC) != 0
                     || ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.COLLIDED_ONBOARDING) == 0
                     && (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ONBOARDING_ROAD) == 0)
                     || (_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.CORNER_COLLIDED) != 0)
@@ -598,38 +753,39 @@ namespace Parking_A.Gameplay
                 //Vertical Alignment
                 if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
-                    rayStartPos.z += ((UniversalConstant._CellHalfSizeC * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
-                                + (UniversalConstant._CellHalfSizeC * rayLengthMultC)) * _vehicleInfos[vIndex].InteractedDir.y;     //Cells offset
+                    rayStartPos.z += ((UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[vIndex].OgVehicleType) + 0.1f       //+ (0.1f * _vehicleInfos[vIndex].OgVehicleType)       //Vehicle Size + Offset
+                                + (UniversalConstant.HALF_CELL_SIZE * rayLengthMultC)) * _vehicleInfos[vIndex].InteractedDir.y;     //Cells offset
                     rayDir.z = _vehicleInfos[vIndex].InteractedDir.y * -1f;
                 }
                 //Horizontal Alignment
                 else
                 {
-                    rayStartPos.x += ((UniversalConstant._CellHalfSizeC * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
-                                + (UniversalConstant._CellHalfSizeC * rayLengthMultC)) * _vehicleInfos[vIndex].InteractedDir.x;     //Cells Offset
+                    rayStartPos.x += ((UniversalConstant.HALF_CELL_SIZE * _vehicleInfos[vIndex].OgVehicleType) + 0.1f       //+ (0.1f * _vehicleInfos[vIndex].OgVehicleType)      //Vehicle Size + Offset
+                                + (UniversalConstant.HALF_CELL_SIZE * rayLengthMultC)) * _vehicleInfos[vIndex].InteractedDir.x;     //Cells Offset
                     rayDir.x = _vehicleInfos[vIndex].InteractedDir.x * -1f;
                 }
 
                 hitCount = 0;
-                // Debug.Log($"Checking Vehicle | index: {i} | name: {_vehicleSpawner.VehiclesSpawned[i].name}"
-                // + $" | interactedDir: {_vehicleInfos[i].InteractedDir}"
-                // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[i].position}");
-                for (rayIndex = rayCountC + (_vehicleInfos[vIndex].VehicleType - 1);
-                    rayIndex > -rayCountC; rayIndex--)
+                // Debug.Log($"Checking Vehicle | index: {vIndex} | name: {_vehicleSpawner.VehiclesSpawned[vIndex].name}"
+                // + $" | interactedDir: {_vehicleInfos[vIndex].InteractedDir}"
+                // + $" | rayPos: {rayStartPos} | Pos: {_vehicleSpawner.VehiclesSpawned[vIndex].position}");
+
+                for (rayIndex = rayCountC + (_vehicleInfos[vIndex].OgVehicleType - 1);
+                    rayIndex > -(rayCountC - 2); rayIndex--)
                 {
                     tempRayPos = rayStartPos;
-                    tempRayPos.z += (UniversalConstant._CellHalfSizeC * 2f) * _vehicleInfos[vIndex].InteractedDir.x * rayIndex;
-                    tempRayPos.x += (UniversalConstant._CellHalfSizeC * 2f) * Mathf.Abs(_vehicleInfos[vIndex].InteractedDir.y) * rayIndex;
+                    tempRayPos.z += (UniversalConstant.HALF_CELL_SIZE * 2f) * _vehicleInfos[vIndex].InteractedDir.x * rayIndex;
+                    tempRayPos.x += (UniversalConstant.HALF_CELL_SIZE * 2f) * Mathf.Abs(_vehicleInfos[vIndex].InteractedDir.y) * rayIndex;
 
 #if COLLISION_DEBUG_DRAW_2
-                    Debug.DrawRay(tempRayPos, rayDir * UniversalConstant._CellHalfSizeC * (rayLengthMultC - 1), Color.cyan);
+                    Debug.DrawRay(tempRayPos, rayDir * UniversalConstant.HALF_CELL_SIZE * (rayLengthMultC - 1), Color.cyan);
 #endif
                     // Debug.DrawRay(tempRayPos, rayDir * _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), Color.cyan);
 
                     // Raycast straight in front of the vehicle parallel to the vehicle with the length of the vehicle plus offset
                     // if (!Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo, _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), _cCollisionCheckLayerMask))
                     if (Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo,
-                        UniversalConstant._CellHalfSizeC * (rayLengthMultC - 1), _onBoardingLayerMaskC))
+                        UniversalConstant.HALF_CELL_SIZE * (rayLengthMultC - 1), _onBoardingLayerMaskC))
                     {
                         // {+} 2 points needed, 1 to the upper side, forward-side and 1 point with offset to the down-side, back-side
                         //     . So as to check if there is any incoming vehicle or not and if the passing vehicle is gone
@@ -647,6 +803,7 @@ namespace Parking_A.Gameplay
                     // Debug.Log($"All Clear | vIndex: {rayIndex} | hitCount: {hitCount}");
                     _vehicleInfos[vIndex].VehicleStatus &= ~VehicleStatus.COLLIDED_ONBOARDING;
                     _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.ONBOARDING_ROAD;
+                    _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.ONBOARDING_CHECK_COMPLETED;
 
                     RenameVehicle(vIndex);
                 }
@@ -666,7 +823,7 @@ namespace Parking_A.Gameplay
             const float cellMult1C = 10f, cellMult2C = 4.5f;
             int vIndex, rayIndex, hitCount;
 
-            for (vIndex = 0; vIndex < _vehicleInfos.Length; vIndex++)
+            for (vIndex = 0; vIndex < _vehicleSpawner.VehiclesSpawned.Count; vIndex++)
             {
                 // If the vehicle has collided with oncoming vehicle before escaping the corner, then unset the flag
                 // and check if the corner is free again or not
@@ -691,8 +848,8 @@ namespace Parking_A.Gameplay
                 if ((_vehicleInfos[vIndex].VehicleStatus & VehicleStatus.ALIGNMENT) != 0)
                 {
                     //Check if the vehicle is at the corner | Only proceed then, else not needed
-                    if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.x) < _roadBoundaries[1] - (UniversalConstant._CellHalfSizeC * cellMult1C) &&        //2 cell gap
-                        Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.z) < _roadBoundaries[0] - (UniversalConstant._CellHalfSizeC * cellMult2C))
+                    if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.x) < _roadBoundaries[1] - (UniversalConstant.HALF_CELL_SIZE * cellMult1C) &&        //2 cell gap
+                        Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.z) < _roadBoundaries[0] - (UniversalConstant.HALF_CELL_SIZE * cellMult2C))
                     {
                         // Debug.Log($"Outside the corner");
                         _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.CORNER_FREE;
@@ -701,15 +858,15 @@ namespace Parking_A.Gameplay
 
                     // rayStartPos.z += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
                     //             + (_cGridHalfCellSize * 7f)) * _vehicleInfos[vIndex].InteractedDir.y;     //Cells offset
-                    rayStartPos.x = _roadBoundaries[1] + (UniversalConstant._CellHalfSizeC * 4f);
-                    rayStartPos.z = (_roadBoundaries[0] - (UniversalConstant._CellHalfSizeC * 4f)) * -1f;
+                    rayStartPos.x = _roadBoundaries[1] + (UniversalConstant.HALF_CELL_SIZE * 4f);
+                    rayStartPos.z = (_roadBoundaries[0] - (UniversalConstant.HALF_CELL_SIZE * 4f)) * -1f;
                     rayDir.x = _vehicleInfos[vIndex].InteractedDir.y;
                 }
                 //Horizontal Alignment
                 else
                 {
-                    if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.z) < _roadBoundaries[0] - (UniversalConstant._CellHalfSizeC * cellMult1C) &&                //2 cell gap
-                        Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.x) < _roadBoundaries[1] - (UniversalConstant._CellHalfSizeC * cellMult2C))
+                    if (Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.z) < _roadBoundaries[0] - (UniversalConstant.HALF_CELL_SIZE * cellMult1C) &&                //2 cell gap
+                        Mathf.Abs(_vehicleSpawner.VehiclesSpawned[vIndex].position.x) < _roadBoundaries[1] - (UniversalConstant.HALF_CELL_SIZE * cellMult2C))
                     {
                         // Debug.Log($"Outside the corner");
                         _vehicleInfos[vIndex].VehicleStatus |= VehicleStatus.CORNER_FREE;
@@ -718,8 +875,8 @@ namespace Parking_A.Gameplay
 
                     // rayStartPos.x += ((_cGridHalfCellSize * _vehicleInfos[vIndex].VehicleType) + 0.1f      //Vehicle Size + Offset
                     //             + (_cGridHalfCellSize * 7f)) * _vehicleInfos[vIndex].InteractedDir.x;     //Cells Offset
-                    rayStartPos.z = (_roadBoundaries[0] + (UniversalConstant._CellHalfSizeC * 4f)) * _vehicleInfos[vIndex].InteractedDir.x;
-                    rayStartPos.x = (_roadBoundaries[1] - (UniversalConstant._CellHalfSizeC * 4f)) * _vehicleInfos[vIndex].InteractedDir.x;
+                    rayStartPos.z = (_roadBoundaries[0] + (UniversalConstant.HALF_CELL_SIZE * 4f)) * _vehicleInfos[vIndex].InteractedDir.x;
+                    rayStartPos.x = (_roadBoundaries[1] - (UniversalConstant.HALF_CELL_SIZE * 4f)) * _vehicleInfos[vIndex].InteractedDir.x;
                     rayDir.z = _vehicleInfos[vIndex].InteractedDir.x * -1f;
                 }
 
@@ -731,17 +888,17 @@ namespace Parking_A.Gameplay
                 for (rayIndex = -1; rayIndex < rayCountC; rayIndex++)
                 {
                     tempRayPos = rayStartPos;
-                    tempRayPos.x += UniversalConstant._CellHalfSizeC * 2.5f * _vehicleInfos[vIndex].InteractedDir.x * rayIndex;
-                    tempRayPos.z += UniversalConstant._CellHalfSizeC * 2.5f * _vehicleInfos[vIndex].InteractedDir.y * rayIndex;
+                    tempRayPos.x += UniversalConstant.HALF_CELL_SIZE * 2.5f * _vehicleInfos[vIndex].InteractedDir.x * rayIndex;
+                    tempRayPos.z += UniversalConstant.HALF_CELL_SIZE * 2.5f * _vehicleInfos[vIndex].InteractedDir.y * rayIndex;
 
 #if CORNER_COLLISION_DEBUG_DRAW_1
-                    Debug.DrawRay(tempRayPos, rayDir * UniversalConstant._CellHalfSizeC * rayLengthMultC, Color.cyan);
+                    Debug.DrawRay(tempRayPos, rayDir * UniversalConstant.HALF_CELL_SIZE * rayLengthMultC, Color.cyan);
 #endif
                     // Debug.DrawRay(tempRayPos, rayDir * _cGridCellSize * 2.75f * (_vehicleInfos[i].VehicleType + 1), Color.cyan);
 
                     // Raycast to the right of  the vehicle perpendicular to the vehicle with some offset
                     if (Physics.Raycast(tempRayPos, rayDir, out colliderHitInfo,
-                        UniversalConstant._CellHalfSizeC * rayLengthMultC, _onBoardingLayerMaskC))
+                        UniversalConstant.HALF_CELL_SIZE * rayLengthMultC, _onBoardingLayerMaskC))
                     {
                         // Debug.Log($"Hit Vehicle | vIndex: {rayIndex} | hitCount: {hitCount}");
 
@@ -769,9 +926,11 @@ namespace Parking_A.Gameplay
         private void RenameVehicle(in int vehicleIndex)
         {
             _vehicleName.Clear();
+
             _vehicleName.Append(_vehicleSpawner.VehiclesSpawned[vehicleIndex].name, 0
-                , _vehicleSpawner.VehiclesSpawned[vehicleIndex].name.Length - 2);
-            _vehicleName.Append(((int)_vehicleInfos[vehicleIndex].VehicleStatus).ToString("d2"));
+                , _vehicleSpawner.VehiclesSpawned[vehicleIndex].name.Length - 4);
+            _vehicleName.Append(((int)_vehicleInfos[vehicleIndex].VehicleStatus).ToString("D4"));           //Max status can go to ((1 << 10) - 1) 
+
             _vehicleSpawner.VehiclesSpawned[vehicleIndex].name = _vehicleName.ToString();
         }
     }
