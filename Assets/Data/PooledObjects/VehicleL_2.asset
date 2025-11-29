@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce8f512da16b26e4e8100715feff53d2, type: 3}
-  m_Name: Boundary_0
+  m_Name: VehicleL_2
   m_EditorClassIdentifier: 
-  poolType: 4
-  poolPrefab: {fileID: 3604490752355796290, guid: 8cad6686f76c26a44b51c4516bd045af, type: 3}
+  poolType: 3
+  poolPrefab: {fileID: 5041637407529620837, guid: ccace83ab29b5dc418ae8a07d5d0d975, type: 3}

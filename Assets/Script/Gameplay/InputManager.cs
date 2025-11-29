@@ -1,193 +1,201 @@
-#define MOBILE_CONTROLS
-// #define DEBUGGING_TOUCH
-
 using UnityEngine;
-
-#if !MOBILE_CONTROLS
 using UnityEngine.InputSystem;
-#else
+using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
-#endif
 
 namespace Parking_A.Gameplay
 {
     public class InputManager : MonoBehaviour
     {
         /// <summary> POWER1: Shrink Vehicle | POWER2: Remove Vehicle </summary>
+        [System.Flags]
         public enum SelectionStatus
         {
-            NOT_SELECTED = 0, SELECTED = 1 << 0, CHECK_AGAIN = 1 << 1, POWER1_ACTIVE = 1 << 2, POWER2_ACTIVE = 1 << 3
+            NOT_SELECTED = 0,
+            SELECTED = 1 << 0,
+            CHECK_AGAIN = 1 << 1,
+            POWER1_ACTIVE = 1 << 2,
+            POWER2_ACTIVE = 1 << 3
         }
 
-        //Keeping track of mouse/touch status
-        private SelectionStatus _selectionStatus;
-
+        private SelectionStatus _selectionStatus = SelectionStatus.NOT_SELECTED;
         private int _hitTransformID = 0;
 
-        //For countergin Camera's rotation //In X/Z pair
-        private readonly float[] _transformMatrix = new float[4] { 0.34f, 0.94f, 0.94f, -0.34f };      //20fY
-        // private float[] transformMatrix = new float[4] { -0.34f, 0.94f, 0.94f, 0.34f };      //-20fY
-        // private float[] transformMatrix = new float[4] { 0f, 1f, 1f, 0f };         //0fY
+        // For countering camera rotation (approx. 20° tilt)
+        // stored as [m01, m00, m11, m10] = [sin, cos, cos, -sin]
+        private readonly float[] _transformMatrix = new float[4]
+        {
+            0.34f,   // m01 (sin)
+            0.94f,   // m00 (cos)
+            0.94f,   // m11 (cos)
+            -0.34f   // m10 (-sin)
+        };
 
         private const int _vehicleLayerMaskC = (1 << 6);
 
-        private void OnDestroy()
+        private Vector2 _interactPos = Vector2.zero;    // pointer pos when click/touch began
+        private Vector2 _lastPointerPos = Vector2.zero; // last known pointer pos
+        private Vector2 _slideDir = Vector2.zero;
+
+#if DEBUGGING_TOUCH
+        private Vector3 _hitPos = Vector3.zero;
+        private bool _drawRay = false;
+#endif
+
+        private void Awake()
         {
-            GameManager.Instance.OnUISelected -= HandleUIAction;
+            // Enable EnhancedTouch globally (safe on Editor + device)
+            EnhancedTouchSupport.Enable();
         }
 
         private void Start()
         {
             GameManager.Instance.OnUISelected += HandleUIAction;
-
-#if !MOBILE_CONTROLS
-            UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
-#endif
         }
 
-        Vector2 _interactPos = Vector2.zero;
-        Vector2 slideDir = Vector2.zero;
+        private void OnDestroy()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.OnUISelected -= HandleUIAction;
 
-#if DEBUGGING_TOUCH
-        Vector3 hitPos = Vector2.zero;
-        bool drawRay = false;
-#endif
+            EnhancedTouchSupport.Disable();
+        }
+
         private void Update()
         {
             bool userInteracting;
+            Vector2 currentPointerPos = Vector2.zero;
 
-#if DEBUGGING_TOUCH
-            if (drawRay)
+            // 1. Read input using new Input System
+
+            // Touch has priority on mobile / touch devices
+            if (Touch.activeTouches.Count > 0)
             {
-                Vector3 drawDir = slideDir;
-                drawDir.z = slideDir.y;
-
-                // drawDir.x = drawDir.x * transformMatrix[1] + drawDir.z * transformMatrix[3];
-                // drawDir.z = drawDir.x * transformMatrix[0] + drawDir.z * transformMatrix[2];
-
-                drawDir.x *= 30f;
-                drawDir.y = 0.5f;
-                drawDir.z *= 30f;
-
-                Debug.DrawRay(hitPos, drawDir, Color.cyan);
+                userInteracting = true;
+                currentPointerPos = Touch.activeTouches[0].screenPosition;
             }
-// #else
-//             Vector2 slideDir = Vector2.zero;
-#endif
-
-
-#if !MOBILE_CONTROLS
-            userInteracting = Mouse.current.leftButton.isPressed;
-            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
-                 || !userInteracting)
+            // Fallback to mouse (Editor / PC)
+            else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
             {
-                if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
-                {
-                    // slideDir = (Mouse.current.position.value - _interactPos).normalized;
+                userInteracting = true;
+                currentPointerPos = Mouse.current.position.ReadValue();
+            }
+            else
+            {
+                userInteracting = false;
+            }
 
-                    slideDir = Mouse.current.position.value;
-                    slideDir = (slideDir - _interactPos).normalized;
-                    slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
-                    slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
-
-                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
-                        || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
-                        _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
-
-                    GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
-
-                    // Check if user has not selected the small vehicle for Shrink power
-                    if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
-                    {
-                        // Remove this if any other way found
-                        if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
-                        {
-                            GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
-                            GameManager.Instance.SavePlayerStats();
-                        }
-
-                        _selectionStatus = SelectionStatus.NOT_SELECTED;
-                    }
-                    else
-                        _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
-
-                    // Debug.Log($"Resetting SelectionStatus | {_selectionStatus}");
 #if DEBUGGING_TOUCH
-                    drawRay = true;
+            if (_drawRay)
+            {
+                Vector3 drawDir = new Vector3(_slideDir.x, 0f, _slideDir.y) * 30f;
+                var from = _hitPos;
+                from.y = 0.5f;
+                Debug.DrawRay(from, drawDir, Color.cyan);
+            }
 #endif
+
+            // 2. If level not generated, only allow finishing a running selection
+            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0)
+            {
+                if ((_selectionStatus & SelectionStatus.SELECTED) != 0 && !userInteracting)
+                {
+                    FinishSelection();
                 }
 
-                _selectionStatus |= SelectionStatus.NOT_SELECTED;
                 _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
-#else
-            userInteracting = (Touch.activeTouches.Count > 0);
-            if ((GameManager.Instance.GameStatus & Global.UniversalConstant.GameStatus.LEVEL_GENERATED) == 0
-                || !userInteracting)
+
+            // 3. While interacting, keep updating last pointer position
+            if (userInteracting)
+            {
+                _lastPointerPos = currentPointerPos;
+            }
+
+            // 4. When interaction ends: finish the selection if any
+            if (!userInteracting)
             {
                 if ((_selectionStatus & SelectionStatus.SELECTED) != 0)
                 {
-                    // slideDir = (Touch.activeTouches[0].screenPosition - interactPos).normalized;         //Count is already 0
-                    slideDir = (slideDir - _interactPos).normalized;
-                    slideDir.x = slideDir.x * _transformMatrix[1] + slideDir.y * _transformMatrix[3];
-                    slideDir.y = slideDir.x * _transformMatrix[0] + slideDir.y * _transformMatrix[2];
-
-                    if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
-                        || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
-                        _selectionStatus &= ~SelectionStatus.SELECTED;          //Unset Selected to only keep powers flag on                    
-
-                    GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, slideDir);
-
-                    // Check if user has not selected the small vehicle for Shrink power
-                    if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
-                    {
-                        // Remove this if any other way found
-                        if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
-                        {
-                            GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
-                            GameManager.Instance.SavePlayerStats();
-                        }
-
-                        _selectionStatus = SelectionStatus.NOT_SELECTED;
-                    }
-                    else
-                        _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
-
-#if DEBUGGING_TOUCH
-                    drawRay = true;
-#endif
+                    FinishSelection();
                 }
 
-                _selectionStatus |= SelectionStatus.NOT_SELECTED;
                 _selectionStatus &= ~SelectionStatus.SELECTED;
                 return;
             }
-            else if (userInteracting)
-                slideDir = Touch.activeTouches[0].screenPosition;
-#endif
 
+            // 5. If user is interacting and nothing is selected yet → try select a vehicle
             if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
             {
-#if !MOBILE_CONTROLS
-                _interactPos = Mouse.current.position.value;
-#else
-                _interactPos = Touch.activeTouches[0].screenPosition;
-#endif
+                _interactPos = currentPointerPos;
 
                 Ray cameraRay = Camera.main.ScreenPointToRay(_interactPos);
-                RaycastHit rayHit;
-
-                if (Physics.Raycast(cameraRay, out rayHit, 500f, _vehicleLayerMaskC))
+                if (Physics.Raycast(cameraRay, out RaycastHit rayHit, 500f, _vehicleLayerMaskC))
                 {
                     _selectionStatus |= SelectionStatus.SELECTED;
                     _hitTransformID = rayHit.transform.GetInstanceID();
 #if DEBUGGING_TOUCH
-                    hitPos = rayHit.point;
+                    _hitPos = rayHit.point;
+                    _drawRay = false;
 #endif
-                    // Debug.Log($"_hitTransformID: {_hitTransformID}");
-                    // GameManager.Instance.OnSelect?.Invoke(rayHit.transform.GetInstanceID(), slideDir);
+                    // Debug.Log($"Selected ID: {_hitTransformID}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Called when user stops interacting and a selection was active.
+        /// Calculates slideDir, transforms it, and fires events.
+        /// </summary>
+        private void FinishSelection()
+        {
+            // Direction from initial press to last pointer pos
+            Vector2 dir = _lastPointerPos - _interactPos;
+            if (dir.sqrMagnitude > 0.001f)
+                _slideDir = dir.normalized;
+            else
+                _slideDir = Vector2.zero;
+
+            // Apply transform matrix to compensate camera rotation
+            float x = _slideDir.x;
+            float y = _slideDir.y;
+
+            // using:
+            // [ m00 m01 ]
+            // [ m10 m11 ]
+            // stored as [m01, m00, m11, m10]
+            _slideDir.x = x * _transformMatrix[1] + y * _transformMatrix[3]; // x' = x*m00 + y*m10
+            _slideDir.y = x * _transformMatrix[0] + y * _transformMatrix[2]; // y' = x*m01 + y*m11
+
+#if DEBUGGING_TOUCH
+            _drawRay = true;
+#endif
+
+            // If a power is active, keep only power flags, not SELECTED
+            if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0
+                || (_selectionStatus & SelectionStatus.POWER2_ACTIVE) != 0)
+            {
+                _selectionStatus &= ~SelectionStatus.SELECTED;
+            }
+
+            GameManager.Instance.OnSelect?.Invoke(_selectionStatus, _hitTransformID, _slideDir);
+
+            // Check if user has not selected another vehicle for Shrink power
+            if ((_selectionStatus & SelectionStatus.CHECK_AGAIN) == 0)
+            {
+                // If nothing remains selected, consider that the power was used
+                if ((_selectionStatus & SelectionStatus.SELECTED) == 0)
+                {
+                    GameManager.Instance.OnUISelected?.Invoke(GameUIManager.UISelected.POWER_USED, -1);
+                    GameManager.Instance.SavePlayerStats();
+                }
+
+                _selectionStatus = SelectionStatus.NOT_SELECTED;
+            }
+            else
+            {
+                _selectionStatus &= ~SelectionStatus.CHECK_AGAIN;
             }
         }
 
@@ -196,25 +204,16 @@ namespace Parking_A.Gameplay
             switch (uISelected)
             {
                 case GameUIManager.UISelected.POWER_1:
-                    // In case the player has selected a small vehicle | Event is fired again to show that small vehicle is selected
-                    // Set the CHECK_AGAIN flag, so that the Update does not modify anything
                     if ((_selectionStatus & SelectionStatus.POWER1_ACTIVE) != 0)
                         _selectionStatus |= SelectionStatus.CHECK_AGAIN;
 
                     _selectionStatus |= SelectionStatus.POWER1_ACTIVE;
-
-                    // Debug.Log($"Changing SelectionStatus: {_selectionStatus}");
                     break;
 
                 case GameUIManager.UISelected.POWER_2:
                     _selectionStatus |= SelectionStatus.POWER2_ACTIVE;
                     break;
             }
-        }
-
-        private void CheckForTouch()
-        {
-
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Parking_A.Gameplay
 
         [SerializeField] private TMPro.TMP_Text _playerGoldTxt;
         [SerializeField] private Button _watchAds;
+        [SerializeField] private Button _backBtn;
 
         private CancellationTokenSource _cts;
 
@@ -55,12 +56,13 @@ namespace Parking_A.Gameplay
             GameManager.Instance.SetGameStatus(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, true));
             // GameManager.Instance.OnGameStatusChange?.Invoke(UniversalConstant.GameStatus.NEXT_LEVEL_REQUESTED, -1));
             _homeBt.onClick.AddListener(() => UpdateUI(UISelected.GO_HOME, false));
+            _backBtn.onClick.AddListener(() => { UpdateUI(UISelected.GO_HOME, false); });
 
-            _watchAds.interactable = false;
+
             _watchAds.onClick.AddListener(() =>
             {
-                _watchAds.interactable = false;
-                // AdManager.Instance.ShowRewarded();
+
+                AdManager.Instance.ShowRewarded();
 
             });
 

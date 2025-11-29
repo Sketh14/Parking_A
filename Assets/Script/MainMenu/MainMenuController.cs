@@ -20,6 +20,7 @@ namespace Parking_A.MainMenu
         [SerializeField] private GameConfigScriptableObject _mainGameConfig;
 
         [SerializeField] private GameObject _mainMenuCanvas;
+        [SerializeField] private GameObject _selectionCanvas;
 
         private void OnDestroy()
         {
@@ -29,7 +30,7 @@ namespace Parking_A.MainMenu
         void Start()
         {
             //Assigning Buttons
-            _playBt.onClick.AddListener(() => SceneManager.LoadScene((int)UniversalConstant.SceneIndex.MAIN_GAMEPLAY));
+            _playBt.onClick.AddListener(() => Playlevel());
             //_quitBt.onClick.AddListener(() => _quitConfirmationPanel.SetActive(true));
 
             //_quitYesBt.onClick.AddListener(Application.Quit);
@@ -52,6 +53,11 @@ namespace Parking_A.MainMenu
 
             MainMenuManager.Instance.OnUIInteraction += HandleUIChange;
         }
+        private void Playlevel()
+        {
+            _selectionCanvas.SetActive(true);
+            _mainMenuCanvas.SetActive(false);
+        }
 
         private void HandleUIChange(MainMenuUIStatus status)
         {
@@ -63,5 +69,6 @@ namespace Parking_A.MainMenu
                     break;
             }
         }
+
     }
 }

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce8f512da16b26e4e8100715feff53d2, type: 3}
   m_Name: NPC_0
   m_EditorClassIdentifier: 
-  poolType: 1
+  poolType: 5
   poolPrefab: {fileID: 405748584394413104, guid: b305c882da9ab504aafa7f1a7bad2ab8, type: 3}

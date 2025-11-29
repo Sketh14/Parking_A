@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.Advertisements;
+using Parking_A.Global;
+using Parking_A.Gameplay;
 
 public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
@@ -9,8 +11,8 @@ public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityA
 
     // --- Game IDs -----------------------------------------------------------------
     [Header("Game IDs")]
-    [SerializeField] private string androidGameId = "YOUR_ANDROID_GAME_ID";
-    [SerializeField] private string iOSGameId = "YOUR_IOS_GAME_ID";
+    [SerializeField] private string androidGameId = "5994661";
+    [SerializeField] private string iOSGameId = "5994660";
     [SerializeField] private bool testMode = true;
     private string gameId;
 
@@ -50,7 +52,7 @@ public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityA
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
 
         // Choose platform-specific IDs
 #if UNITY_IOS
@@ -103,6 +105,7 @@ public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityA
         LoadBanner();
         LoadInterstitial();
         LoadRewarded();
+        ShowBanner();
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
@@ -301,6 +304,7 @@ public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityA
         {
             // Interstitial finished - reload for next time
             interstitialLoaded = false;
+            GrantReward();
             LoadInterstitial();
         }
         else if (adUnitId.Equals(rewardedAdUnitId))
@@ -324,7 +328,7 @@ public class AdManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityA
     private void GrantReward()
     {
         // TODO: Implement the actual reward logic for your game, e.g. give coins/lives.
-        Debug.Log("AdManager: Granting reward to user (placeholder).");
+        GameManager.Instance.CurrentPlayerStats.Coins += 5;
     }
     #endregion
 
